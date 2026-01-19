@@ -27,7 +27,7 @@
 ```kotlin
 dependencies {
     // 통합 모듈 (권장)
-    implementation("io.clroot:excel-dsl:1.0.0-SNAPSHOT")
+    implementation("io.clroot.excel:excel-dsl:0.1.0")
 }
 ```
 
@@ -35,10 +35,10 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("io.clroot:kotlin-excel-dsl-core:1.0.0-SNAPSHOT")
-    implementation("io.clroot:kotlin-excel-dsl-annotation:1.0.0-SNAPSHOT")
-    implementation("io.clroot:kotlin-excel-dsl-render:1.0.0-SNAPSHOT")
-    implementation("io.clroot:kotlin-excel-dsl-theme:1.0.0-SNAPSHOT")
+    implementation("io.clroot.excel:core:0.1.0")
+    implementation("io.clroot.excel:annotation:0.1.0")
+    implementation("io.clroot.excel:render:0.1.0")
+    implementation("io.clroot.excel:theme:0.1.0")
 }
 ```
 
