@@ -23,4 +23,5 @@ inline fun <reified T : Any> excelOf(
     sheetName: String = "Sheet1",
     theme: ExcelTheme? = null,
 ): ExcelDocument =
-    io.clroot.excel.annotation.excelOf(data, sheetName, theme)
+    io.clroot.excel.annotation
+        .excelOf(data, sheetName, theme)

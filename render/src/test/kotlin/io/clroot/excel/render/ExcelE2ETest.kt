@@ -10,6 +10,7 @@ import io.clroot.excel.core.style.Color
 import io.clroot.excel.theme.Theme
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import org.apache.poi.ss.usermodel.BorderStyle
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -421,7 +422,7 @@ class ExcelE2ETest :
                     // Modern 테마 Body: 얇은 테두리
                     val bodyCell = sheet.getRow(1).getCell(0)
                     val bodyStyle = bodyCell.cellStyle
-                    bodyStyle.borderBottom shouldBe org.apache.poi.ss.usermodel.BorderStyle.THIN
+                    bodyStyle.borderBottom shouldBe BorderStyle.THIN
                 }
             }
         }
