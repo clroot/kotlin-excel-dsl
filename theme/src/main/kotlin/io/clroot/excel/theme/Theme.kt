@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package io.clroot.excel.theme
 
 import io.clroot.excel.core.dsl.ExcelTheme

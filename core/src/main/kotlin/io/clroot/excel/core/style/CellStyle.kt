@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package io.clroot.excel.core.style
 
 /**

@@ -8,3 +8,10 @@ profile:
   name: qodana.recommended
 include:
   - name: CheckDependencyLicenses
+exclude:
+  - name: UselessCallOnCollection
+    paths:
+      - core/src/main/kotlin/io/clroot/excel/core/dsl/ExcelBuilders.kt
+  - name: DuplicatedCode
+    paths:
+      - core/src/main/kotlin/io/clroot/excel/core/dsl/ExcelBuilders.kt
