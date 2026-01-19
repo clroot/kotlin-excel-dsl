@@ -13,11 +13,11 @@ open class ExcelException(
  */
 class ExcelDataException(
     message: String,
-    val sheetName: String? = null,
-    val rowIndex: Int? = null,
-    val columnIndex: Int? = null,
-    val columnHeader: String? = null,
-    val actualValue: Any? = null,
+    sheetName: String? = null,
+    rowIndex: Int? = null,
+    columnIndex: Int? = null,
+    columnHeader: String? = null,
+    actualValue: Any? = null,
     cause: Throwable? = null,
 ) : ExcelException(buildDataErrorMessage(message, sheetName, rowIndex, columnIndex, columnHeader, actualValue), cause)
 
@@ -26,9 +26,9 @@ class ExcelDataException(
  */
 class ExcelWriteException(
     message: String,
-    val sheetName: String? = null,
-    val rowIndex: Int? = null,
-    val columnIndex: Int? = null,
+    sheetName: String? = null,
+    rowIndex: Int? = null,
+    columnIndex: Int? = null,
     cause: Throwable? = null,
 ) : ExcelException(buildWriteErrorMessage(message, sheetName, rowIndex, columnIndex), cause)
 
@@ -37,9 +37,9 @@ class ExcelWriteException(
  */
 class ExcelConfigurationException(
     message: String,
-    val className: String? = null,
-    val propertyName: String? = null,
-    val hint: String? = null,
+    className: String? = null,
+    propertyName: String? = null,
+    hint: String? = null,
     cause: Throwable? = null,
 ) : ExcelException(buildConfigErrorMessage(message, className, propertyName, hint), cause)
 
@@ -47,9 +47,9 @@ class ExcelConfigurationException(
  * Exception thrown when a required column is not found.
  */
 class ColumnNotFoundException(
-    val columnName: String,
-    val availableColumns: List<String> = emptyList(),
-    val sheetName: String? = null,
+    columnName: String,
+    availableColumns: List<String> = emptyList(),
+    sheetName: String? = null,
 ) : ExcelException(buildColumnNotFoundMessage(columnName, availableColumns, sheetName))
 
 /**
@@ -57,8 +57,8 @@ class ColumnNotFoundException(
  */
 class StyleException(
     message: String,
-    val styleName: String? = null,
-    val targetColumn: String? = null,
+    styleName: String? = null,
+    targetColumn: String? = null,
     cause: Throwable? = null,
 ) : ExcelException(buildStyleErrorMessage(message, styleName, targetColumn), cause)
 
