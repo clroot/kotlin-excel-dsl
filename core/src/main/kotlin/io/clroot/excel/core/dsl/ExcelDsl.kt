@@ -28,7 +28,10 @@ fun excel(block: ExcelBuilder.() -> Unit): ExcelDocument {
 /**
  * Entry point for building an Excel document with a theme.
  */
-fun excel(theme: ExcelTheme, block: ExcelBuilder.() -> Unit): ExcelDocument {
+fun excel(
+    theme: ExcelTheme,
+    block: ExcelBuilder.() -> Unit,
+): ExcelDocument {
     return ExcelBuilder(theme).apply(block).build()
 }
 
@@ -40,7 +43,10 @@ class ExcelBuilder(private val theme: ExcelTheme? = null) {
     private val sheets = mutableListOf<Sheet>()
     private var stylesConfig: StylesConfig? = null
 
-    fun <T> sheet(name: String, block: SheetBuilder<T>.() -> Unit) {
+    fun <T> sheet(
+        name: String,
+        block: SheetBuilder<T>.() -> Unit,
+    ) {
         sheets.add(SheetBuilder<T>(name).apply(block).build())
     }
 
@@ -53,18 +59,19 @@ class ExcelBuilder(private val theme: ExcelTheme? = null) {
         val bodyStyle = stylesConfig?.bodyStyle ?: theme?.bodyStyle
 
         // Convert DSL ColumnStyleConfig to model ColumnStyleConfig
-        val columnStyles = stylesConfig?.columnStyles?.mapValues { (_, config) ->
-            io.clroot.excel.core.model.ColumnStyleConfig(
-                headerStyle = config.headerStyle,
-                bodyStyle = config.bodyStyle
-            )
-        } ?: emptyMap()
+        val columnStyles =
+            stylesConfig?.columnStyles?.mapValues { (_, config) ->
+                io.clroot.excel.core.model.ColumnStyleConfig(
+                    headerStyle = config.headerStyle,
+                    bodyStyle = config.bodyStyle,
+                )
+            } ?: emptyMap()
 
         return ExcelDocument(
             sheets = sheets.toList(),
             headerStyle = headerStyle,
             bodyStyle = bodyStyle,
-            columnStyles = columnStyles
+            columnStyles = columnStyles,
         )
     }
 }
@@ -82,7 +89,7 @@ class SheetBuilder<T>(private val name: String) {
         header: String,
         width: ColumnWidth = ColumnWidth.Auto,
         format: String? = null,
-        valueExtractor: (T) -> Any?
+        valueExtractor: (T) -> Any?,
     ) {
         columns.add(ColumnDefinition(header, width, format, null, null, valueExtractor))
     }
@@ -96,7 +103,7 @@ class SheetBuilder<T>(private val name: String) {
         width: ColumnWidth = ColumnWidth.Auto,
         format: String? = null,
         style: CellStyleBuilder.() -> Unit,
-        valueExtractor: (T) -> Any?
+        valueExtractor: (T) -> Any?,
     ) {
         val cellStyle = CellStyleBuilder().apply(style).build()
         columns.add(ColumnDefinition(header, width, format, null, cellStyle, valueExtractor))
@@ -112,14 +119,17 @@ class SheetBuilder<T>(private val name: String) {
         format: String? = null,
         headerStyle: (CellStyleBuilder.() -> Unit)? = null,
         bodyStyle: (CellStyleBuilder.() -> Unit)? = null,
-        valueExtractor: (T) -> Any?
+        valueExtractor: (T) -> Any?,
     ) {
         val hStyle = headerStyle?.let { CellStyleBuilder().apply(it).build() }
         val bStyle = bodyStyle?.let { CellStyleBuilder().apply(it).build() }
         columns.add(ColumnDefinition(header, width, format, hStyle, bStyle, valueExtractor))
     }
 
-    fun headerGroup(title: String, block: HeaderGroupBuilder<T>.() -> Unit) {
+    fun headerGroup(
+        title: String,
+        block: HeaderGroupBuilder<T>.() -> Unit,
+    ) {
         val builder = HeaderGroupBuilder<T>(title)
         builder.apply(block)
         val group = builder.build()
@@ -131,19 +141,21 @@ class SheetBuilder<T>(private val name: String) {
 
     fun rows(data: Iterable<T>) {
         data.forEach { item ->
-            val cells = columns.map { column ->
-                Cell(value = column.valueExtractor(item))
-            }
+            val cells =
+                columns.map { column ->
+                    Cell(value = column.valueExtractor(item))
+                }
             rows.add(Row(cells))
         }
     }
 
-    internal fun build(): Sheet = Sheet(
-        name = name,
-        columns = columns.toList(),
-        headerGroups = headerGroups.toList(),
-        rows = rows.toList()
-    )
+    internal fun build(): Sheet =
+        Sheet(
+            name = name,
+            columns = columns.toList(),
+            headerGroups = headerGroups.toList(),
+            rows = rows.toList(),
+        )
 }
 
 /**
@@ -157,7 +169,7 @@ class HeaderGroupBuilder<T>(private val title: String) {
         header: String,
         width: ColumnWidth = ColumnWidth.Auto,
         format: String? = null,
-        valueExtractor: (T) -> Any?
+        valueExtractor: (T) -> Any?,
     ) {
         columns.add(ColumnDefinition(header, width, format, null, null, valueExtractor))
     }
@@ -167,7 +179,7 @@ class HeaderGroupBuilder<T>(private val title: String) {
         width: ColumnWidth = ColumnWidth.Auto,
         format: String? = null,
         style: CellStyleBuilder.() -> Unit,
-        valueExtractor: (T) -> Any?
+        valueExtractor: (T) -> Any?,
     ) {
         val cellStyle = CellStyleBuilder().apply(style).build()
         columns.add(ColumnDefinition(header, width, format, null, cellStyle, valueExtractor))
@@ -179,17 +191,18 @@ class HeaderGroupBuilder<T>(private val title: String) {
         format: String? = null,
         headerStyle: (CellStyleBuilder.() -> Unit)? = null,
         bodyStyle: (CellStyleBuilder.() -> Unit)? = null,
-        valueExtractor: (T) -> Any?
+        valueExtractor: (T) -> Any?,
     ) {
         val hStyle = headerStyle?.let { CellStyleBuilder().apply(it).build() }
         val bStyle = bodyStyle?.let { CellStyleBuilder().apply(it).build() }
         columns.add(ColumnDefinition(header, width, format, hStyle, bStyle, valueExtractor))
     }
 
-    internal fun build(): HeaderGroup = HeaderGroup(
-        title = title,
-        columns = columns.toList()
-    )
+    internal fun build(): HeaderGroup =
+        HeaderGroup(
+            title = title,
+            columns = columns.toList(),
+        )
 }
 
 /**
@@ -198,7 +211,7 @@ class HeaderGroupBuilder<T>(private val title: String) {
 data class StylesConfig(
     val headerStyle: CellStyle? = null,
     val bodyStyle: CellStyle? = null,
-    val columnStyles: Map<String, ColumnStyleConfig> = emptyMap()
+    val columnStyles: Map<String, ColumnStyleConfig> = emptyMap(),
 )
 
 /**
@@ -206,7 +219,7 @@ data class StylesConfig(
  */
 data class ColumnStyleConfig(
     val headerStyle: CellStyle? = null,
-    val bodyStyle: CellStyle? = null
+    val bodyStyle: CellStyle? = null,
 )
 
 /**
@@ -230,7 +243,10 @@ class StylesBuilder {
      * Define styles for a specific column by header name.
      * Usage: styles { column("금액") { header { bold() }; body { align(RIGHT) } } }
      */
-    fun column(headerName: String, block: ColumnStyleBuilder.() -> Unit) {
+    fun column(
+        headerName: String,
+        block: ColumnStyleBuilder.() -> Unit,
+    ) {
         columnStyles[headerName] = ColumnStyleBuilder().apply(block).build()
     }
 
@@ -297,13 +313,14 @@ class CellStyleBuilder {
         numberFormat = format
     }
 
-    internal fun build(): CellStyle = CellStyle(
-        backgroundColor = backgroundColor,
-        fontColor = fontColor,
-        bold = bold,
-        italic = italic,
-        alignment = alignment,
-        border = border,
-        numberFormat = numberFormat
-    )
+    internal fun build(): CellStyle =
+        CellStyle(
+            backgroundColor = backgroundColor,
+            fontColor = fontColor,
+            bold = bold,
+            italic = italic,
+            alignment = alignment,
+            border = border,
+            numberFormat = numberFormat,
+        )
 }

@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
     kotlin("jvm") version "2.2.0" apply false
+    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
     `maven-publish`
     signing
 }
@@ -20,6 +21,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
 

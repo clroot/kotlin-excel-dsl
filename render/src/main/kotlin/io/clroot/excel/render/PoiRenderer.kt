@@ -3,7 +3,6 @@ package io.clroot.excel.render
 import io.clroot.excel.core.ExcelWriteException
 import io.clroot.excel.core.model.*
 import io.clroot.excel.core.style.*
-import org.apache.poi.ss.usermodel.BorderStyle as PoiBorderStyle
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.ss.usermodel.Workbook
@@ -13,15 +12,18 @@ import org.apache.poi.xssf.usermodel.XSSFColor
 import java.io.OutputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
+import org.apache.poi.ss.usermodel.BorderStyle as PoiBorderStyle
 
 /**
  * Renders ExcelDocument to .xlsx format using Apache POI (SXSSF for streaming).
  */
 class PoiRenderer(
-    private val rowAccessWindowSize: Int = 100
+    private val rowAccessWindowSize: Int = 100,
 ) : ExcelRenderer {
-
-    override fun render(document: ExcelDocument, output: OutputStream) {
+    override fun render(
+        document: ExcelDocument,
+        output: OutputStream,
+    ) {
         try {
             SXSSFWorkbook(rowAccessWindowSize).use { workbook ->
                 // Create global styles
@@ -37,12 +39,14 @@ class PoiRenderer(
                 }
 
                 // Create date style
-                val dateStyle = workbook.createCellStyle().apply {
-                    dataFormat = workbook.createDataFormat().getFormat("yyyy-mm-dd")
-                }
-                val dateTimeStyle = workbook.createCellStyle().apply {
-                    dataFormat = workbook.createDataFormat().getFormat("yyyy-mm-dd hh:mm:ss")
-                }
+                val dateStyle =
+                    workbook.createCellStyle().apply {
+                        dataFormat = workbook.createDataFormat().getFormat("yyyy-mm-dd")
+                    }
+                val dateTimeStyle =
+                    workbook.createCellStyle().apply {
+                        dataFormat = workbook.createDataFormat().getFormat("yyyy-mm-dd hh:mm:ss")
+                    }
 
                 document.sheets.forEach { sheetModel ->
                     // Create inline column styles (defined in column DSL)
@@ -61,7 +65,7 @@ class PoiRenderer(
                     // Helper to get header style for a column (priority: inline > column-specific > global)
                     fun getHeaderStyleForColumn(
                         index: Int,
-                        columnHeader: String
+                        columnHeader: String,
                     ): org.apache.poi.ss.usermodel.CellStyle? {
                         return inlineHeaderStyles[index]
                             ?: columnHeaderStyles[columnHeader]
@@ -71,7 +75,7 @@ class PoiRenderer(
                     // Helper to get body style for a column (priority: inline > column-specific > global)
                     fun getBodyStyleForColumn(
                         index: Int,
-                        columnHeader: String
+                        columnHeader: String,
                     ): org.apache.poi.ss.usermodel.CellStyle? {
                         return inlineBodyStyles[index]
                             ?: columnBodyStyles[columnHeader]
@@ -146,12 +150,15 @@ class PoiRenderer(
         } catch (e: Exception) {
             throw ExcelWriteException(
                 message = "Failed to write Excel document: ${e.message}",
-                cause = e
+                cause = e,
             )
         }
     }
 
-    private fun createPoiStyle(workbook: Workbook, style: CellStyle): org.apache.poi.ss.usermodel.CellStyle {
+    private fun createPoiStyle(
+        workbook: Workbook,
+        style: CellStyle,
+    ): org.apache.poi.ss.usermodel.CellStyle {
         val poiStyle = workbook.createCellStyle()
 
         // Background color
@@ -178,21 +185,23 @@ class PoiRenderer(
 
         // Alignment
         style.alignment?.let { alignment ->
-            poiStyle.alignment = when (alignment) {
-                Alignment.LEFT -> HorizontalAlignment.LEFT
-                Alignment.CENTER -> HorizontalAlignment.CENTER
-                Alignment.RIGHT -> HorizontalAlignment.RIGHT
-            }
+            poiStyle.alignment =
+                when (alignment) {
+                    Alignment.LEFT -> HorizontalAlignment.LEFT
+                    Alignment.CENTER -> HorizontalAlignment.CENTER
+                    Alignment.RIGHT -> HorizontalAlignment.RIGHT
+                }
         }
 
         // Border
         style.border?.let { border ->
-            val poiBorder = when (border) {
-                BorderStyle.NONE -> PoiBorderStyle.NONE
-                BorderStyle.THIN -> PoiBorderStyle.THIN
-                BorderStyle.MEDIUM -> PoiBorderStyle.MEDIUM
-                BorderStyle.THICK -> PoiBorderStyle.THICK
-            }
+            val poiBorder =
+                when (border) {
+                    BorderStyle.NONE -> PoiBorderStyle.NONE
+                    BorderStyle.THIN -> PoiBorderStyle.THIN
+                    BorderStyle.MEDIUM -> PoiBorderStyle.MEDIUM
+                    BorderStyle.THICK -> PoiBorderStyle.THICK
+                }
             poiStyle.borderTop = poiBorder
             poiStyle.borderBottom = poiBorder
             poiStyle.borderLeft = poiBorder
@@ -215,7 +224,7 @@ class PoiRenderer(
         cell: org.apache.poi.ss.usermodel.Cell,
         value: Any?,
         dateStyle: org.apache.poi.ss.usermodel.CellStyle,
-        dateTimeStyle: org.apache.poi.ss.usermodel.CellStyle
+        dateTimeStyle: org.apache.poi.ss.usermodel.CellStyle,
     ) {
         when (value) {
             null -> cell.setBlank()

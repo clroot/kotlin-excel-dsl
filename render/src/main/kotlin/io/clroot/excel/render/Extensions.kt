@@ -6,6 +6,9 @@ import java.io.OutputStream
 /**
  * Extension function to write an ExcelDocument to an OutputStream.
  */
-fun ExcelDocument.writeTo(output: OutputStream, renderer: ExcelRenderer = PoiRenderer()) {
+fun ExcelDocument.writeTo(
+    output: OutputStream,
+    renderer: ExcelRenderer = PoiRenderer(),
+) {
     renderer.render(this, output)
 }

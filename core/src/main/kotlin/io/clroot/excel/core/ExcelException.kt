@@ -5,7 +5,7 @@ package io.clroot.excel.core
  */
 open class ExcelException(
     message: String,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : RuntimeException(message, cause)
 
 /**
@@ -18,7 +18,7 @@ class ExcelDataException(
     val columnIndex: Int? = null,
     val columnHeader: String? = null,
     val actualValue: Any? = null,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : ExcelException(buildDataErrorMessage(message, sheetName, rowIndex, columnIndex, columnHeader, actualValue), cause)
 
 /**
@@ -29,7 +29,7 @@ class ExcelWriteException(
     val sheetName: String? = null,
     val rowIndex: Int? = null,
     val columnIndex: Int? = null,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : ExcelException(buildWriteErrorMessage(message, sheetName, rowIndex, columnIndex), cause)
 
 /**
@@ -40,7 +40,7 @@ class ExcelConfigurationException(
     val className: String? = null,
     val propertyName: String? = null,
     val hint: String? = null,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : ExcelException(buildConfigErrorMessage(message, className, propertyName, hint), cause)
 
 /**
@@ -49,7 +49,7 @@ class ExcelConfigurationException(
 class ColumnNotFoundException(
     val columnName: String,
     val availableColumns: List<String> = emptyList(),
-    val sheetName: String? = null
+    val sheetName: String? = null,
 ) : ExcelException(buildColumnNotFoundMessage(columnName, availableColumns, sheetName))
 
 /**
@@ -59,7 +59,7 @@ class StyleException(
     message: String,
     val styleName: String? = null,
     val targetColumn: String? = null,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : ExcelException(buildStyleErrorMessage(message, styleName, targetColumn), cause)
 
 // Helper functions to build detailed error messages
@@ -69,86 +69,91 @@ private fun buildDataErrorMessage(
     rowIndex: Int?,
     columnIndex: Int?,
     columnHeader: String?,
-    actualValue: Any?
-): String = buildString {
-    append(message)
-    val context = mutableListOf<String>()
-    sheetName?.let { context.add("sheet='$it'") }
-    rowIndex?.let { context.add("row=${it + 1}") }
-    columnIndex?.let { context.add("column=${it + 1}") }
-    columnHeader?.let { context.add("header='$it'") }
-    actualValue?.let { context.add("value='$it' (${it::class.simpleName})") }
-    if (context.isNotEmpty()) {
-        append(" [")
-        append(context.joinToString(", "))
-        append("]")
+    actualValue: Any?,
+): String =
+    buildString {
+        append(message)
+        val context = mutableListOf<String>()
+        sheetName?.let { context.add("sheet='$it'") }
+        rowIndex?.let { context.add("row=${it + 1}") }
+        columnIndex?.let { context.add("column=${it + 1}") }
+        columnHeader?.let { context.add("header='$it'") }
+        actualValue?.let { context.add("value='$it' (${it::class.simpleName})") }
+        if (context.isNotEmpty()) {
+            append(" [")
+            append(context.joinToString(", "))
+            append("]")
+        }
     }
-}
 
 private fun buildWriteErrorMessage(
     message: String,
     sheetName: String?,
     rowIndex: Int?,
-    columnIndex: Int?
-): String = buildString {
-    append(message)
-    val context = mutableListOf<String>()
-    sheetName?.let { context.add("sheet='$it'") }
-    rowIndex?.let { context.add("row=${it + 1}") }
-    columnIndex?.let { context.add("column=${it + 1}") }
-    if (context.isNotEmpty()) {
-        append(" [")
-        append(context.joinToString(", "))
-        append("]")
+    columnIndex: Int?,
+): String =
+    buildString {
+        append(message)
+        val context = mutableListOf<String>()
+        sheetName?.let { context.add("sheet='$it'") }
+        rowIndex?.let { context.add("row=${it + 1}") }
+        columnIndex?.let { context.add("column=${it + 1}") }
+        if (context.isNotEmpty()) {
+            append(" [")
+            append(context.joinToString(", "))
+            append("]")
+        }
     }
-}
 
 private fun buildConfigErrorMessage(
     message: String,
     className: String?,
     propertyName: String?,
-    hint: String?
-): String = buildString {
-    append(message)
-    val context = mutableListOf<String>()
-    className?.let { context.add("class=$it") }
-    propertyName?.let { context.add("property=$it") }
-    if (context.isNotEmpty()) {
-        append(" [")
-        append(context.joinToString(", "))
-        append("]")
+    hint: String?,
+): String =
+    buildString {
+        append(message)
+        val context = mutableListOf<String>()
+        className?.let { context.add("class=$it") }
+        propertyName?.let { context.add("property=$it") }
+        if (context.isNotEmpty()) {
+            append(" [")
+            append(context.joinToString(", "))
+            append("]")
+        }
+        hint?.let {
+            append("\nHint: ")
+            append(it)
+        }
     }
-    hint?.let {
-        append("\nHint: ")
-        append(it)
-    }
-}
 
 private fun buildColumnNotFoundMessage(
     columnName: String,
     availableColumns: List<String>,
-    sheetName: String?
-): String = buildString {
-    append("Column '$columnName' not found")
-    sheetName?.let { append(" (sheet='$it')") }
-    if (availableColumns.isNotEmpty()) {
-        append("\nAvailable columns: ")
-        append(availableColumns.joinToString(", ") { "'$it'" })
+    sheetName: String?,
+): String =
+    buildString {
+        append("Column '$columnName' not found")
+        sheetName?.let { append(" (sheet='$it')") }
+        if (availableColumns.isNotEmpty()) {
+            append("\nAvailable columns: ")
+            append(availableColumns.joinToString(", ") { "'$it'" })
+        }
     }
-}
 
 private fun buildStyleErrorMessage(
     message: String,
     styleName: String?,
-    targetColumn: String?
-): String = buildString {
-    append(message)
-    val context = mutableListOf<String>()
-    styleName?.let { context.add("style=$it") }
-    targetColumn?.let { context.add("targetColumn='$it'") }
-    if (context.isNotEmpty()) {
-        append(" [")
-        append(context.joinToString(", "))
-        append("]")
+    targetColumn: String?,
+): String =
+    buildString {
+        append(message)
+        val context = mutableListOf<String>()
+        styleName?.let { context.add("style=$it") }
+        targetColumn?.let { context.add("targetColumn='$it'") }
+        if (context.isNotEmpty()) {
+            append(" [")
+            append(context.joinToString(", "))
+            append("]")
+        }
     }
-}

@@ -10,7 +10,7 @@ data class CellStyle(
     val italic: Boolean = false,
     val alignment: Alignment? = null,
     val border: BorderStyle? = null,
-    val numberFormat: String? = null
+    val numberFormat: String? = null,
 )
 
 /**
@@ -19,7 +19,7 @@ data class CellStyle(
 data class Color(
     val red: Int,
     val green: Int,
-    val blue: Int
+    val blue: Int,
 ) {
     companion object {
         val WHITE = Color(255, 255, 255)
@@ -38,7 +38,7 @@ data class Color(
 enum class Alignment {
     LEFT,
     CENTER,
-    RIGHT
+    RIGHT,
 }
 
 /**
@@ -48,5 +48,5 @@ enum class BorderStyle {
     NONE,
     THIN,
     MEDIUM,
-    THICK
+    THICK,
 }

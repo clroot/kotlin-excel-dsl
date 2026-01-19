@@ -9,7 +9,7 @@ data class ExcelDocument(
     val sheets: List<Sheet> = emptyList(),
     val headerStyle: CellStyle? = null,
     val bodyStyle: CellStyle? = null,
-    val columnStyles: Map<String, ColumnStyleConfig> = emptyMap()
+    val columnStyles: Map<String, ColumnStyleConfig> = emptyMap(),
 )
 
 /**
@@ -17,7 +17,7 @@ data class ExcelDocument(
  */
 data class ColumnStyleConfig(
     val headerStyle: CellStyle? = null,
-    val bodyStyle: CellStyle? = null
+    val bodyStyle: CellStyle? = null,
 )
 
 /**
@@ -27,7 +27,7 @@ data class Sheet(
     val name: String,
     val columns: List<ColumnDefinition<*>> = emptyList(),
     val headerGroups: List<HeaderGroup> = emptyList(),
-    val rows: List<Row> = emptyList()
+    val rows: List<Row> = emptyList(),
 )
 
 /**
@@ -35,7 +35,7 @@ data class Sheet(
  */
 data class HeaderGroup(
     val title: String,
-    val columns: List<ColumnDefinition<*>>
+    val columns: List<ColumnDefinition<*>>,
 )
 
 /**
@@ -47,7 +47,7 @@ data class ColumnDefinition<T>(
     val format: String? = null,
     val headerStyle: io.clroot.excel.core.style.CellStyle? = null,
     val bodyStyle: io.clroot.excel.core.style.CellStyle? = null,
-    val valueExtractor: (T) -> Any?
+    val valueExtractor: (T) -> Any?,
 )
 
 /**
@@ -55,7 +55,9 @@ data class ColumnDefinition<T>(
  */
 sealed class ColumnWidth {
     data object Auto : ColumnWidth()
+
     data class Fixed(val chars: Int) : ColumnWidth()
+
     data class Percent(val value: Int) : ColumnWidth()
 }
 
@@ -80,7 +82,7 @@ val auto: ColumnWidth = ColumnWidth.Auto
  * Represents a row containing cells.
  */
 data class Row(
-    val cells: List<Cell> = emptyList()
+    val cells: List<Cell> = emptyList(),
 )
 
 /**
@@ -89,5 +91,5 @@ data class Row(
 data class Cell(
     val value: Any?,
     val colspan: Int = 1,
-    val rowspan: Int = 1
+    val rowspan: Int = 1,
 )

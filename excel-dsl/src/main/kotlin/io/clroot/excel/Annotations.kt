@@ -19,5 +19,5 @@ typealias Column = io.clroot.excel.annotation.Column
  */
 inline fun <reified T : Any> excelOf(
     data: Iterable<T>,
-    sheetName: String = "Sheet1"
+    sheetName: String = "Sheet1",
 ): ExcelDocument = io.clroot.excel.annotation.excelOf(data, sheetName)

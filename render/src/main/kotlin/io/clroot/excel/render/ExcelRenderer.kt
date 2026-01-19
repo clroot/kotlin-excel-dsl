@@ -10,5 +10,8 @@ interface ExcelRenderer {
     /**
      * Renders the document to the output stream.
      */
-    fun render(document: ExcelDocument, output: OutputStream)
+    fun render(
+        document: ExcelDocument,
+        output: OutputStream,
+    )
 }

@@ -21,5 +21,5 @@ annotation class Column(
     val header: String,
     val width: Int = 0,
     val format: String = "",
-    val order: Int = Int.MAX_VALUE
+    val order: Int = Int.MAX_VALUE,
 )

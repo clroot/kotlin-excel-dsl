@@ -12,7 +12,7 @@ import kotlin.reflect.full.memberProperties
  */
 inline fun <reified T : Any> excelOf(
     data: Iterable<T>,
-    sheetName: String = "Sheet1"
+    sheetName: String = "Sheet1",
 ): ExcelDocument {
     return excelOf(T::class, data, sheetName)
 }
@@ -23,7 +23,7 @@ inline fun <reified T : Any> excelOf(
 fun <T : Any> excelOf(
     klass: KClass<T>,
     data: Iterable<T>,
-    sheetName: String = "Sheet1"
+    sheetName: String = "Sheet1",
 ): ExcelDocument {
     val className = klass.qualifiedName ?: klass.simpleName ?: "Unknown"
 
@@ -31,50 +31,55 @@ fun <T : Any> excelOf(
         throw ExcelConfigurationException(
             message = "Missing @Excel annotation",
             className = className,
-            hint = "Add @Excel annotation to your data class: @Excel data class ${klass.simpleName}(...)"
+            hint = "Add @Excel annotation to your data class: @Excel data class ${klass.simpleName}(...)",
         )
     }
 
-    val columnProps = klass.memberProperties
-        .filter { it.findAnnotation<Column>() != null }
-        .sortedBy { it.findAnnotation<Column>()!!.order }
+    val columnProps =
+        klass.memberProperties
+            .filter { it.findAnnotation<Column>() != null }
+            .sortedBy { it.findAnnotation<Column>()!!.order }
 
     if (columnProps.isEmpty()) {
         val allProps = klass.memberProperties.map { it.name }
         throw ExcelConfigurationException(
             message = "No properties annotated with @Column",
             className = className,
-            hint = "Add @Column annotation to properties. Available properties: ${allProps.joinToString(", ")}"
+            hint = "Add @Column annotation to properties. Available properties: ${allProps.joinToString(", ")}",
         )
     }
 
     val typedProps = columnProps.filterIsInstance<KProperty1<T, *>>()
 
-    val columns = typedProps.map { prop ->
-        val annotation = prop.findAnnotation<Column>()!!
-        ColumnDefinition<T>(
-            header = annotation.header,
-            width = if (annotation.width > 0) ColumnWidth.Fixed(annotation.width) else ColumnWidth.Auto,
-            format = annotation.format.ifEmpty { null },
-            valueExtractor = { item: T -> prop.get(item) }
-        )
-    }
+    val columns =
+        typedProps.map { prop ->
+            val annotation = prop.findAnnotation<Column>()!!
+            ColumnDefinition<T>(
+                header = annotation.header,
+                width = if (annotation.width > 0) ColumnWidth.Fixed(annotation.width) else ColumnWidth.Auto,
+                format = annotation.format.ifEmpty { null },
+                valueExtractor = { item: T -> prop.get(item) },
+            )
+        }
 
-    val rows = data.map { item ->
-        Row(
-            cells = typedProps.map { prop ->
-                Cell(value = prop.get(item))
-            }
-        )
-    }
+    val rows =
+        data.map { item ->
+            Row(
+                cells =
+                    typedProps.map { prop ->
+                        Cell(value = prop.get(item))
+                    },
+            )
+        }
 
     return ExcelDocument(
-        sheets = listOf(
-            Sheet(
-                name = sheetName,
-                columns = columns,
-                rows = rows
-            )
-        )
+        sheets =
+            listOf(
+                Sheet(
+                    name = sheetName,
+                    columns = columns,
+                    rows = rows,
+                ),
+            ),
     )
 }
