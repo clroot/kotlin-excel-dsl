@@ -417,6 +417,11 @@ class ExcelE2ETest :
                     headerStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
                     headerStyle.font.bold shouldBe true
                     headerStyle.alignment shouldBe HorizontalAlignment.CENTER
+
+                    // Modern 테마 Body: 얇은 테두리
+                    val bodyCell = sheet.getRow(1).getCell(0)
+                    val bodyStyle = bodyCell.cellStyle
+                    bodyStyle.borderBottom shouldBe org.apache.poi.ss.usermodel.BorderStyle.THIN
                 }
             }
         }
