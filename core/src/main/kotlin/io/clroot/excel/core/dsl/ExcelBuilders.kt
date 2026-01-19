@@ -1,7 +1,10 @@
+@file:Suppress("unused")
+
 package io.clroot.excel.core.dsl
 
 import io.clroot.excel.core.model.Cell
 import io.clroot.excel.core.model.ColumnDefinition
+import io.clroot.excel.core.model.ColumnStyleConfig
 import io.clroot.excel.core.model.ColumnWidth
 import io.clroot.excel.core.model.ExcelDocument
 import io.clroot.excel.core.model.HeaderGroup
@@ -34,7 +37,7 @@ class ExcelBuilder(private val theme: ExcelTheme? = null) {
         // Convert DSL ColumnStyleConfig to model ColumnStyleConfig
         val columnStyles =
             stylesConfig?.columnStyles?.mapValues { (_, config) ->
-                io.clroot.excel.core.model.ColumnStyleConfig(
+                ColumnStyleConfig(
                     headerStyle = config.headerStyle,
                     bodyStyle = config.bodyStyle,
                 )

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package io.clroot.excel.core.dsl
 
 import io.clroot.excel.core.model.ExcelDocument

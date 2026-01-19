@@ -1,6 +1,7 @@
 package io.clroot.excel.annotation
 
 import io.clroot.excel.core.ExcelConfigurationException
+import io.clroot.excel.core.dsl.ExcelTheme
 import io.clroot.excel.core.model.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -13,8 +14,9 @@ import kotlin.reflect.full.memberProperties
 inline fun <reified T : Any> excelOf(
     data: Iterable<T>,
     sheetName: String = "Sheet1",
+    theme: ExcelTheme? = null,
 ): ExcelDocument {
-    return excelOf(T::class, data, sheetName)
+    return excelOf(T::class, data, sheetName, theme)
 }
 
 /**
@@ -24,6 +26,7 @@ fun <T : Any> excelOf(
     klass: KClass<T>,
     data: Iterable<T>,
     sheetName: String = "Sheet1",
+    theme: ExcelTheme? = null,
 ): ExcelDocument {
     val className = klass.qualifiedName ?: klass.simpleName ?: "Unknown"
 
@@ -81,5 +84,7 @@ fun <T : Any> excelOf(
                     rows = rows,
                 ),
             ),
+        headerStyle = theme?.headerStyle,
+        bodyStyle = theme?.bodyStyle,
     )
 }

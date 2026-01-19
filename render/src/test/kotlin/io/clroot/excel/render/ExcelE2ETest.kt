@@ -10,6 +10,7 @@ import io.clroot.excel.core.style.Color
 import io.clroot.excel.theme.Theme
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import org.apache.poi.ss.usermodel.BorderStyle
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -394,6 +395,34 @@ class ExcelE2ETest :
                     sheet.getRow(0).getCell(2).stringCellValue shouldBe "가입일"
                     sheet.getRow(1).getCell(0).stringCellValue shouldBe "김철수"
                     sheet.getRow(1).getCell(1).numericCellValue shouldBe 30.0
+                }
+            }
+
+            it("excelOf에 테마를 적용하면 헤더에 스타일이 적용된다") {
+                val users =
+                    listOf(
+                        AnnotatedUser("김철수", 30, LocalDate.of(2024, 1, 15)),
+                    )
+
+                val document = excelOf(users, theme = Theme.Modern)
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+                    val headerCell = sheet.getRow(0).getCell(0)
+                    val headerStyle = headerCell.cellStyle
+
+                    // Modern 테마: 파란 배경, 흰색 글자, 볼드, 가운데 정렬
+                    headerStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+                    headerStyle.font.bold shouldBe true
+                    headerStyle.alignment shouldBe HorizontalAlignment.CENTER
+
+                    // Modern 테마 Body: 얇은 테두리
+                    val bodyCell = sheet.getRow(1).getCell(0)
+                    val bodyStyle = bodyCell.cellStyle
+                    bodyStyle.borderBottom shouldBe BorderStyle.THIN
                 }
             }
         }
