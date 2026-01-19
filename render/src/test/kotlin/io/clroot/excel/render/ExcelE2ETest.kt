@@ -396,6 +396,29 @@ class ExcelE2ETest :
                     sheet.getRow(1).getCell(1).numericCellValue shouldBe 30.0
                 }
             }
+
+            it("excelOf에 테마를 적용하면 헤더에 스타일이 적용된다") {
+                val users =
+                    listOf(
+                        AnnotatedUser("김철수", 30, LocalDate.of(2024, 1, 15)),
+                    )
+
+                val document = excelOf(users, theme = Theme.Modern)
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+                    val headerCell = sheet.getRow(0).getCell(0)
+                    val headerStyle = headerCell.cellStyle
+
+                    // Modern 테마: 파란 배경, 흰색 글자, 볼드, 가운데 정렬
+                    headerStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+                    headerStyle.font.bold shouldBe true
+                    headerStyle.alignment shouldBe HorizontalAlignment.CENTER
+                }
+            }
         }
     })
 

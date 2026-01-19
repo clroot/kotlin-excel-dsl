@@ -2,6 +2,7 @@
 
 package io.clroot.excel
 
+import io.clroot.excel.core.dsl.ExcelTheme
 import io.clroot.excel.core.model.ExcelDocument
 
 /**
@@ -20,4 +21,5 @@ typealias Column = io.clroot.excel.annotation.Column
 inline fun <reified T : Any> excelOf(
     data: Iterable<T>,
     sheetName: String = "Sheet1",
-): ExcelDocument = io.clroot.excel.annotation.excelOf(data, sheetName)
+    theme: ExcelTheme? = null,
+): ExcelDocument = io.clroot.excel.annotation.excelOf(data, sheetName, theme)
