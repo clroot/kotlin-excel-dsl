@@ -74,20 +74,22 @@ class ParserE2ETest : DescribeSpec({
                 @Column("이메일", order = 2) val email: String,
             )
 
-            val original = listOf(
-                User("김철수", "same@email.com"),
-                User("이영희", "same@email.com"),
-            )
+            val original =
+                listOf(
+                    User("김철수", "same@email.com"),
+                    User("이영희", "same@email.com"),
+                )
 
             val output = ByteArrayOutputStream()
             excelOf(original).writeTo(output)
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                validateAll { users ->
-                    val duplicates = users.groupBy { it.email }.filter { it.value.size > 1 }
-                    require(duplicates.isEmpty()) { "중복된 이메일이 있습니다: ${duplicates.keys}" }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    validateAll { users ->
+                        val duplicates = users.groupBy { it.email }.filter { it.value.size > 1 }
+                        require(duplicates.isEmpty()) { "중복된 이메일이 있습니다: ${duplicates.keys}" }
+                    }
                 }
-            }
 
             result.shouldBeInstanceOf<ParseResult.Failure<User>>()
         }
@@ -99,20 +101,22 @@ class ParserE2ETest : DescribeSpec({
                 @Column("이메일", order = 2) val email: String,
             )
 
-            val original = listOf(
-                User("김철수", "kim@email.com"),
-                User("이영희", "lee@email.com"),
-            )
+            val original =
+                listOf(
+                    User("김철수", "kim@email.com"),
+                    User("이영희", "lee@email.com"),
+                )
 
             val output = ByteArrayOutputStream()
             excelOf(original).writeTo(output)
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                validateAll { users ->
-                    val duplicates = users.groupBy { it.email }.filter { it.value.size > 1 }
-                    require(duplicates.isEmpty()) { "중복된 이메일이 있습니다: ${duplicates.keys}" }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    validateAll { users ->
+                        val duplicates = users.groupBy { it.email }.filter { it.value.size > 1 }
+                        require(duplicates.isEmpty()) { "중복된 이메일이 있습니다: ${duplicates.keys}" }
+                    }
                 }
-            }
 
             result.shouldBeInstanceOf<ParseResult.Success<User>>()
             result.getOrThrow() shouldHaveSize 2
@@ -144,11 +148,12 @@ class ParserE2ETest : DescribeSpec({
                 workbook.write(output)
             }
 
-            val result = parseExcel<Product>(ByteArrayInputStream(output.toByteArray())) {
-                converter<Money> { value ->
-                    Money(BigDecimal(value?.toString() ?: "0"))
+            val result =
+                parseExcel<Product>(ByteArrayInputStream(output.toByteArray())) {
+                    converter<Money> { value ->
+                        Money(BigDecimal(value?.toString() ?: "0"))
+                    }
                 }
-            }
 
             result.shouldBeInstanceOf<ParseResult.Success<Product>>()
             result.getOrThrow()[0].price.amount.compareTo(BigDecimal("1500000")) shouldBe 0
@@ -177,11 +182,12 @@ class ParserE2ETest : DescribeSpec({
                 workbook.write(output)
             }
 
-            val result = parseExcel<Contact>(ByteArrayInputStream(output.toByteArray())) {
-                converter<Email> { value ->
-                    Email(value?.toString() ?: "")
+            val result =
+                parseExcel<Contact>(ByteArrayInputStream(output.toByteArray())) {
+                    converter<Email> { value ->
+                        Email(value?.toString() ?: "")
+                    }
                 }
-            }
 
             result.shouldBeInstanceOf<ParseResult.Success<Contact>>()
             result.getOrThrow()[0].email shouldBe Email("kim@example.com")
@@ -208,9 +214,10 @@ class ParserE2ETest : DescribeSpec({
                 workbook.write(output)
             }
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                sheetName = "Users"
-            }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    sheetName = "Users"
+                }
 
             result.shouldBeInstanceOf<ParseResult.Success<User>>()
             result.getOrThrow()[0].name shouldBe "김철수"
@@ -235,9 +242,10 @@ class ParserE2ETest : DescribeSpec({
                 workbook.write(output)
             }
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                sheetIndex = 1
-            }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    sheetIndex = 1
+                }
 
             result.shouldBeInstanceOf<ParseResult.Success<User>>()
             result.getOrThrow()[0].name shouldBe "김철수"
@@ -252,21 +260,23 @@ class ParserE2ETest : DescribeSpec({
                 @Column("이메일", order = 2) val email: String,
             )
 
-            val original = listOf(
-                User("김철수", "invalid1"),
-                User("이영희", "invalid2"),
-                User("박민수", "invalid3"),
-            )
+            val original =
+                listOf(
+                    User("김철수", "invalid1"),
+                    User("이영희", "invalid2"),
+                    User("박민수", "invalid3"),
+                )
 
             val output = ByteArrayOutputStream()
             excelOf(original).writeTo(output)
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                onError = OnError.FAIL_FAST
-                validateRow { user ->
-                    require(user.email.contains("@")) { "이메일 형식 오류" }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    onError = OnError.FAIL_FAST
+                    validateRow { user ->
+                        require(user.email.contains("@")) { "이메일 형식 오류" }
+                    }
                 }
-            }
 
             result.shouldBeInstanceOf<ParseResult.Failure<User>>()
             val errors = (result as ParseResult.Failure).errors
@@ -280,21 +290,23 @@ class ParserE2ETest : DescribeSpec({
                 @Column("이메일", order = 2) val email: String,
             )
 
-            val original = listOf(
-                User("김철수", "invalid1"),
-                User("이영희", "invalid2"),
-                User("박민수", "invalid3"),
-            )
+            val original =
+                listOf(
+                    User("김철수", "invalid1"),
+                    User("이영희", "invalid2"),
+                    User("박민수", "invalid3"),
+                )
 
             val output = ByteArrayOutputStream()
             excelOf(original).writeTo(output)
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                onError = OnError.COLLECT
-                validateRow { user ->
-                    require(user.email.contains("@")) { "이메일 형식 오류" }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    onError = OnError.COLLECT
+                    validateRow { user ->
+                        require(user.email.contains("@")) { "이메일 형식 오류" }
+                    }
                 }
-            }
 
             result.shouldBeInstanceOf<ParseResult.Failure<User>>()
             val errors = (result as ParseResult.Failure).errors
@@ -320,9 +332,10 @@ class ParserE2ETest : DescribeSpec({
                 workbook.write(output)
             }
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                headerMatching = HeaderMatching.FLEXIBLE
-            }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    headerMatching = HeaderMatching.FLEXIBLE
+                }
 
             result.shouldBeInstanceOf<ParseResult.Success<User>>()
             result.getOrThrow()[0].name shouldBe "김철수"
@@ -345,9 +358,10 @@ class ParserE2ETest : DescribeSpec({
                 workbook.write(output)
             }
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                headerMatching = HeaderMatching.FLEXIBLE
-            }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    headerMatching = HeaderMatching.FLEXIBLE
+                }
 
             result.shouldBeInstanceOf<ParseResult.Success<User>>()
             result.getOrThrow()[0].name shouldBe "김철수"
@@ -370,9 +384,10 @@ class ParserE2ETest : DescribeSpec({
                 workbook.write(output)
             }
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                headerMatching = HeaderMatching.EXACT
-            }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    headerMatching = HeaderMatching.EXACT
+                }
 
             // EXACT 모드에서는 "Name"과 "name"이 매칭되지 않아 필수 필드 누락
             result.shouldBeInstanceOf<ParseResult.Failure<User>>()
@@ -397,9 +412,10 @@ class ParserE2ETest : DescribeSpec({
                 workbook.write(output)
             }
 
-            val result = parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
-                skipEmptyRows = true
-            }
+            val result =
+                parseExcel<User>(ByteArrayInputStream(output.toByteArray())) {
+                    skipEmptyRows = true
+                }
 
             result.shouldBeInstanceOf<ParseResult.Success<User>>()
             val users = result.getOrThrow()
@@ -419,11 +435,12 @@ class ParserE2ETest : DescribeSpec({
                 @Column("연봉", order = 4) val salary: Long,
             )
 
-            val original = listOf(
-                Employee(1001, "김철수", "개발팀", 50000000),
-                Employee(1002, "이영희", "마케팅팀", 45000000),
-                Employee(1003, "박민수", "인사팀", 48000000),
-            )
+            val original =
+                listOf(
+                    Employee(1001, "김철수", "개발팀", 50000000),
+                    Employee(1002, "이영희", "마케팅팀", 45000000),
+                    Employee(1003, "박민수", "인사팀", 48000000),
+                )
 
             val output = ByteArrayOutputStream()
             excelOf(original).writeTo(output)
