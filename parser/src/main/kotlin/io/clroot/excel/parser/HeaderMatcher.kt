@@ -6,7 +6,6 @@ import kotlin.reflect.KClass
  * Matches Excel header cells to column definitions.
  */
 class HeaderMatcher(private val strategy: HeaderMatching) {
-
     companion object {
         private val WHITESPACE_REGEX = Regex("\\s+")
     }
@@ -14,7 +13,11 @@ class HeaderMatcher(private val strategy: HeaderMatching) {
     /**
      * Checks if the cell header matches the expected header or any of its aliases.
      */
-    fun matches(cellHeader: String, expectedHeader: String, aliases: Array<String>): Boolean {
+    fun matches(
+        cellHeader: String,
+        expectedHeader: String,
+        aliases: Array<String>,
+    ): Boolean {
         val candidates = listOf(expectedHeader) + aliases
         return candidates.any { candidate ->
             when (strategy) {
@@ -28,7 +31,10 @@ class HeaderMatcher(private val strategy: HeaderMatching) {
      * Finds the matching column header from candidates.
      * Returns the matched candidate or null if no match found.
      */
-    fun findMatch(cellHeader: String, columns: List<ColumnMeta>): ColumnMeta? {
+    fun findMatch(
+        cellHeader: String,
+        columns: List<ColumnMeta>,
+    ): ColumnMeta? {
         return columns.find { column ->
             matches(cellHeader, column.header, column.aliases)
         }

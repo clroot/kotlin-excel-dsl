@@ -12,4 +12,7 @@ dependencies {
     implementation("org.apache.poi:poi:5.5.1")
     implementation("org.apache.poi:poi-ooxml:5.5.1")
     implementation(kotlin("reflect"))
+
+    // Test dependencies for roundtrip tests
+    testImplementation(project(":render"))
 }

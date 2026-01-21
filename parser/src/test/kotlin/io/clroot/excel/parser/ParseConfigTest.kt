@@ -20,14 +20,15 @@ class ParseConfigTest : DescribeSpec({
         }
 
         it("커스텀 설정이 적용된다") {
-            val config = parseConfig<Any> {
-                headerRow = 1
-                sheetIndex = 2
-                headerMatching = HeaderMatching.EXACT
-                onError = OnError.FAIL_FAST
-                skipEmptyRows = false
-                trimWhitespace = false
-            }
+            val config =
+                parseConfig<Any> {
+                    headerRow = 1
+                    sheetIndex = 2
+                    headerMatching = HeaderMatching.EXACT
+                    onError = OnError.FAIL_FAST
+                    skipEmptyRows = false
+                    trimWhitespace = false
+                }
 
             config.headerRow shouldBe 1
             config.sheetIndex shouldBe 2
@@ -38,10 +39,11 @@ class ParseConfigTest : DescribeSpec({
         }
 
         it("sheetName 설정 시 sheetIndex보다 우선한다") {
-            val config = parseConfig<Any> {
-                sheetIndex = 2
-                sheetName = "Users"
-            }
+            val config =
+                parseConfig<Any> {
+                    sheetIndex = 2
+                    sheetName = "Users"
+                }
 
             config.sheetName shouldBe "Users"
         }
@@ -49,9 +51,10 @@ class ParseConfigTest : DescribeSpec({
         it("커스텀 컨버터를 등록할 수 있다") {
             data class Money(val amount: BigDecimal)
 
-            val config = parseConfig<Any> {
-                converter { value: Any? -> Money((value?.toString() ?: "0").toBigDecimal()) }
-            }
+            val config =
+                parseConfig<Any> {
+                    converter { value: Any? -> Money((value?.toString() ?: "0").toBigDecimal()) }
+                }
 
             config.converters.containsKey(Money::class) shouldBe true
         }
@@ -60,9 +63,10 @@ class ParseConfigTest : DescribeSpec({
             data class User(val name: String)
 
             var validated = false
-            val config = parseConfig<User> {
-                validateRow { validated = true }
-            }
+            val config =
+                parseConfig<User> {
+                    validateRow { validated = true }
+                }
 
             config.rowValidator?.invoke(User("test"))
             validated shouldBe true
@@ -72,9 +76,10 @@ class ParseConfigTest : DescribeSpec({
             data class User(val name: String)
 
             var validated = false
-            val config = parseConfig<User> {
-                validateAll { validated = true }
-            }
+            val config =
+                parseConfig<User> {
+                    validateAll { validated = true }
+                }
 
             config.allValidator?.invoke(listOf(User("test")))
             validated shouldBe true

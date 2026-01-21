@@ -70,9 +70,10 @@ class AnnotationExtractorTest : DescribeSpec({
                 @Column("이름") val name: String,
             )
 
-            val exception = shouldThrow<ExcelConfigurationException> {
-                AnnotationExtractor.extractColumns(User::class)
-            }
+            val exception =
+                shouldThrow<ExcelConfigurationException> {
+                    AnnotationExtractor.extractColumns(User::class)
+                }
             exception.message shouldContain "@Excel"
         }
 
@@ -80,9 +81,10 @@ class AnnotationExtractorTest : DescribeSpec({
             @Excel
             data class User(val name: String)
 
-            val exception = shouldThrow<ExcelConfigurationException> {
-                AnnotationExtractor.extractColumns(User::class)
-            }
+            val exception =
+                shouldThrow<ExcelConfigurationException> {
+                    AnnotationExtractor.extractColumns(User::class)
+                }
             exception.message shouldContain "@Column"
         }
     }

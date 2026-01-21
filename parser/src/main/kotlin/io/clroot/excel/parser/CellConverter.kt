@@ -19,7 +19,11 @@ class CellConverter(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> convert(value: Any?, targetType: KClass<T>, isNullable: Boolean = false): T? {
+    fun <T : Any> convert(
+        value: Any?,
+        targetType: KClass<T>,
+        isNullable: Boolean = false,
+    ): T? {
         // Check custom converter first
         customConverters[targetType]?.let { converter ->
             return converter(value) as T?
@@ -61,11 +65,12 @@ class CellConverter(
     private fun convertToString(value: Any): String {
         return when (value) {
             is String -> value
-            is Double -> if (value == value.toLong().toDouble()) {
-                value.toLong().toString()
-            } else {
-                value.toString()
-            }
+            is Double ->
+                if (value == value.toLong().toDouble()) {
+                    value.toLong().toString()
+                } else {
+                    value.toString()
+                }
 
             else -> value.toString()
         }

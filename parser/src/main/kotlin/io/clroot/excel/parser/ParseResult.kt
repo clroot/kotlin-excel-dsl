@@ -19,29 +19,32 @@ sealed class ParseResult<T> {
     /**
      * Returns the parsed data or throws [ExcelParseException] if parsing failed.
      */
-    fun getOrThrow(): List<T> = when (this) {
-        is Success -> data
-        is Failure -> throw ExcelParseException(
-            message = "Excel parsing failed with ${errors.size} error(s)",
-            errors = errors,
-        )
-    }
+    fun getOrThrow(): List<T> =
+        when (this) {
+            is Success -> data
+            is Failure -> throw ExcelParseException(
+                message = "Excel parsing failed with ${errors.size} error(s)",
+                errors = errors,
+            )
+        }
 
     /**
      * Returns the parsed data or the result of [default] if parsing failed.
      */
-    fun getOrElse(default: () -> List<T>): List<T> = when (this) {
-        is Success -> data
-        is Failure -> default()
-    }
+    fun getOrElse(default: () -> List<T>): List<T> =
+        when (this) {
+            is Success -> data
+            is Failure -> default()
+        }
 
     /**
      * Returns the parsed data or null if parsing failed.
      */
-    fun getOrNull(): List<T>? = when (this) {
-        is Success -> data
-        is Failure -> null
-    }
+    fun getOrNull(): List<T>? =
+        when (this) {
+            is Success -> data
+            is Failure -> null
+        }
 }
 
 /**

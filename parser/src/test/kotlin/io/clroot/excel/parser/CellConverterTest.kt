@@ -88,7 +88,7 @@ class CellConverterTest : DescribeSpec({
 
         it("ISO 문자열을 변환한다") {
             converter.convert("2024-01-15T12:30:00", LocalDateTime::class) shouldBe
-                    LocalDateTime.of(2024, 1, 15, 12, 30, 0)
+                LocalDateTime.of(2024, 1, 15, 12, 30, 0)
         }
     }
 
@@ -106,11 +106,13 @@ class CellConverterTest : DescribeSpec({
         it("등록된 커스텀 컨버터를 사용한다") {
             data class Money(val amount: BigDecimal)
 
-            val customConverter = CellConverter(
-                customConverters = mapOf(
-                    Money::class to { value -> Money((value?.toString() ?: "0").toBigDecimal()) }
+            val customConverter =
+                CellConverter(
+                    customConverters =
+                        mapOf(
+                            Money::class to { value -> Money((value?.toString() ?: "0").toBigDecimal()) },
+                        ),
                 )
-            )
 
             customConverter.convert("100.50", Money::class) shouldBe Money(BigDecimal("100.50"))
         }

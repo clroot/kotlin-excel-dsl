@@ -74,24 +74,24 @@ data class ParseConfig<T : Any>(
             allValidator = validator
         }
 
-        fun build(): ParseConfig<T> = ParseConfig(
-            headerRow = headerRow,
-            sheetIndex = sheetIndex,
-            sheetName = sheetName,
-            headerMatching = headerMatching,
-            onError = onError,
-            skipEmptyRows = skipEmptyRows,
-            trimWhitespace = trimWhitespace,
-            converters = converters.toMap(),
-            rowValidator = rowValidator,
-            allValidator = allValidator,
-        )
+        fun build(): ParseConfig<T> =
+            ParseConfig(
+                headerRow = headerRow,
+                sheetIndex = sheetIndex,
+                sheetName = sheetName,
+                headerMatching = headerMatching,
+                onError = onError,
+                skipEmptyRows = skipEmptyRows,
+                trimWhitespace = trimWhitespace,
+                converters = converters.toMap(),
+                rowValidator = rowValidator,
+                allValidator = allValidator,
+            )
     }
 }
 
 /**
  * Creates a new ParseConfig using a DSL builder pattern.
  */
-inline fun <reified T : Any> parseConfig(
-    block: ParseConfig.Builder<T>.() -> Unit,
-): ParseConfig<T> = ParseConfig.Builder<T>().apply(block).build()
+inline fun <reified T : Any> parseConfig(block: ParseConfig.Builder<T>.() -> Unit): ParseConfig<T> =
+    ParseConfig.Builder<T>().apply(block).build()

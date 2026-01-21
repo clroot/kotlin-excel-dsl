@@ -12,7 +12,6 @@ import kotlin.reflect.jvm.jvmErasure
  * Extracts column metadata from @Excel/@Column annotated classes.
  */
 object AnnotationExtractor {
-
     /**
      * Extract column metadata from the given class.
      */
@@ -28,18 +27,20 @@ object AnnotationExtractor {
         }
 
         // Get constructor parameter order for stable sorting when order values are equal
-        val constructorParamOrder = getConstructorParameterOrder(klass)
-            .withIndex()
-            .associate { it.value to it.index }
+        val constructorParamOrder =
+            getConstructorParameterOrder(klass)
+                .withIndex()
+                .associate { it.value to it.index }
 
-        val columnProps = klass.memberProperties
-            .filter { it.findAnnotation<Column>() != null }
-            .sortedWith(
-                compareBy(
-                    { it.findAnnotation<Column>()!!.order },
-                    { constructorParamOrder[it.name] ?: Int.MAX_VALUE },
-                ),
-            )
+        val columnProps =
+            klass.memberProperties
+                .filter { it.findAnnotation<Column>() != null }
+                .sortedWith(
+                    compareBy(
+                        { it.findAnnotation<Column>()!!.order },
+                        { constructorParamOrder[it.name] ?: Int.MAX_VALUE },
+                    ),
+                )
 
         if (columnProps.isEmpty()) {
             val allProps = klass.memberProperties.map { it.name }
@@ -66,12 +67,13 @@ object AnnotationExtractor {
      * Get the primary constructor parameter order for the given class.
      */
     fun <T : Any> getConstructorParameterOrder(klass: KClass<T>): List<String> {
-        val constructor = klass.constructors.firstOrNull()
-            ?: throw ExcelConfigurationException(
-                message = "No constructor found",
-                className = klass.qualifiedName,
-                hint = "Ensure the class has a primary constructor",
-            )
+        val constructor =
+            klass.constructors.firstOrNull()
+                ?: throw ExcelConfigurationException(
+                    message = "No constructor found",
+                    className = klass.qualifiedName,
+                    hint = "Ensure the class has a primary constructor",
+                )
 
         return constructor.parameters.mapNotNull { it.name }
     }
