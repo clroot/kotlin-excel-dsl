@@ -8,5 +8,6 @@ dependencies {
     api(project(":core"))
     api(project(":annotation"))
     api(project(":render"))
+    api(project(":parser"))
     api(project(":theme"))
 }
