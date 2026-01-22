@@ -34,12 +34,13 @@ enum class StyleAlignment {
     RIGHT,
     ;
 
-    internal fun toAlignment(): Alignment? = when (this) {
-        NONE -> null
-        LEFT -> Alignment.LEFT
-        CENTER -> Alignment.CENTER
-        RIGHT -> Alignment.RIGHT
-    }
+    internal fun toAlignment(): Alignment? =
+        when (this) {
+            NONE -> null
+            LEFT -> Alignment.LEFT
+            CENTER -> Alignment.CENTER
+            RIGHT -> Alignment.RIGHT
+        }
 }
 
 /**
@@ -52,10 +53,11 @@ enum class StyleBorder {
     THICK,
     ;
 
-    internal fun toBorderStyle(): BorderStyle? = when (this) {
-        NONE -> null
-        THIN -> BorderStyle.THIN
-        MEDIUM -> BorderStyle.MEDIUM
-        THICK -> BorderStyle.THICK
-    }
+    internal fun toBorderStyle(): BorderStyle? =
+        when (this) {
+            NONE -> null
+            THIN -> BorderStyle.THIN
+            MEDIUM -> BorderStyle.MEDIUM
+            THICK -> BorderStyle.THICK
+        }
 }

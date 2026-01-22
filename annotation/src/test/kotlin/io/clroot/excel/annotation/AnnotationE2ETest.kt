@@ -26,23 +26,22 @@ class AnnotationE2ETest : DescribeSpec({
         data class Product(
             @Column("상품명", order = 1)
             val name: String,
-
             @Column("가격", format = "#,##0", order = 2)
             @BodyStyle(alignment = StyleAlignment.RIGHT)
             @ConditionalStyle(NegativeStyler::class)
             val price: Int,
-
             @Column("상태", order = 3)
             @HeaderStyle(backgroundColorHex = "#4CAF50")
             val status: String,
         )
 
         it("Excel 파일이 정상 생성된다") {
-            val products = listOf(
-                Product("상품A", 10000, "판매중"),
-                Product("상품B", -5000, "할인"),
-                Product("상품C", 25000, "품절"),
-            )
+            val products =
+                listOf(
+                    Product("상품A", 10000, "판매중"),
+                    Product("상품B", -5000, "할인"),
+                    Product("상품C", 25000, "품절"),
+                )
 
             val doc = excelOf(products)
             val bytes = doc.toByteArray()

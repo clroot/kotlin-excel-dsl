@@ -9,7 +9,6 @@ import io.clroot.excel.core.style.Color
  * Utility for converting style annotations to CellStyle.
  */
 object StyleConverter {
-
     /**
      * Parses a HEX color string to Color.
      *
@@ -33,7 +32,10 @@ object StyleConverter {
     /**
      * Resolves color from enum and hex, preferring hex if not blank.
      */
-    fun resolveColor(enumColor: StyleColor, hexColor: String): Color? {
+    fun resolveColor(
+        enumColor: StyleColor,
+        hexColor: String,
+    ): Color? {
         if (hexColor.isNotBlank()) {
             return parseHexColor(hexColor)
         }
@@ -45,28 +47,30 @@ object StyleConverter {
      *
      * @return CellStyle, or null if all values are defaults
      */
-    fun toCellStyle(annotation: HeaderStyle): CellStyle? = buildCellStyle(
-        bg = resolveColor(annotation.backgroundColor, annotation.backgroundColorHex),
-        fg = resolveColor(annotation.fontColor, annotation.fontColorHex),
-        bold = annotation.bold,
-        italic = annotation.italic,
-        align = annotation.alignment.toAlignment(),
-        border = annotation.border.toBorderStyle(),
-    )
+    fun toCellStyle(annotation: HeaderStyle): CellStyle? =
+        buildCellStyle(
+            bg = resolveColor(annotation.backgroundColor, annotation.backgroundColorHex),
+            fg = resolveColor(annotation.fontColor, annotation.fontColorHex),
+            bold = annotation.bold,
+            italic = annotation.italic,
+            align = annotation.alignment.toAlignment(),
+            border = annotation.border.toBorderStyle(),
+        )
 
     /**
      * Converts @BodyStyle annotation to CellStyle.
      *
      * @return CellStyle, or null if all values are defaults
      */
-    fun toCellStyle(annotation: BodyStyle): CellStyle? = buildCellStyle(
-        bg = resolveColor(annotation.backgroundColor, annotation.backgroundColorHex),
-        fg = resolveColor(annotation.fontColor, annotation.fontColorHex),
-        bold = annotation.bold,
-        italic = annotation.italic,
-        align = annotation.alignment.toAlignment(),
-        border = annotation.border.toBorderStyle(),
-    )
+    fun toCellStyle(annotation: BodyStyle): CellStyle? =
+        buildCellStyle(
+            bg = resolveColor(annotation.backgroundColor, annotation.backgroundColorHex),
+            fg = resolveColor(annotation.fontColor, annotation.fontColorHex),
+            bold = annotation.bold,
+            italic = annotation.italic,
+            align = annotation.alignment.toAlignment(),
+            border = annotation.border.toBorderStyle(),
+        )
 
     private fun buildCellStyle(
         bg: Color?,
