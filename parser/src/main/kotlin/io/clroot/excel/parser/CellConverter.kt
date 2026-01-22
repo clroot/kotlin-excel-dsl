@@ -8,6 +8,19 @@ import kotlin.reflect.KClass
 
 /**
  * Converts Excel cell values to Kotlin types.
+ *
+ * Handles conversion from POI cell values (String, Double, Boolean, LocalDateTime)
+ * to target Kotlin types including primitives, date/time types, and BigDecimal.
+ *
+ * Supported target types:
+ * - String, Int, Long, Double, Float, Boolean
+ * - LocalDate, LocalDateTime
+ * - BigDecimal
+ * - Custom types via registered converters
+ *
+ * @property customConverters custom type converters keyed by target type
+ * @property trimWhitespace whether to trim whitespace from string values
+ * @property treatBlankAsNull whether to treat blank strings as null
  */
 class CellConverter(
     private val customConverters: Map<KClass<*>, (Any?) -> Any?> = emptyMap(),
@@ -19,6 +32,16 @@ class CellConverter(
         private val EXCEL_EPOCH = LocalDate.of(1899, 12, 30)
     }
 
+    /**
+     * Converts a cell value to the specified target type.
+     *
+     * @param T the target type
+     * @param value the raw cell value from POI (may be null)
+     * @param targetType the KClass of the target type
+     * @param isNullable whether the target property accepts null values
+     * @return the converted value, or null if nullable and value is null/blank
+     * @throws IllegalArgumentException if conversion fails or null is not allowed
+     */
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> convert(
         value: Any?,

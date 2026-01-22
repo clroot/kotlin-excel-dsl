@@ -7,8 +7,6 @@ import io.clroot.excel.core.model.ColumnWidth as CoreColumnWidth
 // Models
 typealias ExcelDocument = io.clroot.excel.core.model.ExcelDocument
 typealias Sheet = io.clroot.excel.core.model.Sheet
-typealias Row = io.clroot.excel.core.model.Row
-typealias Cell = io.clroot.excel.core.model.Cell
 typealias ColumnDefinition<T> = io.clroot.excel.core.model.ColumnDefinition<T>
 typealias ColumnWidth = io.clroot.excel.core.model.ColumnWidth
 typealias HeaderGroup = io.clroot.excel.core.model.HeaderGroup

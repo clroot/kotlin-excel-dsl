@@ -24,12 +24,14 @@ data class ColumnStyleConfig(
 
 /**
  * Represents a single sheet in an Excel document.
+ *
+ * Uses streaming mode with [dataSource] and column extractors for memory-efficient large dataset handling.
  */
 data class Sheet(
     val name: String,
     val columns: List<ColumnDefinition<*>> = emptyList(),
     val headerGroups: List<HeaderGroup> = emptyList(),
-    val rows: List<Row> = emptyList(),
+    val dataSource: Iterable<*>? = null,
 )
 
 /**
@@ -79,19 +81,3 @@ val Int.percent: ColumnWidth get() = ColumnWidth.Percent(this)
  * Auto column width constant.
  */
 val auto: ColumnWidth = ColumnWidth.Auto
-
-/**
- * Represents a row containing cells.
- */
-data class Row(
-    val cells: List<Cell> = emptyList(),
-)
-
-/**
- * Represents a cell with value and optional styling.
- */
-data class Cell(
-    val value: Any?,
-    val colspan: Int = 1,
-    val rowspan: Int = 1,
-)

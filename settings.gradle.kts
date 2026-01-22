@@ -17,6 +17,7 @@ include("render")
 include("parser")
 include("theme")
 include("excel-dsl")
+include("benchmarks")
 
 nmcpSettings {
     centralPortal {

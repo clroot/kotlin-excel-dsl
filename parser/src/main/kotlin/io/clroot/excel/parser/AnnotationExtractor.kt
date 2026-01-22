@@ -9,7 +9,13 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.jvmErasure
 
 /**
- * Extracts column metadata from @Excel/@Column annotated classes.
+ * Extracts column metadata from `@Excel`/`@Column` annotated data classes.
+ *
+ * This utility object uses Kotlin reflection to inspect annotated classes
+ * and extract column definitions for Excel parsing.
+ *
+ * @see io.clroot.excel.annotation.Excel
+ * @see io.clroot.excel.annotation.Column
  */
 object AnnotationExtractor {
     /**
