@@ -23,15 +23,33 @@ data class ColumnStyleConfig(
 )
 
 /**
+ * Configuration for freezing panes (rows and columns).
+ *
+ * @property row the number of rows to freeze from the top (0 = no frozen rows)
+ * @property col the number of columns to freeze from the left (0 = no frozen columns)
+ */
+data class FreezePane(
+    val row: Int = 0,
+    val col: Int = 0,
+)
+
+/**
  * Represents a single sheet in an Excel document.
  *
  * Uses streaming mode with [dataSource] and column extractors for memory-efficient large dataset handling.
+ *
+ * @property freezePane configuration for frozen rows/columns (null = no freezing)
+ * @property autoFilter whether to enable auto-filter on the header row
+ * @property alternateRowStyle style applied to even-numbered data rows (0-indexed: rows 0, 2, 4...)
  */
 data class Sheet(
     val name: String,
     val columns: List<ColumnDefinition<*>> = emptyList(),
     val headerGroups: List<HeaderGroup> = emptyList(),
     val dataSource: Iterable<*>? = null,
+    val freezePane: FreezePane? = null,
+    val autoFilter: Boolean = false,
+    val alternateRowStyle: CellStyle? = null,
 )
 
 /**
@@ -61,8 +79,6 @@ sealed class ColumnWidth {
     data object Auto : ColumnWidth()
 
     data class Fixed(val chars: Int) : ColumnWidth()
-
-    data class Percent(val value: Int) : ColumnWidth()
 }
 
 /**
@@ -70,12 +86,6 @@ sealed class ColumnWidth {
  * Usage: column("이름", width = 20.chars) { it.name }
  */
 val Int.chars: ColumnWidth get() = ColumnWidth.Fixed(this)
-
-/**
- * Extension property to create Percent column width.
- * Usage: column("내용", width = 30.percent) { it.content }
- */
-val Int.percent: ColumnWidth get() = ColumnWidth.Percent(this)
 
 /**
  * Auto column width constant.

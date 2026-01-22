@@ -134,6 +134,9 @@ class PoiRenderer(
                             ColumnWidthCalculator.calculateTextWidth(sheetModel.columns[index].header)
                         }.toMutableMap()
 
+                    // Create alternate row style if defined
+                    val alternatePoiStyle = sheetModel.alternateRowStyle?.let { styleCache.getOrCreate(it) }
+
                     // Create data rows using streaming mode
                     val dataSource = sheetModel.dataSource
                     if (dataSource != null) {
@@ -142,6 +145,7 @@ class PoiRenderer(
                         var rowIndex = 0
                         dataSource.forEach { item ->
                             val row = sheet.createRow(currentRow + rowIndex)
+                            val isAlternateRow = rowIndex % 2 == 0 && alternatePoiStyle != null
                             columns.forEachIndexed { cellIndex, column ->
                                 val value = column.valueExtractor(item)
                                 val cell = row.createCell(cellIndex)
@@ -149,7 +153,11 @@ class PoiRenderer(
                                 // Apply body style only for non-date cells
                                 if (value !is LocalDate && value !is LocalDateTime) {
                                     val columnHeader = column.header
-                                    getBodyStyleForColumn(cellIndex, columnHeader)?.let { cell.cellStyle = it }
+                                    val bodyStyle = getBodyStyleForColumn(cellIndex, columnHeader)
+                                    when {
+                                        isAlternateRow -> cell.cellStyle = alternatePoiStyle
+                                        bodyStyle != null -> cell.cellStyle = bodyStyle
+                                    }
                                 }
                                 // Track max width for auto-width columns
                                 if (cellIndex in autoWidthColumns) {
@@ -172,9 +180,23 @@ class PoiRenderer(
                                 val maxWidth = autoWidthMaxWidths[index] ?: 0.0
                                 sheet.setColumnWidth(index, ColumnWidthCalculator.toPoiWidth(maxWidth))
                             }
-
-                            is ColumnWidth.Percent -> {} // Handle percentage-based width if needed
                         }
+                    }
+
+                    // Apply freeze pane
+                    sheetModel.freezePane?.let { freeze ->
+                        if (freeze.row > 0 || freeze.col > 0) {
+                            sheet.createFreezePane(freeze.col, freeze.row)
+                        }
+                    }
+
+                    // Apply auto-filter on header row
+                    if (sheetModel.autoFilter && sheetModel.columns.isNotEmpty()) {
+                        val headerRowIndex = if (hasHeaderGroups) 1 else 0
+                        val lastColIndex = sheetModel.columns.size - 1
+                        sheet.setAutoFilter(
+                            CellRangeAddress(headerRowIndex, headerRowIndex, 0, lastColIndex),
+                        )
                     }
                 }
 

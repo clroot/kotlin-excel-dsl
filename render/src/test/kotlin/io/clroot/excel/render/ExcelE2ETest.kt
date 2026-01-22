@@ -373,6 +373,180 @@ class ExcelE2ETest :
             }
         }
 
+        describe("틀 고정 (freezePane)") {
+            it("헤더 행을 고정한다") {
+                data class User(
+                    val name: String,
+                    val age: Int,
+                )
+
+                val users = listOf(User("김철수", 30))
+
+                val document =
+                    excel {
+                        sheet<User>("사용자") {
+                            freezePane(row = 1)
+                            column("이름") { it.name }
+                            column("나이") { it.age }
+                            rows(users)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+                    sheet.paneInformation.horizontalSplitPosition shouldBe 1
+                    sheet.paneInformation.isFreezePane shouldBe true
+                }
+            }
+
+            it("헤더 행과 첫 번째 컬럼을 고정한다") {
+                data class User(
+                    val name: String,
+                    val age: Int,
+                )
+
+                val users = listOf(User("김철수", 30))
+
+                val document =
+                    excel {
+                        sheet<User>("사용자") {
+                            freezePane(row = 1, col = 1)
+                            column("이름") { it.name }
+                            column("나이") { it.age }
+                            rows(users)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+                    sheet.paneInformation.horizontalSplitPosition shouldBe 1
+                    sheet.paneInformation.verticalSplitPosition shouldBe 1
+                    sheet.paneInformation.isFreezePane shouldBe true
+                }
+            }
+        }
+
+        describe("자동 필터 (autoFilter)") {
+            it("헤더 행에 자동 필터를 적용한다") {
+                data class User(
+                    val name: String,
+                    val age: Int,
+                )
+
+                val users = listOf(User("김철수", 30), User("이영희", 25))
+
+                val document =
+                    excel {
+                        sheet<User>("사용자") {
+                            autoFilter()
+                            column("이름") { it.name }
+                            column("나이") { it.age }
+                            rows(users)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+                    val autoFilter = sheet.ctWorksheet.autoFilter
+                    autoFilter.ref shouldBe "A1:B1"
+                }
+            }
+
+            it("헤더 그룹이 있는 경우 두 번째 행에 자동 필터를 적용한다") {
+                data class Student(
+                    val name: String,
+                    val korean: Int,
+                    val english: Int,
+                )
+
+                val students = listOf(Student("김철수", 90, 85))
+
+                val document =
+                    excel {
+                        sheet<Student>("성적표") {
+                            autoFilter()
+                            headerGroup("학생 정보") {
+                                column("이름") { it.name }
+                            }
+                            headerGroup("성적") {
+                                column("국어") { it.korean }
+                                column("영어") { it.english }
+                            }
+                            rows(students)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+                    val autoFilter = sheet.ctWorksheet.autoFilter
+                    // 헤더 그룹이 있으면 두 번째 행(index 1)에 필터 적용
+                    autoFilter.ref shouldBe "A2:C2"
+                }
+            }
+        }
+
+        describe("줄무늬 행 (alternateRowStyle)") {
+            it("짝수 행에 배경색을 적용한다") {
+                data class User(
+                    val name: String,
+                    val age: Int,
+                )
+
+                val users =
+                    listOf(
+                        User("김철수", 30),
+                        User("이영희", 25),
+                        User("박지민", 28),
+                        User("최수현", 32),
+                    )
+
+                val document =
+                    excel {
+                        sheet<User>("사용자") {
+                            alternateRowStyle {
+                                backgroundColor(Color.LIGHT_GRAY)
+                            }
+                            column("이름") { it.name }
+                            column("나이") { it.age }
+                            rows(users)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+
+                    // 짝수 행(0, 2)에는 배경색 적용
+                    val row0Cell = sheet.getRow(1).getCell(0)
+                    row0Cell.cellStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+
+                    val row2Cell = sheet.getRow(3).getCell(0)
+                    row2Cell.cellStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+
+                    // 홀수 행(1, 3)에는 배경색 없음
+                    val row1Cell = sheet.getRow(2).getCell(0)
+                    row1Cell.cellStyle.fillPattern shouldBe FillPatternType.NO_FILL
+
+                    val row3Cell = sheet.getRow(4).getCell(0)
+                    row3Cell.cellStyle.fillPattern shouldBe FillPatternType.NO_FILL
+                }
+            }
+        }
+
         describe("어노테이션 방식") {
             it("@Excel, @Column으로 Excel 파일을 생성한다") {
                 val users =

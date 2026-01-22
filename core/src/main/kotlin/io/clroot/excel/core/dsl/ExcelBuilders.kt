@@ -6,6 +6,7 @@ import io.clroot.excel.core.model.ColumnDefinition
 import io.clroot.excel.core.model.ColumnStyleConfig
 import io.clroot.excel.core.model.ColumnWidth
 import io.clroot.excel.core.model.ExcelDocument
+import io.clroot.excel.core.model.FreezePane
 import io.clroot.excel.core.model.HeaderGroup
 import io.clroot.excel.core.model.Sheet
 
@@ -112,6 +113,75 @@ class SheetBuilder<T>(private val name: String) {
     private val columns = mutableListOf<ColumnDefinition<T>>()
     private val headerGroups = mutableListOf<HeaderGroup>()
     private var dataSource: Iterable<T>? = null
+    private var freezePaneConfig: FreezePane? = null
+    private var autoFilterEnabled: Boolean = false
+    private var alternateStyle: io.clroot.excel.core.style.CellStyle? = null
+
+    /**
+     * Freezes rows and/or columns in the sheet.
+     *
+     * Frozen panes remain visible while scrolling through the rest of the sheet.
+     * This is useful for keeping headers visible when viewing large datasets.
+     *
+     * Example:
+     * ```kotlin
+     * sheet<User>("Users") {
+     *     freezePane(row = 1)  // Freeze header row
+     *     freezePane(row = 1, col = 1)  // Freeze header row and first column
+     * }
+     * ```
+     *
+     * @param row the number of rows to freeze from the top (default: 0)
+     * @param col the number of columns to freeze from the left (default: 0)
+     */
+    fun freezePane(
+        row: Int = 0,
+        col: Int = 0,
+    ) {
+        freezePaneConfig = FreezePane(row, col)
+    }
+
+    /**
+     * Enables auto-filter dropdown on the header row.
+     *
+     * When enabled, Excel will show filter dropdowns on each column header,
+     * allowing users to filter and sort data.
+     *
+     * Example:
+     * ```kotlin
+     * sheet<User>("Users") {
+     *     autoFilter()
+     *     column("Name") { it.name }
+     *     column("Age") { it.age }
+     * }
+     * ```
+     */
+    fun autoFilter() {
+        autoFilterEnabled = true
+    }
+
+    /**
+     * Applies alternating row styling (zebra stripes) to even-numbered data rows.
+     *
+     * This creates a visual pattern that makes it easier to read across rows.
+     * The style is applied to rows at indices 0, 2, 4, etc. (0-indexed from data rows).
+     *
+     * Example:
+     * ```kotlin
+     * sheet<User>("Users") {
+     *     alternateRowStyle {
+     *         backgroundColor(Color.LIGHT_GRAY)
+     *     }
+     *     column("Name") { it.name }
+     *     rows(users)
+     * }
+     * ```
+     *
+     * @param block the style builder block for alternate rows
+     */
+    fun alternateRowStyle(block: CellStyleBuilder.() -> Unit) {
+        alternateStyle = CellStyleBuilder().apply(block).build()
+    }
 
     /**
      * Defines a column in the sheet.
@@ -235,6 +305,9 @@ class SheetBuilder<T>(private val name: String) {
             columns = columns.toList(),
             headerGroups = headerGroups.toList(),
             dataSource = dataSource,
+            freezePane = freezePaneConfig,
+            autoFilter = autoFilterEnabled,
+            alternateRowStyle = alternateStyle,
         )
 }
 
