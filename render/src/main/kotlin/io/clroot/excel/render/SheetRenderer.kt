@@ -2,6 +2,7 @@ package io.clroot.excel.render
 
 import io.clroot.excel.core.model.ColumnDefinition
 import io.clroot.excel.core.model.ColumnWidth
+import io.clroot.excel.core.model.Formula
 import io.clroot.excel.core.model.Sheet
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Row
@@ -164,6 +165,7 @@ internal class SheetRenderer(
             is Boolean -> cell.setCellValue(value)
             is LocalDate -> cell.setCellValue(value)
             is LocalDateTime -> cell.setCellValue(value)
+            is Formula -> cell.cellFormula = value.normalizedExpression
             else -> cell.setCellValue(value.toString())
         }
     }
