@@ -8,7 +8,7 @@ Kotlin DSL for creating Excel files with type safety and elegant syntax.
 
 - **Hybrid API**: Annotations for simple cases, DSL for complex ones
 - **Type Safety**: Compile-time verification of configurations
-- **CSS-like Styling**: Intuitive style definitions with themes
+- **Declarative Styling**: Intuitive style definitions with themes
 - **Annotation Styling**: `@HeaderStyle`, `@BodyStyle`, `@ConditionalStyle` for annotation-based styling
 - **Conditional Styling**: Dynamic styles based on cell values
 - **Formula Support**: Excel formulas with `formula("SUM(A1:A10)")`
