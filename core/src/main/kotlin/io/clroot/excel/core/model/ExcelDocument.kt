@@ -24,13 +24,23 @@ data class ColumnStyleConfig(
 
 /**
  * Represents a single sheet in an Excel document.
+ *
+ * Supports two modes:
+ * - Legacy mode: pre-computed [rows] list (for backwards compatibility)
+ * - Streaming mode: [dataSource] with column extractors (memory-efficient for large datasets)
  */
 data class Sheet(
     val name: String,
     val columns: List<ColumnDefinition<*>> = emptyList(),
     val headerGroups: List<HeaderGroup> = emptyList(),
     val rows: List<Row> = emptyList(),
-)
+    val dataSource: Iterable<*>? = null,
+) {
+    /**
+     * Returns true if this sheet uses streaming mode (dataSource instead of rows).
+     */
+    val isStreaming: Boolean get() = dataSource != null
+}
 
 /**
  * Represents a header group for multi-row headers.

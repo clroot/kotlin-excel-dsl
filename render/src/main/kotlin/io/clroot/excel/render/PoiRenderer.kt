@@ -124,38 +124,57 @@ class PoiRenderer(
                         }
                     }
 
-                    // Create data rows
-                    sheetModel.rows.forEachIndexed { rowIndex, rowModel ->
-                        val row = sheet.createRow(currentRow + rowIndex)
-                        rowModel.cells.forEachIndexed { cellIndex, cellModel ->
-                            val cell = row.createCell(cellIndex)
-                            setCellValue(cell, cellModel.value, dateStyle, dateTimeStyle)
-                            // Apply body style only for non-date cells (date cells have their own format)
-                            if (cellModel.value !is LocalDate && cellModel.value !is LocalDateTime) {
-                                val columnHeader = sheetModel.columns.getOrNull(cellIndex)?.header ?: ""
-                                getBodyStyleForColumn(cellIndex, columnHeader)?.let { cell.cellStyle = it }
-                            }
-                        }
-                    }
-
-                    // Set column widths
-                    // Collect auto-width column indices first to avoid multiple row iterations
+                    // Set up auto-width tracking
                     val autoWidthColumns =
                         sheetModel.columns.mapIndexedNotNull { index, column ->
                             if (column.width is ColumnWidth.Auto) index else null
                         }
-
-                    // Initialize value collectors with headers
                     val autoWidthValues =
                         autoWidthColumns.associateWith { index ->
                             mutableListOf<Any?>(sheetModel.columns[index].header)
                         }
 
-                    // Single pass through rows to collect all auto-width column values
-                    if (autoWidthColumns.isNotEmpty()) {
-                        sheetModel.rows.forEach { row ->
-                            autoWidthColumns.forEach { index ->
-                                row.cells.getOrNull(index)?.value?.let { autoWidthValues[index]?.add(it) }
+                    // Create data rows - streaming mode or legacy mode
+                    val dataSource = sheetModel.dataSource
+                    if (sheetModel.isStreaming && dataSource != null) {
+                        // Streaming mode: iterate data source directly
+                        @Suppress("UNCHECKED_CAST")
+                        val columns = sheetModel.columns as List<ColumnDefinition<Any?>>
+                        var rowIndex = 0
+                        dataSource.forEach { item ->
+                            val row = sheet.createRow(currentRow + rowIndex)
+                            columns.forEachIndexed { cellIndex, column ->
+                                val value = column.valueExtractor(item)
+                                val cell = row.createCell(cellIndex)
+                                setCellValue(cell, value, dateStyle, dateTimeStyle)
+                                // Apply body style only for non-date cells
+                                if (value !is LocalDate && value !is LocalDateTime) {
+                                    val columnHeader = column.header
+                                    getBodyStyleForColumn(cellIndex, columnHeader)?.let { cell.cellStyle = it }
+                                }
+                                // Track auto-width values
+                                if (cellIndex in autoWidthColumns) {
+                                    autoWidthValues[cellIndex]?.add(value)
+                                }
+                            }
+                            rowIndex++
+                        }
+                    } else {
+                        // Legacy mode: use pre-computed rows
+                        sheetModel.rows.forEachIndexed { rowIndex, rowModel ->
+                            val row = sheet.createRow(currentRow + rowIndex)
+                            rowModel.cells.forEachIndexed { cellIndex, cellModel ->
+                                val cell = row.createCell(cellIndex)
+                                setCellValue(cell, cellModel.value, dateStyle, dateTimeStyle)
+                                // Apply body style only for non-date cells
+                                if (cellModel.value !is LocalDate && cellModel.value !is LocalDateTime) {
+                                    val columnHeader = sheetModel.columns.getOrNull(cellIndex)?.header ?: ""
+                                    getBodyStyleForColumn(cellIndex, columnHeader)?.let { cell.cellStyle = it }
+                                }
+                                // Track auto-width values
+                                if (cellIndex in autoWidthColumns) {
+                                    autoWidthValues[cellIndex]?.add(cellModel.value)
+                                }
                             }
                         }
                     }

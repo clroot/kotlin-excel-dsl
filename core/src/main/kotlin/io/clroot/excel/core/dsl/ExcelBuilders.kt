@@ -2,13 +2,11 @@
 
 package io.clroot.excel.core.dsl
 
-import io.clroot.excel.core.model.Cell
 import io.clroot.excel.core.model.ColumnDefinition
 import io.clroot.excel.core.model.ColumnStyleConfig
 import io.clroot.excel.core.model.ColumnWidth
 import io.clroot.excel.core.model.ExcelDocument
 import io.clroot.excel.core.model.HeaderGroup
-import io.clroot.excel.core.model.Row
 import io.clroot.excel.core.model.Sheet
 
 /**
@@ -113,7 +111,7 @@ class ExcelBuilder(private val theme: ExcelTheme? = null) {
 class SheetBuilder<T>(private val name: String) {
     private val columns = mutableListOf<ColumnDefinition<T>>()
     private val headerGroups = mutableListOf<HeaderGroup>()
-    private val rows = mutableListOf<Row>()
+    private var dataSource: Iterable<T>? = null
 
     /**
      * Defines a column in the sheet.
@@ -222,19 +220,13 @@ class SheetBuilder<T>(private val name: String) {
     /**
      * Populates the sheet with data rows.
      *
-     * Each item in the iterable becomes a row, with cell values
-     * extracted using the column value extractors.
+     * The data is stored as-is and processed during rendering (streaming mode).
+     * This enables memory-efficient handling of large datasets.
      *
      * @param data the iterable of data objects to populate as rows
      */
     fun rows(data: Iterable<T>) {
-        data.forEach { item ->
-            val cells =
-                columns.map { column ->
-                    Cell(value = column.valueExtractor(item))
-                }
-            rows.add(Row(cells))
-        }
+        this.dataSource = data
     }
 
     internal fun build(): Sheet =
@@ -242,7 +234,7 @@ class SheetBuilder<T>(private val name: String) {
             name = name,
             columns = columns.toList(),
             headerGroups = headerGroups.toList(),
-            rows = rows.toList(),
+            dataSource = dataSource,
         )
 }
 

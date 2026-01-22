@@ -210,7 +210,10 @@ class LargeDatasetTest :
                 val rowCount = 100_000
                 val runtime = Runtime.getRuntime()
 
-                // GC를 실행하여 초기 메모리 상태 측정
+                // 데이터 먼저 생성 (메모리 측정에서 제외)
+                val data = generateLargeData(rowCount)
+
+                // 데이터 생성 후 메모리 측정 시작 (순수 POI 렌더링 메모리만 측정)
                 System.gc()
                 Thread.sleep(100)
                 val memoryBefore = runtime.totalMemory() - runtime.freeMemory()
@@ -222,7 +225,7 @@ class LargeDatasetTest :
                             column("Name") { it.name }
                             column("Value") { it.value }
                             column("Date") { it.date }
-                            rows(generateLargeData(rowCount))
+                            rows(data)
                         }
                     }
 
@@ -237,19 +240,22 @@ class LargeDatasetTest :
                 val memoryUsedMB = (memoryAfter - memoryBefore) / 1_000_000.0
                 val fileSizeMB = output.toByteArray().size / 1_000_000.0
 
-                println("10만 행 생성 메모리 사용량: ${memoryUsedMB}MB")
+                println("10만 행 POI 렌더링 메모리 사용량: ${memoryUsedMB}MB")
                 println("10만 행 파일 크기: ${fileSizeMB}MB")
 
                 // SXSSF는 rowAccessWindowSize(기본 100)만큼만 메모리에 유지
-                // 10만 행 데이터 자체는 메모리에 있지만, POI 객체는 스트리밍됨
-                // 실측 약 33MB, 여유를 두어 100MB 제한
-                assert(memoryUsedMB < 100.0) { "Memory usage ($memoryUsedMB MB) exceeds 100MB limit" }
+                // 순수 POI 렌더링 메모리는 50MB 미만이어야 함
+                assert(memoryUsedMB < 50.0) { "Memory usage ($memoryUsedMB MB) exceeds 50MB limit" }
             }
 
             it("SXSSF 스트리밍으로 메모리 사용량이 행 수에 비례하지 않는다") {
                 val runtime = Runtime.getRuntime()
 
-                // 1만 행 생성
+                // 데이터 먼저 생성 (메모리 측정에서 제외)
+                val data10k = generateLargeData(10_000)
+                val data50k = generateLargeData(50_000)
+
+                // 1만 행 렌더링
                 System.gc()
                 Thread.sleep(100)
                 val memoryBefore10k = runtime.totalMemory() - runtime.freeMemory()
@@ -258,7 +264,7 @@ class LargeDatasetTest :
                     sheet<LargeDataRow>("Data") {
                         column("ID") { it.id }
                         column("Name") { it.name }
-                        rows(generateLargeData(10_000))
+                        rows(data10k)
                     }
                 }.writeTo(ByteArrayOutputStream())
 
@@ -267,7 +273,7 @@ class LargeDatasetTest :
                 val memoryAfter10k = runtime.totalMemory() - runtime.freeMemory()
                 val memoryUsed10k = (memoryAfter10k - memoryBefore10k) / 1_000_000.0
 
-                // 5만 행 생성
+                // 5만 행 렌더링
                 System.gc()
                 Thread.sleep(100)
                 val memoryBefore50k = runtime.totalMemory() - runtime.freeMemory()
@@ -276,7 +282,7 @@ class LargeDatasetTest :
                     sheet<LargeDataRow>("Data") {
                         column("ID") { it.id }
                         column("Name") { it.name }
-                        rows(generateLargeData(50_000))
+                        rows(data50k)
                     }
                 }.writeTo(ByteArrayOutputStream())
 
@@ -285,14 +291,14 @@ class LargeDatasetTest :
                 val memoryAfter50k = runtime.totalMemory() - runtime.freeMemory()
                 val memoryUsed50k = (memoryAfter50k - memoryBefore50k) / 1_000_000.0
 
-                println("1만 행 메모리: ${memoryUsed10k}MB")
-                println("5만 행 메모리: ${memoryUsed50k}MB")
+                println("1만 행 POI 렌더링 메모리: ${memoryUsed10k}MB")
+                println("5만 행 POI 렌더링 메모리: ${memoryUsed50k}MB")
                 println("메모리 증가 비율: ${memoryUsed50k / memoryUsed10k.coerceAtLeast(1.0)}배 (행 수는 5배)")
 
-                // 행 수가 5배 증가해도 메모리 사용량은 5배보다 훨씬 적게 증가해야 함
-                // 스트리밍이 제대로 동작하면 메모리 증가 비율이 3배 미만이어야 함
+                // SXSSF 스트리밍이 제대로 동작하면 행 수와 무관하게 메모리가 거의 일정
+                // 메모리 증가 비율이 2배 미만이어야 함
                 val memoryRatio = memoryUsed50k / memoryUsed10k.coerceAtLeast(1.0)
-                assert(memoryRatio < 3.0) { "Memory ratio ($memoryRatio) exceeds 3x limit" }
+                assert(memoryRatio < 2.0) { "Memory ratio ($memoryRatio) exceeds 2x limit" }
             }
         }
 
@@ -333,6 +339,13 @@ class LargeDatasetTest :
                 val rowCount = 1_000_000
                 val runtime = Runtime.getRuntime()
 
+                // 데이터 먼저 생성 (메모리 측정에서 제외)
+                val data = generateLargeData(rowCount)
+
+                // 임시 파일로 출력 (ByteArrayOutputStream 메모리 사용 제외)
+                val tempFile = kotlin.io.path.createTempFile("excel-test", ".xlsx").toFile()
+
+                // 데이터 생성 후 메모리 측정 시작 (순수 POI 렌더링 메모리만 측정)
                 System.gc()
                 Thread.sleep(100)
                 val memoryBefore = runtime.totalMemory() - runtime.freeMemory()
@@ -345,15 +358,11 @@ class LargeDatasetTest :
                                     column("ID") { it.id }
                                     column("Name") { it.name }
                                     column("Value") { it.value }
-                                    rows(generateLargeData(rowCount))
+                                    rows(data)
                                 }
                             }
 
-                        val output = ByteArrayOutputStream()
-                        document.writeTo(output)
-
-                        val sizeMB = output.toByteArray().size / 1_000_000.0
-                        println("100만 행 파일 크기: ${sizeMB}MB")
+                        tempFile.outputStream().use { document.writeTo(it) }
                     }
 
                 System.gc()
@@ -361,8 +370,12 @@ class LargeDatasetTest :
                 val memoryAfter = runtime.totalMemory() - runtime.freeMemory()
                 val memoryUsedMB = (memoryAfter - memoryBefore) / 1_000_000.0
 
+                val fileSizeMB = tempFile.length() / 1_000_000.0
+                tempFile.delete()
+
+                println("100만 행 파일 크기: ${fileSizeMB}MB")
                 println("100만 행 생성 시간: ${elapsed}ms (${elapsed / 1000}초)")
-                println("100만 행 메모리 사용량: ${memoryUsedMB}MB")
+                println("100만 행 POI 렌더링 메모리 사용량: ${memoryUsedMB}MB")
                 elapsed shouldBeLessThan 300_000L // 5분 이내
             }
 
