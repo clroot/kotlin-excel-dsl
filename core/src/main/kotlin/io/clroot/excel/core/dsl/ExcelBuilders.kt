@@ -5,10 +5,12 @@ package io.clroot.excel.core.dsl
 import io.clroot.excel.core.model.ColumnDefinition
 import io.clroot.excel.core.model.ColumnStyleConfig
 import io.clroot.excel.core.model.ColumnWidth
+import io.clroot.excel.core.model.ConditionalStyle
 import io.clroot.excel.core.model.ExcelDocument
 import io.clroot.excel.core.model.FreezePane
 import io.clroot.excel.core.model.HeaderGroup
 import io.clroot.excel.core.model.Sheet
+import io.clroot.excel.core.style.CellStyle
 
 /**
  * Builder for constructing an [ExcelDocument].
@@ -200,7 +202,17 @@ class SheetBuilder<T>(private val name: String) {
         format: String? = null,
         valueExtractor: (T) -> Any?,
     ) {
-        columns.add(ColumnDefinition(header, width, format, null, null, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = null,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -225,7 +237,17 @@ class SheetBuilder<T>(private val name: String) {
         valueExtractor: (T) -> Any?,
     ) {
         val cellStyle = CellStyleBuilder().apply(style).build()
-        columns.add(ColumnDefinition(header, width, format, null, cellStyle, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = cellStyle,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -257,7 +279,119 @@ class SheetBuilder<T>(private val name: String) {
     ) {
         val hStyle = headerStyle?.let { CellStyleBuilder().apply(it).build() }
         val bStyle = bodyStyle?.let { CellStyleBuilder().apply(it).build() }
-        columns.add(ColumnDefinition(header, width, format, hStyle, bStyle, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = hStyle,
+                bodyStyle = bStyle,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
+    }
+
+    /**
+     * Defines a column with conditional styling based on cell value.
+     *
+     * The conditional style function receives the cell value and returns a [CellStyle]
+     * if a style should be applied, or null otherwise.
+     *
+     * Example:
+     * ```kotlin
+     * column("가격", conditionalStyle = { value: Int? ->
+     *     when {
+     *         value == null -> null
+     *         value < 0 -> fontColor(Color.RED)
+     *         value > 1000000 -> fontColor(Color.GREEN)
+     *         else -> null
+     *     }
+     * }) { it.price }
+     * ```
+     *
+     * @param header the column header text
+     * @param width the column width specification
+     * @param format the number format pattern
+     * @param conditionalStyle function that returns a style based on cell value
+     * @param valueExtractor a function to extract the cell value from each data object
+     */
+    @JvmName("columnWithConditionalStyle")
+    fun <V> column(
+        header: String,
+        width: ColumnWidth = ColumnWidth.Auto,
+        format: String? = null,
+        conditionalStyle: (V?) -> CellStyle?,
+        valueExtractor: (T) -> V?,
+    ) {
+        @Suppress("UNCHECKED_CAST")
+        val wrappedConditional =
+            ConditionalStyle<Any?> { value ->
+                conditionalStyle(value as? V)
+            }
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = null,
+                conditionalStyle = wrappedConditional,
+                valueExtractor = valueExtractor,
+            ),
+        )
+    }
+
+    /**
+     * Defines a column with body style and conditional styling.
+     *
+     * The conditional style is merged with bodyStyle, with conditional style taking priority.
+     *
+     * Example:
+     * ```kotlin
+     * column(
+     *     "가격",
+     *     bodyStyle = { bold() },
+     *     conditionalStyle = { value: Int? ->
+     *         if (value != null && value < 0) fontColor(Color.RED) else null
+     *     }
+     * ) { it.price }
+     * ```
+     *
+     * @param header the column header text
+     * @param width the column width specification
+     * @param format the number format pattern
+     * @param bodyStyle the base style for body cells
+     * @param conditionalStyle function that returns additional style based on cell value
+     * @param valueExtractor a function to extract the cell value from each data object
+     */
+    @JvmName("columnWithBodyStyleAndConditionalStyle")
+    fun <V> column(
+        header: String,
+        width: ColumnWidth = ColumnWidth.Auto,
+        format: String? = null,
+        bodyStyle: CellStyleBuilder.() -> Unit,
+        conditionalStyle: (V?) -> CellStyle?,
+        valueExtractor: (T) -> V?,
+    ) {
+        val bStyle = CellStyleBuilder().apply(bodyStyle).build()
+
+        @Suppress("UNCHECKED_CAST")
+        val wrappedConditional =
+            ConditionalStyle<Any?> { value ->
+                conditionalStyle(value as? V)
+            }
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = bStyle,
+                conditionalStyle = wrappedConditional,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -341,7 +475,17 @@ class HeaderGroupBuilder<T>(private val title: String) {
         format: String? = null,
         valueExtractor: (T) -> Any?,
     ) {
-        columns.add(ColumnDefinition(header, width, format, null, null, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = null,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -361,7 +505,17 @@ class HeaderGroupBuilder<T>(private val title: String) {
         valueExtractor: (T) -> Any?,
     ) {
         val cellStyle = CellStyleBuilder().apply(style).build()
-        columns.add(ColumnDefinition(header, width, format, null, cellStyle, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = cellStyle,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -384,7 +538,17 @@ class HeaderGroupBuilder<T>(private val title: String) {
     ) {
         val hStyle = headerStyle?.let { CellStyleBuilder().apply(it).build() }
         val bStyle = bodyStyle?.let { CellStyleBuilder().apply(it).build() }
-        columns.add(ColumnDefinition(header, width, format, hStyle, bStyle, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = hStyle,
+                bodyStyle = bStyle,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     internal fun build(): HeaderGroup =

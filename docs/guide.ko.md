@@ -11,6 +11,7 @@ Excel DSL의 스타일링, 고급 기능 및 상세 사용법을 다룹니다.
   - [컬럼별 스타일](#컬럼별-스타일)
   - [인라인 컬럼 스타일](#인라인-컬럼-스타일)
   - [헤더/바디 스타일 분리](#헤더바디-스타일-분리)
+  - [조건부 스타일](#조건부-스타일)
   - [스타일 우선순위](#스타일-우선순위)
   - [테마](#테마)
 - [고급 기능](#고급-기능)
@@ -19,6 +20,7 @@ Excel DSL의 스타일링, 고급 기능 및 상세 사용법을 다룹니다.
   - [틀 고정](#틀-고정)
   - [자동 필터](#자동-필터)
   - [줄무늬 행 스타일](#줄무늬-행-스타일)
+  - [수식](#수식)
   - [멀티 시트](#멀티-시트)
 
 ## 스타일링
@@ -109,13 +111,70 @@ excel {
 }.writeTo(output)
 ```
 
+### 조건부 스타일
+
+렌더링 시점에 셀 값에 따라 동적으로 스타일을 적용합니다:
+
+```kotlin
+excel {
+    sheet<Transaction>("거래내역") {
+        column("내역") { it.description }
+        column("금액", conditionalStyle = { value: Int? ->
+            when {
+                value == null -> null
+                value < 0 -> CellStyleBuilder.fontColor(Color.RED)
+                value > 1000000 -> CellStyleBuilder.fontColor(Color.GREEN)
+                else -> null
+            }
+        }) { it.amount }
+        rows(transactions)
+    }
+}.writeTo(output)
+```
+
+조건부 스타일은 바디 스타일과 함께 사용할 수 있습니다:
+
+```kotlin
+excel {
+    sheet<Transaction>("거래내역") {
+        column(
+            "금액",
+            bodyStyle = { bold(); align(Alignment.RIGHT) },
+            conditionalStyle = { value: Int? ->
+                if (value != null && value < 0) CellStyleBuilder.fontColor(Color.RED) else null
+            }
+        ) { it.amount }
+        // 음수: bold + 우측 정렬 + 빨간색
+        // 양수: bold + 우측 정렬
+        rows(transactions)
+    }
+}.writeTo(output)
+```
+
+**편의 함수** - 간단한 경우에 사용합니다:
+
+```kotlin
+import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.fontColor
+import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.backgroundColor
+
+column("상태", conditionalStyle = { value: String? ->
+    when (value) {
+        "에러" -> fontColor(Color.RED)
+        "성공" -> fontColor(Color.GREEN)
+        else -> null
+    }
+}) { it.status }
+```
+
 ### 스타일 우선순위
 
 여러 스타일이 정의된 경우 다음 순서로 적용됩니다 (높은 우선순위 순):
 
-1. **인라인 스타일** - 컬럼에 직접 정의
-2. **컬럼별 스타일** - `styles { column("이름") { ... } }`로 정의
-3. **전역 스타일** - `styles { header { ... } }`로 정의
+1. **조건부 스타일** - 셀 값에 따른 동적 스타일
+2. **인라인 스타일** - 컬럼에 직접 정의
+3. **컬럼별 스타일** - `styles { column("이름") { ... } }`로 정의
+4. **전역 스타일** - `styles { header { ... } }`로 정의
+5. **줄무늬 행 스타일** - 짝수 인덱스 행에 적용
 
 ### 테마
 
@@ -257,6 +316,38 @@ excel {
     }
 }.writeTo(output)
 ```
+
+### 수식
+
+`formula()` 함수를 사용하여 셀에 Excel 수식을 지정합니다:
+
+```kotlin
+import io.clroot.excel.core.model.formula
+
+excel {
+    sheet<SummaryRow>("요약") {
+        column("항목") { it.label }
+        column("값") { formula("SUM(B2:B100)") }
+        rows(summaryData)
+    }
+}.writeTo(output)
+```
+
+선행 `=` 기호는 선택사항입니다 - `formula("SUM(A1:A10)")`과 `formula("=SUM(A1:A10)")` 모두 동작합니다:
+
+```kotlin
+// 동일하게 동작
+column("합계") { formula("SUM(A1:A10)") }
+column("합계") { formula("=SUM(A1:A10)") }
+```
+
+다른 시트를 참조할 수도 있습니다:
+
+```kotlin
+column("총합") { formula("SUM(매출!B2:B100)") }
+```
+
+**참고:** 수식 유효성 검사는 Excel에서 파일을 열 때 수행됩니다. 잘못된 수식은 Excel에서 오류로 표시됩니다.
 
 ### 멀티 시트
 

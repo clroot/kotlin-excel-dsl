@@ -62,6 +62,15 @@ data class HeaderGroup(
 
 /**
  * Defines a column with header, width, and value extraction logic.
+ *
+ * @param T the type of the data row
+ * @property header the column header text
+ * @property width the column width configuration
+ * @property format the number format pattern (e.g., "#,##0" for integers)
+ * @property headerStyle the style applied to the header cell
+ * @property bodyStyle the base style applied to all body cells in this column
+ * @property conditionalStyle optional conditional style that applies based on cell value
+ * @property valueExtractor function to extract the cell value from a data row
  */
 data class ColumnDefinition<T>(
     val header: String,
@@ -69,6 +78,7 @@ data class ColumnDefinition<T>(
     val format: String? = null,
     val headerStyle: io.clroot.excel.core.style.CellStyle? = null,
     val bodyStyle: io.clroot.excel.core.style.CellStyle? = null,
+    val conditionalStyle: ConditionalStyle<Any?>? = null,
     val valueExtractor: (T) -> Any?,
 )
 

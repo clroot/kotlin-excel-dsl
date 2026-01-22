@@ -9,6 +9,8 @@ Kotlin DSL for creating Excel files with type safety and elegant syntax.
 - **Hybrid API**: Annotations for simple cases, DSL for complex ones
 - **Type Safety**: Compile-time verification of configurations
 - **CSS-like Styling**: Intuitive style definitions with themes
+- **Conditional Styling**: Dynamic styles based on cell values
+- **Formula Support**: Excel formulas with `formula("SUM(A1:A10)")`
 - **Header Groups**: Multi-row headers with automatic cell merging
 - **Freeze Panes / Auto Filter / Zebra Stripes**: Common Excel features
 - **Streaming Support**: SXSSF for large datasets (1M+ rows)
@@ -23,9 +25,11 @@ Kotlin DSL for creating Excel files with type safety and elegant syntax.
 
 ```kotlin
 dependencies {
-    implementation("io.clroot.excel:excel-dsl:0.1.0")
+    implementation("io.clroot.excel:excel-dsl:$version")
 }
 ```
+
+> Check [Releases](https://github.com/clroot/kotlin-excel-dsl/releases) for the latest version.
 
 ## Quick Start
 
@@ -70,6 +74,37 @@ excel(theme = Theme.Modern) {
         column("Name") { it.name }
         column("Age") { it.age }
         rows(users)
+    }
+}.writeTo(output)
+```
+
+### Conditional Styling
+
+```kotlin
+excel {
+    sheet<Transaction>("Transactions") {
+        column("Description") { it.description }
+        column("Amount", conditionalStyle = { value: Int? ->
+            when {
+                value == null -> null
+                value < 0 -> CellStyleBuilder.fontColor(Color.RED)
+                value > 1000000 -> CellStyleBuilder.fontColor(Color.GREEN)
+                else -> null
+            }
+        }) { it.amount }
+        rows(transactions)
+    }
+}.writeTo(output)
+```
+
+### Formulas
+
+```kotlin
+excel {
+    sheet<SummaryRow>("Summary") {
+        column("Label") { it.label }
+        column("Value") { formula("SUM(A1:A10)") }  // Excel formula
+        rows(summaryData)
     }
 }.writeTo(output)
 ```

@@ -9,6 +9,8 @@
 - **하이브리드 API**: 간단한 경우 어노테이션, 복잡한 경우 DSL
 - **타입 안전성**: 컴파일 타임에 설정 오류 검증
 - **CSS-like 스타일링**: 테마와 함께 직관적인 스타일 정의
+- **조건부 스타일**: 셀 값에 따른 동적 스타일 적용
+- **수식 지원**: `formula("SUM(A1:A10)")` Excel 수식
 - **헤더 그룹**: 셀 자동 병합을 지원하는 다중 헤더
 - **틀 고정 / 자동 필터 / 줄무늬 행**: 일반적인 Excel 기능 지원
 - **스트리밍 지원**: 대용량 데이터를 위한 SXSSF (100만+ 행)
@@ -23,9 +25,11 @@
 
 ```kotlin
 dependencies {
-    implementation("io.clroot.excel:excel-dsl:0.1.0")
+    implementation("io.clroot.excel:excel-dsl:$version")
 }
 ```
+
+> 최신 버전은 [Releases](https://github.com/clroot/kotlin-excel-dsl/releases)에서 확인하세요.
 
 ## 빠른 시작
 
@@ -70,6 +74,37 @@ excel(theme = Theme.Modern) {
         column("이름") { it.name }
         column("나이") { it.age }
         rows(users)
+    }
+}.writeTo(output)
+```
+
+### 조건부 스타일
+
+```kotlin
+excel {
+    sheet<Transaction>("거래내역") {
+        column("내역") { it.description }
+        column("금액", conditionalStyle = { value: Int? ->
+            when {
+                value == null -> null
+                value < 0 -> CellStyleBuilder.fontColor(Color.RED)
+                value > 1000000 -> CellStyleBuilder.fontColor(Color.GREEN)
+                else -> null
+            }
+        }) { it.amount }
+        rows(transactions)
+    }
+}.writeTo(output)
+```
+
+### 수식
+
+```kotlin
+excel {
+    sheet<SummaryRow>("요약") {
+        column("항목") { it.label }
+        column("값") { formula("SUM(A1:A10)") }  // Excel 수식
+        rows(summaryData)
     }
 }.writeTo(output)
 ```

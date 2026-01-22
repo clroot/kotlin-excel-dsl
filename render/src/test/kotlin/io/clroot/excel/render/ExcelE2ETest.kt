@@ -3,8 +3,10 @@ package io.clroot.excel.render
 import io.clroot.excel.annotation.Column
 import io.clroot.excel.annotation.Excel
 import io.clroot.excel.annotation.excelOf
+import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.fontColor
 import io.clroot.excel.core.dsl.excel
 import io.clroot.excel.core.model.chars
+import io.clroot.excel.core.model.formula
 import io.clroot.excel.core.style.Alignment
 import io.clroot.excel.core.style.Color
 import io.clroot.excel.theme.Theme
@@ -13,6 +15,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.apache.poi.ss.usermodel.BorderStyle
+import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -811,6 +814,106 @@ class ExcelE2ETest :
                     val bodyCell = sheet.getRow(1).getCell(0)
                     val bodyStyle = bodyCell.cellStyle
                     bodyStyle.borderBottom shouldBe BorderStyle.THIN
+                }
+            }
+        }
+
+        describe("조건부 스타일") {
+            it("음수 금액에 빨간색을 적용한다") {
+                data class Transaction(
+                    val description: String,
+                    val amount: Int,
+                )
+
+                val transactions =
+                    listOf(
+                        Transaction("급여", 3000000),
+                        Transaction("식비", -150000),
+                        Transaction("보너스", 500000),
+                    )
+
+                val document =
+                    excel {
+                        sheet<Transaction>("가계부") {
+                            column("내역") { it.description }
+                            column("금액", conditionalStyle = { value: Int? ->
+                                when {
+                                    value == null -> null
+                                    value < 0 -> fontColor(Color.RED)
+                                    value >= 1000000 -> fontColor(Color.GREEN)
+                                    else -> null
+                                }
+                            }) { it.amount }
+                            rows(transactions)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+
+                    // 급여 (3000000): 초록색
+                    val salaryCell = sheet.getRow(1).getCell(1)
+                    val salaryFont =
+                        workbook.getFontAt(salaryCell.cellStyle.fontIndex)
+                            as org.apache.poi.xssf.usermodel.XSSFFont
+                    salaryFont.xssfColor?.rgb?.get(1) shouldBe 0x80.toByte() // Green component
+
+                    // 식비 (-150000): 빨간색
+                    val expenseCell = sheet.getRow(2).getCell(1)
+                    val expenseFont =
+                        workbook.getFontAt(expenseCell.cellStyle.fontIndex)
+                            as org.apache.poi.xssf.usermodel.XSSFFont
+                    expenseFont.xssfColor?.rgb?.get(0) shouldBe 0xFF.toByte() // Red component
+                }
+            }
+        }
+
+        describe("수식") {
+            it("SUM 수식을 사용하여 합계를 계산한다") {
+                data class Sales(
+                    val product: String,
+                    val amount: Int,
+                )
+
+                val sales =
+                    listOf(
+                        Sales("상품A", 10000),
+                        Sales("상품B", 20000),
+                        Sales("상품C", 30000),
+                    )
+
+                // 합계 행을 위한 별도 데이터 클래스
+                data class SummaryRow(
+                    val label: String,
+                    val total: Any,
+                )
+
+                val document =
+                    excel {
+                        sheet<Sales>("매출") {
+                            column("상품") { it.product }
+                            column("금액") { it.amount }
+                            rows(sales)
+                        }
+                        sheet<SummaryRow>("요약") {
+                            column("항목") { it.label }
+                            column("값") { it.total }
+                            rows(listOf(SummaryRow("총 매출", formula("SUM(매출!B2:B4)"))))
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val summarySheet = workbook.getSheet("요약")
+                    val formulaCell = summarySheet.getRow(1).getCell(1)
+
+                    formulaCell.cellType shouldBe CellType.FORMULA
+                    formulaCell.cellFormula shouldBe "SUM(매출!B2:B4)"
                 }
             }
         }
