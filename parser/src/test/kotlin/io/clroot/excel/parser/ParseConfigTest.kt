@@ -17,6 +17,7 @@ class ParseConfigTest : DescribeSpec({
             config.onError shouldBe OnError.COLLECT
             config.skipEmptyRows shouldBe true
             config.trimWhitespace shouldBe true
+            config.treatBlankAsNull shouldBe true
         }
 
         it("커스텀 설정이 적용된다") {

@@ -14,16 +14,20 @@ import kotlin.reflect.full.primaryConstructor
 
 /**
  * Parses an Excel file into a list of data class instances.
+ *
+ * Note: The caller is responsible for closing the [input] InputStream after this function returns.
+ * This function does not close the stream.
  */
 inline fun <reified T : Any> parseExcel(
     input: InputStream,
     noinline configure: ParseConfig.Builder<T>.() -> Unit = {},
-): ParseResult<T> {
-    return parseExcel(T::class, input, configure)
-}
+): ParseResult<T> = parseExcel(T::class, input, configure)
 
 /**
  * Parses an Excel file into a list of data class instances.
+ *
+ * Note: The caller is responsible for closing the [input] InputStream after this function returns.
+ * This function does not close the stream.
  */
 fun <T : Any> parseExcel(
     klass: KClass<T>,
@@ -47,6 +51,7 @@ internal class ExcelParserImpl<T : Any>(
         CellConverter(
             customConverters = config.converters,
             trimWhitespace = config.trimWhitespace,
+            treatBlankAsNull = config.treatBlankAsNull,
         )
 
     fun parse(input: InputStream): ParseResult<T> {
@@ -90,13 +95,12 @@ internal class ExcelParserImpl<T : Any>(
             for (rowIndex in dataStartRow..lastRowNum) {
                 val row = sheet.getRow(rowIndex)
 
-                if (row == null || isEmptyRow(row)) {
-                    if (config.skipEmptyRows) continue
+                val isEmpty = row == null || isEmptyRow(row)
+                if (isEmpty && config.skipEmptyRows) {
+                    continue
                 }
 
-                val parseRowResult = parseRow(row, rowIndex, headerMapping)
-
-                when (parseRowResult) {
+                when (val parseRowResult = parseRow(row, rowIndex, headerMapping)) {
                     is RowParseResult.Success -> {
                         // Validate row
                         val validationError = validateRow(parseRowResult.data, rowIndex)

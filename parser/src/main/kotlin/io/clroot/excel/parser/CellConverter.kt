@@ -12,6 +12,7 @@ import kotlin.reflect.KClass
 class CellConverter(
     private val customConverters: Map<KClass<*>, (Any?) -> Any?> = emptyMap(),
     private val trimWhitespace: Boolean = true,
+    private val treatBlankAsNull: Boolean = true,
 ) {
     companion object {
         // Excel epoch is 1899-12-30 (accounting for Excel's leap year bug)
@@ -40,6 +41,17 @@ class CellConverter(
         }
 
         val processedValue = if (trimWhitespace && value is String) value.trim() else value
+
+        // Treat blank strings as null if configured
+        if (treatBlankAsNull && processedValue is String && processedValue.isBlank()) {
+            if (isNullable) {
+                return null
+            } else {
+                throw IllegalArgumentException(
+                    "${targetType.simpleName} 타입은 null을 허용하지 않지만, 셀 값이 비어있습니다.",
+                )
+            }
+        }
 
         return when (targetType) {
             String::class -> convertToString(processedValue)

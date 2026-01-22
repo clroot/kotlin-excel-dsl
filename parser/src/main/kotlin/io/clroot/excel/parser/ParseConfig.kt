@@ -35,6 +35,7 @@ data class ParseConfig<T : Any>(
     val onError: OnError,
     val skipEmptyRows: Boolean,
     val trimWhitespace: Boolean,
+    val treatBlankAsNull: Boolean,
     val converters: Map<KClass<*>, (Any?) -> Any?>,
     val rowValidator: ((T) -> Unit)?,
     val allValidator: ((List<T>) -> Unit)?,
@@ -47,6 +48,9 @@ data class ParseConfig<T : Any>(
         var onError: OnError = OnError.COLLECT
         var skipEmptyRows: Boolean = true
         var trimWhitespace: Boolean = true
+
+        /** Treat blank strings (whitespace only) as null */
+        var treatBlankAsNull: Boolean = true
 
         @PublishedApi
         internal val converters: MutableMap<KClass<*>, (Any?) -> Any?> = mutableMapOf()
@@ -83,6 +87,7 @@ data class ParseConfig<T : Any>(
                 onError = onError,
                 skipEmptyRows = skipEmptyRows,
                 trimWhitespace = trimWhitespace,
+                treatBlankAsNull = treatBlankAsNull,
                 converters = converters.toMap(),
                 rowValidator = rowValidator,
                 allValidator = allValidator,
