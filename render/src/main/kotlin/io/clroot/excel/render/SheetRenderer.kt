@@ -65,7 +65,7 @@ internal class SheetRenderer(
             cell.setCellValue(group.title)
 
             // Apply global header style to group headers
-            styleResolver.resolveHeaderStyle(columns.first())?.let {
+            styleResolver.resolveGroupHeaderStyle()?.let {
                 cell.cellStyle = styleCache.getOrCreate(it)
             }
 

@@ -36,6 +36,16 @@ internal class StyleResolver(
     }
 
     /**
+     * Resolves the style for group headers.
+     *
+     * Group headers are not tied to any specific column, so they always use
+     * the global header style regardless of column-specific or inline styles.
+     *
+     * @return the global header style, or null if not defined
+     */
+    fun resolveGroupHeaderStyle(): CellStyle? = globalHeaderStyle
+
+    /**
      * Resolves the header style for a column.
      *
      * @param column the column definition
