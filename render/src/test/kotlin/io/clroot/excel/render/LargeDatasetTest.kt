@@ -52,7 +52,7 @@ class LargeDatasetTest :
                     }
 
                 println("10만 행 생성 시간: ${elapsed}ms")
-                elapsed shouldBeLessThan 30_000L // 30초 이내
+                elapsed shouldBeLessThan 5_000L // 5초 이내 (실측 ~1.5초)
             }
 
             it("10만 행 파일의 첫 번째와 마지막 행이 올바르다") {
@@ -113,7 +113,7 @@ class LargeDatasetTest :
                     }
 
                 println("어노테이션 방식 10만 행 생성 시간: ${elapsed}ms")
-                elapsed shouldBeLessThan 30_000L
+                elapsed shouldBeLessThan 10_000L // 10초 이내
             }
         }
 
@@ -201,7 +201,7 @@ class LargeDatasetTest :
                     }
 
                 println("멀티 시트 (5만 x 2) 생성 시간: ${elapsed}ms")
-                elapsed shouldBeLessThan 30_000L
+                elapsed shouldBeLessThan 10_000L // 10초 이내
             }
         }
 
@@ -244,8 +244,8 @@ class LargeDatasetTest :
                 println("10만 행 파일 크기: ${fileSizeMB}MB")
 
                 // SXSSF는 rowAccessWindowSize(기본 100)만큼만 메모리에 유지
-                // 순수 POI 렌더링 메모리는 50MB 미만이어야 함
-                assert(memoryUsedMB < 50.0) { "Memory usage ($memoryUsedMB MB) exceeds 50MB limit" }
+                // 순수 POI 렌더링 메모리는 20MB 미만이어야 함 (실측 ~2-3MB)
+                assert(memoryUsedMB < 20.0) { "Memory usage ($memoryUsedMB MB) exceeds 20MB limit" }
             }
 
             it("auto-width 컬럼에서도 메모리 사용량이 일정하다") {
@@ -298,9 +298,9 @@ class LargeDatasetTest :
                 println("메모리 증가 비율: ${memoryUsed100k / memoryUsed10k.coerceAtLeast(0.1)}배 (행 수는 10배)")
 
                 // auto-width가 O(1) 메모리를 사용하면 행 수 10배 증가해도 메모리는 거의 동일
-                // 메모리 증가 비율이 3배 미만이어야 함
+                // 메모리 증가 비율이 2배 미만이어야 함
                 val memoryRatio = memoryUsed100k / memoryUsed10k.coerceAtLeast(0.1)
-                assert(memoryRatio < 3.0) { "Memory ratio ($memoryRatio) exceeds 3x limit for auto-width" }
+                assert(memoryRatio < 2.0) { "Memory ratio ($memoryRatio) exceeds 2x limit for auto-width" }
             }
 
             it("SXSSF 스트리밍으로 메모리 사용량이 행 수에 비례하지 않는다") {
