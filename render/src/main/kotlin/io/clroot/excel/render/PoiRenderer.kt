@@ -177,10 +177,10 @@ class PoiRenderer(
                                 // Build merged style: bodyStyle + alternateRowStyle (if applicable)
                                 val columnHeader = column.header
                                 val bodyDomainStyle = getBodyDomainStyleForColumn(cellIndex, columnHeader)
+                                val alternateStyle = sheetModel.alternateRowStyle
                                 val mergedStyle =
-                                    if (isAlternateRow) {
-                                        bodyDomainStyle?.merge(sheetModel.alternateRowStyle!!)
-                                            ?: sheetModel.alternateRowStyle
+                                    if (isAlternateRow && alternateStyle != null) {
+                                        bodyDomainStyle?.merge(alternateStyle) ?: alternateStyle
                                     } else {
                                         bodyDomainStyle
                                     }
