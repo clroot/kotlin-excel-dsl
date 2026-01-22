@@ -387,7 +387,7 @@ class LargeDatasetTest :
                     }
 
                 println("50만 행 생성 시간: ${elapsed}ms (${elapsed / 1000}초)")
-                elapsed shouldBeLessThan 120_000L // 2분 이내
+                elapsed shouldBeLessThan 10_000L // 10초 이내 (실측 ~1.3초)
             }
 
             it("100만 행을 생성한다") {
@@ -431,7 +431,9 @@ class LargeDatasetTest :
                 println("100만 행 파일 크기: ${fileSizeMB}MB")
                 println("100만 행 생성 시간: ${elapsed}ms (${elapsed / 1000}초)")
                 println("100만 행 POI 렌더링 메모리 사용량: ${memoryUsedMB}MB")
-                elapsed shouldBeLessThan 300_000L // 5분 이내
+
+                elapsed shouldBeLessThan 15_000L // 15초 이내 (실측 ~2.5초)
+                assert(memoryUsedMB < 10.0) { "Memory usage ($memoryUsedMB MB) exceeds 10MB limit" } // 실측 ~0.01MB
             }
 
             it("100만 행 + 테마 적용") {
@@ -454,7 +456,7 @@ class LargeDatasetTest :
                     }
 
                 println("100만 행 + 테마 생성 시간: ${elapsed}ms (${elapsed / 1000}초)")
-                elapsed shouldBeLessThan 300_000L // 5분 이내
+                elapsed shouldBeLessThan 15_000L // 15초 이내 (실측 ~2.6초)
             }
         }
     })
