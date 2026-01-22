@@ -11,6 +11,7 @@ This guide covers styling, advanced features, and detailed usage of the Excel DS
   - [Column-Level Styles](#column-level-styles)
   - [Inline Column Styles](#inline-column-styles)
   - [Separate Header and Body Styles](#separate-header-and-body-styles)
+  - [Conditional Styling](#conditional-styling)
   - [Style Priority](#style-priority)
   - [Themes](#themes)
 - [Advanced Features](#advanced-features)
@@ -19,6 +20,7 @@ This guide covers styling, advanced features, and detailed usage of the Excel DS
   - [Freeze Panes](#freeze-panes)
   - [Auto Filter](#auto-filter)
   - [Alternate Row Styling](#alternate-row-styling)
+  - [Formulas](#formulas)
   - [Multi-Sheet](#multi-sheet)
 
 ## Styling
@@ -109,13 +111,70 @@ excel {
 }.writeTo(output)
 ```
 
+### Conditional Styling
+
+Apply dynamic styles based on cell values at render time:
+
+```kotlin
+excel {
+    sheet<Transaction>("Transactions") {
+        column("Description") { it.description }
+        column("Amount", conditionalStyle = { value: Int? ->
+            when {
+                value == null -> null
+                value < 0 -> CellStyleBuilder.fontColor(Color.RED)
+                value > 1000000 -> CellStyleBuilder.fontColor(Color.GREEN)
+                else -> null
+            }
+        }) { it.amount }
+        rows(transactions)
+    }
+}.writeTo(output)
+```
+
+Conditional styles can be combined with body styles:
+
+```kotlin
+excel {
+    sheet<Transaction>("Transactions") {
+        column(
+            "Amount",
+            bodyStyle = { bold(); align(Alignment.RIGHT) },
+            conditionalStyle = { value: Int? ->
+                if (value != null && value < 0) CellStyleBuilder.fontColor(Color.RED) else null
+            }
+        ) { it.amount }
+        // Negative values will be: bold + right-aligned + red
+        // Positive values will be: bold + right-aligned
+        rows(transactions)
+    }
+}.writeTo(output)
+```
+
+**Convenience functions** for simple cases:
+
+```kotlin
+import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.fontColor
+import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.backgroundColor
+
+column("Status", conditionalStyle = { value: String? ->
+    when (value) {
+        "ERROR" -> fontColor(Color.RED)
+        "SUCCESS" -> fontColor(Color.GREEN)
+        else -> null
+    }
+}) { it.status }
+```
+
 ### Style Priority
 
 When multiple styles are defined, they are applied in this order (highest priority first):
 
-1. **Inline styles** - Defined directly on the column
-2. **Column-specific styles** - Defined via `styles { column("Name") { ... } }`
-3. **Global styles** - Defined via `styles { header { ... } }`
+1. **Conditional styles** - Dynamic styles based on cell values
+2. **Inline styles** - Defined directly on the column
+3. **Column-specific styles** - Defined via `styles { column("Name") { ... } }`
+4. **Global styles** - Defined via `styles { header { ... } }`
+5. **Alternate row styles** - Applied to even-indexed rows
 
 ### Themes
 
@@ -257,6 +316,38 @@ excel {
     }
 }.writeTo(output)
 ```
+
+### Formulas
+
+Use Excel formulas in cells with the `formula()` function:
+
+```kotlin
+import io.clroot.excel.core.model.formula
+
+excel {
+    sheet<SummaryRow>("Summary") {
+        column("Label") { it.label }
+        column("Value") { formula("SUM(B2:B100)") }
+        rows(summaryData)
+    }
+}.writeTo(output)
+```
+
+The leading `=` sign is optional - both `formula("SUM(A1:A10)")` and `formula("=SUM(A1:A10)")` work:
+
+```kotlin
+// These are equivalent
+column("Total") { formula("SUM(A1:A10)") }
+column("Total") { formula("=SUM(A1:A10)") }
+```
+
+Formulas can reference other sheets:
+
+```kotlin
+column("Grand Total") { formula("SUM(Sales!B2:B100)") }
+```
+
+**Note:** Formula validation is performed by Excel when opening the file. Invalid formulas will show as errors in Excel.
 
 ### Multi-Sheet
 
