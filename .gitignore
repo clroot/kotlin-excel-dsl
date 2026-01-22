@@ -29,6 +29,7 @@ Thumbs.db
 
 # Local configuration
 local.properties
+.claude/settings.local.json
 
 # Internal documentation (plans, todos)
 docs/plans/
