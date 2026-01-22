@@ -47,10 +47,6 @@ class PoiRenderer(
                     config.bodyStyle?.let { columnBodyStyles[columnName] = styleCache.getOrCreate(it) }
                 }
 
-                // Create date style (cached via StyleCache)
-                val dateStyle = styleCache.getDateStyle()
-                val dateTimeStyle = styleCache.getDateTimeStyle()
-
                 document.sheets.forEach { sheetModel ->
                     // Create inline column styles (defined in column DSL)
                     val inlineHeaderStyles = mutableMapOf<Int, org.apache.poi.ss.usermodel.CellStyle>()
@@ -83,6 +79,16 @@ class PoiRenderer(
                         return inlineBodyStyles[index]
                             ?: columnBodyStyles[columnHeader]
                             ?: globalBodyStyle
+                    }
+
+                    // Helper to get domain body style for a column (for style merging)
+                    fun getBodyDomainStyleForColumn(
+                        index: Int,
+                        columnHeader: String,
+                    ): CellStyle? {
+                        return sheetModel.columns[index].bodyStyle
+                            ?: document.columnStyles[columnHeader]?.bodyStyle
+                            ?: document.bodyStyle
                     }
 
                     if (hasHeaderGroups) {
@@ -134,9 +140,6 @@ class PoiRenderer(
                             ColumnWidthCalculator.calculateTextWidth(sheetModel.columns[index].header)
                         }.toMutableMap()
 
-                    // Create alternate row style if defined
-                    val alternatePoiStyle = sheetModel.alternateRowStyle?.let { styleCache.getOrCreate(it) }
-
                     // Create data rows using streaming mode
                     val dataSource = sheetModel.dataSource
                     if (dataSource != null) {
@@ -145,20 +148,58 @@ class PoiRenderer(
                         var rowIndex = 0
                         dataSource.forEach { item ->
                             val row = sheet.createRow(currentRow + rowIndex)
-                            val isAlternateRow = rowIndex % 2 == 0 && alternatePoiStyle != null
+                            val isAlternateRow = rowIndex % 2 == 0 && sheetModel.alternateRowStyle != null
                             columns.forEachIndexed { cellIndex, column ->
                                 val value = column.valueExtractor(item)
                                 val cell = row.createCell(cellIndex)
-                                setCellValue(cell, value, dateStyle, dateTimeStyle)
-                                // Apply body style only for non-date cells
-                                if (value !is LocalDate && value !is LocalDateTime) {
-                                    val columnHeader = column.header
-                                    val bodyStyle = getBodyStyleForColumn(cellIndex, columnHeader)
+
+                                // Determine base style for date formatting
+                                val isDate = value is LocalDate
+                                val isDateTime = value is LocalDateTime
+                                val baseDateFormat =
                                     when {
-                                        isAlternateRow -> cell.cellStyle = alternatePoiStyle
-                                        bodyStyle != null -> cell.cellStyle = bodyStyle
+                                        isDate -> "yyyy-mm-dd"
+                                        isDateTime -> "yyyy-mm-dd hh:mm:ss"
+                                        else -> null
                                     }
+
+                                // Set cell value
+                                when (value) {
+                                    null -> cell.setBlank()
+                                    is String -> cell.setCellValue(value)
+                                    is Number -> cell.setCellValue(value.toDouble())
+                                    is Boolean -> cell.setCellValue(value)
+                                    is LocalDate -> cell.setCellValue(value)
+                                    is LocalDateTime -> cell.setCellValue(value)
+                                    else -> cell.setCellValue(value.toString())
                                 }
+
+                                // Build merged style: bodyStyle + alternateRowStyle (if applicable)
+                                val columnHeader = column.header
+                                val bodyDomainStyle = getBodyDomainStyleForColumn(cellIndex, columnHeader)
+                                val mergedStyle =
+                                    when {
+                                        isAlternateRow && bodyDomainStyle != null ->
+                                            bodyDomainStyle.merge(sheetModel.alternateRowStyle!!)
+
+                                        isAlternateRow -> sheetModel.alternateRowStyle
+                                        else -> bodyDomainStyle
+                                    }
+
+                                // Apply style (with date format if needed)
+                                val finalStyle =
+                                    when {
+                                        mergedStyle != null && baseDateFormat != null ->
+                                            mergedStyle.copy(numberFormat = baseDateFormat)
+
+                                        mergedStyle != null -> mergedStyle
+                                        baseDateFormat != null ->
+                                            CellStyle(numberFormat = baseDateFormat)
+
+                                        else -> null
+                                    }
+                                finalStyle?.let { cell.cellStyle = styleCache.getOrCreate(it) }
+
                                 // Track max width for auto-width columns
                                 if (cellIndex in autoWidthColumns) {
                                     val textWidth = ColumnWidthCalculator.calculateTextWidth(value?.toString() ?: "")
@@ -207,31 +248,6 @@ class PoiRenderer(
                 message = "Failed to write Excel document: ${e.message}",
                 cause = e,
             )
-        }
-    }
-
-    private fun setCellValue(
-        cell: org.apache.poi.ss.usermodel.Cell,
-        value: Any?,
-        dateStyle: org.apache.poi.ss.usermodel.CellStyle,
-        dateTimeStyle: org.apache.poi.ss.usermodel.CellStyle,
-    ) {
-        when (value) {
-            null -> cell.setBlank()
-            is String -> cell.setCellValue(value)
-            is Number -> cell.setCellValue(value.toDouble())
-            is Boolean -> cell.setCellValue(value)
-            is LocalDate -> {
-                cell.setCellValue(value)
-                cell.cellStyle = dateStyle
-            }
-
-            is LocalDateTime -> {
-                cell.setCellValue(value)
-                cell.cellStyle = dateTimeStyle
-            }
-
-            else -> cell.setCellValue(value.toString())
         }
     }
 }

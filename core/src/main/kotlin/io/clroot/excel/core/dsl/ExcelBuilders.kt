@@ -131,13 +131,16 @@ class SheetBuilder<T>(private val name: String) {
      * }
      * ```
      *
-     * @param row the number of rows to freeze from the top (default: 0)
-     * @param col the number of columns to freeze from the left (default: 0)
+     * @param row the number of rows to freeze from the top (default: 0, must be non-negative)
+     * @param col the number of columns to freeze from the left (default: 0, must be non-negative)
+     * @throws IllegalArgumentException if row or col is negative
      */
     fun freezePane(
         row: Int = 0,
         col: Int = 0,
     ) {
+        require(row >= 0) { "freezePane row must be non-negative, but was $row" }
+        require(col >= 0) { "freezePane col must be non-negative, but was $col" }
         freezePaneConfig = FreezePane(row, col)
     }
 

@@ -8,8 +8,10 @@ import io.clroot.excel.core.model.chars
 import io.clroot.excel.core.style.Alignment
 import io.clroot.excel.core.style.Color
 import io.clroot.excel.theme.Theme
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import org.apache.poi.ss.usermodel.BorderStyle
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.HorizontalAlignment
@@ -430,6 +432,30 @@ class ExcelE2ETest :
                     sheet.paneInformation.isFreezePane shouldBe true
                 }
             }
+
+            it("음수 row 값에 대해 예외를 던진다") {
+                shouldThrow<IllegalArgumentException> {
+                    excel {
+                        sheet<String>("테스트") {
+                            freezePane(row = -1)
+                            column("값") { it }
+                            rows(listOf("test"))
+                        }
+                    }
+                }.message shouldContain "row must be non-negative"
+            }
+
+            it("음수 col 값에 대해 예외를 던진다") {
+                shouldThrow<IllegalArgumentException> {
+                    excel {
+                        sheet<String>("테스트") {
+                            freezePane(col = -1)
+                            column("값") { it }
+                            rows(listOf("test"))
+                        }
+                    }
+                }.message shouldContain "col must be non-negative"
+            }
         }
 
         describe("자동 필터 (autoFilter)") {
@@ -543,6 +569,97 @@ class ExcelE2ETest :
 
                     val row3Cell = sheet.getRow(4).getCell(0)
                     row3Cell.cellStyle.fillPattern shouldBe FillPatternType.NO_FILL
+                }
+            }
+
+            it("날짜 셀에도 alternateRowStyle이 적용된다") {
+                data class Event(
+                    val name: String,
+                    val date: LocalDate,
+                )
+
+                val events =
+                    listOf(
+                        Event("회의", LocalDate.of(2024, 5, 15)),
+                        Event("세미나", LocalDate.of(2024, 5, 16)),
+                    )
+
+                val document =
+                    excel {
+                        sheet<Event>("일정") {
+                            alternateRowStyle {
+                                backgroundColor(Color.LIGHT_GRAY)
+                            }
+                            column("일정명") { it.name }
+                            column("날짜") { it.date }
+                            rows(events)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+
+                    // 첫 번째 행(짝수)의 날짜 셀에 배경색 적용
+                    val dateCell = sheet.getRow(1).getCell(1)
+                    dateCell.cellStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+                    dateCell.localDateTimeCellValue.toLocalDate() shouldBe LocalDate.of(2024, 5, 15)
+
+                    // 두 번째 행(홀수)의 날짜 셀에는 배경색 없음
+                    val dateCell2 = sheet.getRow(2).getCell(1)
+                    dateCell2.cellStyle.fillPattern shouldBe FillPatternType.NO_FILL
+                }
+            }
+
+            it("bodyStyle과 alternateRowStyle이 병합된다") {
+                data class User(
+                    val name: String,
+                    val age: Int,
+                )
+
+                val users =
+                    listOf(
+                        User("김철수", 30),
+                        User("이영희", 25),
+                    )
+
+                val document =
+                    excel {
+                        styles {
+                            body {
+                                bold()
+                                align(Alignment.CENTER)
+                            }
+                        }
+                        sheet<User>("사용자") {
+                            alternateRowStyle {
+                                backgroundColor(Color.LIGHT_GRAY)
+                            }
+                            column("이름") { it.name }
+                            column("나이") { it.age }
+                            rows(users)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+
+                    // 첫 번째 행(짝수): bodyStyle(bold, center) + alternateRowStyle(배경색)
+                    val row0Cell = sheet.getRow(1).getCell(0)
+                    row0Cell.cellStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+                    row0Cell.cellStyle.font.bold shouldBe true
+                    row0Cell.cellStyle.alignment shouldBe HorizontalAlignment.CENTER
+
+                    // 두 번째 행(홀수): bodyStyle(bold, center)만 적용
+                    val row1Cell = sheet.getRow(2).getCell(0)
+                    row1Cell.cellStyle.fillPattern shouldBe FillPatternType.NO_FILL
+                    row1Cell.cellStyle.font.bold shouldBe true
+                    row1Cell.cellStyle.alignment shouldBe HorizontalAlignment.CENTER
                 }
             }
         }
