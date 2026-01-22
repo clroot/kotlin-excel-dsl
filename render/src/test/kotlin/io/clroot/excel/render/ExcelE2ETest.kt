@@ -342,6 +342,103 @@ class ExcelE2ETest :
                     mergedRegions.size shouldBe 2
                 }
             }
+
+            it("그룹 헤더에 전역 헤더 스타일이 적용된다") {
+                data class Student(
+                    val name: String,
+                    val score: Int,
+                )
+
+                val students = listOf(Student("김철수", 90))
+
+                val document =
+                    excel {
+                        styles {
+                            header {
+                                backgroundColor(Color.GRAY)
+                                bold()
+                            }
+                        }
+                        sheet<Student>("성적표") {
+                            headerGroup("학생 정보") {
+                                column("이름") { it.name }
+                            }
+                            headerGroup("성적") {
+                                column("점수") { it.score }
+                            }
+                            rows(students)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+
+                    // 그룹 헤더(첫 번째 행)에 전역 스타일 적용
+                    val groupHeader1 = sheet.getRow(0).getCell(0)
+                    groupHeader1.cellStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+                    groupHeader1.cellStyle.font.bold shouldBe true
+
+                    val groupHeader2 = sheet.getRow(0).getCell(1)
+                    groupHeader2.cellStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+                    groupHeader2.cellStyle.font.bold shouldBe true
+
+                    // 컬럼 헤더(두 번째 행)에도 전역 스타일 적용
+                    val columnHeader = sheet.getRow(1).getCell(0)
+                    columnHeader.cellStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+                    columnHeader.cellStyle.font.bold shouldBe true
+                }
+            }
+
+            it("첫 번째 컬럼에 인라인 스타일이 있어도 그룹 헤더에는 전역 스타일만 적용된다") {
+                data class Student(
+                    val name: String,
+                    val score: Int,
+                )
+
+                val students = listOf(Student("김철수", 90))
+
+                val document =
+                    excel {
+                        styles {
+                            header {
+                                backgroundColor(Color.GRAY)
+                            }
+                        }
+                        sheet<Student>("성적표") {
+                            headerGroup("학생 정보") {
+                                // 첫 번째 컬럼에 인라인 헤더 스타일 (빨간 배경)
+                                column("이름", headerStyle = {
+                                    backgroundColor(Color.RED)
+                                    italic()
+                                }) { it.name }
+                            }
+                            headerGroup("성적") {
+                                column("점수") { it.score }
+                            }
+                            rows(students)
+                        }
+                    }
+
+                val output = ByteArrayOutputStream()
+                document.writeTo(output)
+
+                XSSFWorkbook(ByteArrayInputStream(output.toByteArray())).use { workbook ->
+                    val sheet = workbook.getSheetAt(0)
+
+                    // 그룹 헤더는 전역 스타일만 적용 (인라인 스타일 무시)
+                    val groupHeader = sheet.getRow(0).getCell(0)
+                    groupHeader.cellStyle.fillPattern shouldBe FillPatternType.SOLID_FOREGROUND
+                    // 인라인 스타일의 italic이 적용되지 않아야 함
+                    groupHeader.cellStyle.font.italic shouldBe false
+
+                    // 컬럼 헤더는 인라인 스타일 적용
+                    val columnHeader = sheet.getRow(1).getCell(0)
+                    columnHeader.cellStyle.font.italic shouldBe true
+                }
+            }
         }
 
         describe("날짜/시간 포맷") {
