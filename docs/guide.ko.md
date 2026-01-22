@@ -14,6 +14,12 @@ Excel DSL의 스타일링, 고급 기능 및 상세 사용법을 다룹니다.
   - [조건부 스타일](#조건부-스타일)
   - [스타일 우선순위](#스타일-우선순위)
   - [테마](#테마)
+- [어노테이션 스타일링](#어노테이션-스타일링)
+  - [HeaderStyle과 BodyStyle](#headerstyle과-bodystyle)
+  - [ConditionalStyle](#conditionalstyle)
+  - [스타일 열거형](#스타일-열거형)
+  - [HEX 색상 지원](#hex-색상-지원)
+  - [어노테이션 스타일 우선순위](#어노테이션-스타일-우선순위)
 - [고급 기능](#고급-기능)
   - [헤더 그룹](#헤더-그룹)
   - [컬럼 너비](#컬럼-너비)
@@ -195,6 +201,158 @@ excel(theme = Theme.Modern) {
 | `Theme.Modern` | 파란 헤더, 흰색 글자, 가운데 정렬 |
 | `Theme.Minimal` | 볼드 헤더, 배경색 없음 |
 | `Theme.Classic` | 회색 헤더, 중간 두께 테두리 |
+
+## 어노테이션 스타일링
+
+어노테이션 방식(`@Excel`, `@Column`)을 사용할 때, `@HeaderStyle`, `@BodyStyle`, `@ConditionalStyle` 어노테이션으로 스타일을 적용할 수 있습니다.
+
+### HeaderStyle과 BodyStyle
+
+클래스 레벨(전체 컬럼) 또는 프로퍼티 레벨(특정 컬럼)에 스타일을 적용합니다:
+
+```kotlin
+@Excel
+@HeaderStyle(bold = true, backgroundColor = StyleColor.LIGHT_GRAY)
+@BodyStyle(alignment = StyleAlignment.CENTER)
+data class User(
+    @Column("이름", order = 1)
+    @HeaderStyle(fontColor = StyleColor.BLUE)  // 클래스 레벨 오버라이드
+    val name: String,
+
+    @Column("나이", order = 2)
+    @BodyStyle(bold = true)  // 클래스 레벨 오버라이드
+    val age: Int,
+
+    @Column("이메일", order = 3)
+    val email: String  // 클래스 레벨 스타일 사용
+)
+
+excelOf(users).writeTo(output)
+```
+
+사용 가능한 속성:
+- `bold` - 볼드체 (기본값: false)
+- `italic` - 이탤릭체 (기본값: false)
+- `backgroundColor` - `StyleColor` 열거형으로 배경색 지정
+- `backgroundColorHex` - HEX 문자열로 배경색 지정 (예: "#FF5733")
+- `fontColor` - `StyleColor` 열거형으로 글자색 지정
+- `fontColorHex` - HEX 문자열로 글자색 지정
+- `alignment` - `StyleAlignment` 열거형으로 정렬 지정
+- `border` - `StyleBorder` 열거형으로 테두리 지정
+
+### ConditionalStyle
+
+`@ConditionalStyle` 어노테이션과 `ConditionalStyler<T>` 인터페이스를 사용하여 셀 값에 따른 동적 스타일을 적용합니다:
+
+```kotlin
+class ScoreStyler : ConditionalStyler<Int> {
+    override fun style(value: Int?): CellStyle? = when {
+        value == null -> null
+        value >= 90 -> CellStyle(fontColor = Color.GREEN, bold = true)
+        value >= 70 -> CellStyle(fontColor = Color.BLUE)
+        value < 60 -> CellStyle(fontColor = Color.RED)
+        else -> null
+    }
+}
+
+class StatusStyler : ConditionalStyler<String> {
+    override fun style(value: String?): CellStyle? = when (value) {
+        "활성" -> CellStyle(backgroundColor = Color(200, 255, 200))
+        "비활성" -> CellStyle(backgroundColor = Color(255, 200, 200))
+        else -> null
+    }
+}
+
+@Excel
+data class Student(
+    @Column("이름", order = 1)
+    val name: String,
+
+    @Column("점수", order = 2)
+    @ConditionalStyle(ScoreStyler::class)
+    val score: Int,
+
+    @Column("상태", order = 3)
+    @ConditionalStyle(StatusStyler::class)
+    val status: String
+)
+```
+
+**중요:** `ConditionalStyler<T>`의 제네릭 타입은 프로퍼티 타입과 일치해야 합니다. 타입이 맞지 않으면 런타임에 `ExcelConfigurationException`이 발생합니다.
+
+### 스타일 열거형
+
+타입 안전한 스타일 정의를 위한 열거형:
+
+**StyleColor:**
+```kotlin
+enum class StyleColor {
+    NONE,        // 색상 없음 (상속)
+    WHITE, BLACK, GRAY, LIGHT_GRAY,
+    RED, GREEN, BLUE, YELLOW, ORANGE
+}
+```
+
+**StyleAlignment:**
+```kotlin
+enum class StyleAlignment {
+    NONE,    // 정렬 없음 (상속)
+    LEFT, CENTER, RIGHT
+}
+```
+
+**StyleBorder:**
+```kotlin
+enum class StyleBorder {
+    NONE,    // 테두리 없음 (상속)
+    THIN, MEDIUM, THICK
+}
+```
+
+### HEX 색상 지원
+
+`StyleColor`에 없는 색상은 HEX 문자열로 지정합니다:
+
+```kotlin
+@Excel
+@HeaderStyle(backgroundColorHex = "#4A90D9", fontColorHex = "#FFFFFF")
+data class CustomStyled(
+    @Column("값", order = 1)
+    @BodyStyle(backgroundColorHex = "#F5F5F5")
+    val value: String
+)
+```
+
+지원 형식:
+- 6자리 HEX: `"#RRGGBB"` (예: "#FF5733")
+- # 없는 6자리: `"RRGGBB"` (예: "FF5733")
+
+**참고:** 열거형 색상과 HEX 색상이 모두 지정된 경우, HEX가 우선 적용됩니다.
+
+### 어노테이션 스타일 우선순위
+
+스타일은 다음 순서로 적용됩니다 (높은 우선순위 순):
+
+1. **ConditionalStyle** - `ConditionalStyler`의 동적 스타일
+2. **프로퍼티 레벨 어노테이션** - 프로퍼티의 `@HeaderStyle`/`@BodyStyle`
+3. **클래스 레벨 어노테이션** - 클래스의 `@HeaderStyle`/`@BodyStyle`
+4. **테마 스타일** - `excelOf(data, theme = Theme.Modern)`에서 지정
+
+예시:
+```kotlin
+@Excel
+@HeaderStyle(bold = true)  // 우선순위 3
+@BodyStyle(alignment = StyleAlignment.LEFT)  // 우선순위 3
+data class Report(
+    @Column("점수", order = 1)
+    @BodyStyle(alignment = StyleAlignment.RIGHT)  // 우선순위 2 - 클래스 오버라이드
+    @ConditionalStyle(ScoreStyler::class)  // 우선순위 1 - 조건부 추가
+    val score: Int
+)
+
+// 테마와 함께 사용:
+excelOf(reports, theme = Theme.Modern)  // 테마는 우선순위 4
+```
 
 ## 고급 기능
 

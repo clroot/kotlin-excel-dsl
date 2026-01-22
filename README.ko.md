@@ -8,7 +8,8 @@
 
 - **하이브리드 API**: 간단한 경우 어노테이션, 복잡한 경우 DSL
 - **타입 안전성**: 컴파일 타임에 설정 오류 검증
-- **CSS-like 스타일링**: 테마와 함께 직관적인 스타일 정의
+- **선언적 스타일링**: 테마와 함께 직관적인 스타일 정의
+- **어노테이션 스타일링**: `@HeaderStyle`, `@BodyStyle`, `@ConditionalStyle` 어노테이션 기반 스타일링
 - **조건부 스타일**: 셀 값에 따른 동적 스타일 적용
 - **수식 지원**: `formula("SUM(A1:A10)")` Excel 수식
 - **헤더 그룹**: 셀 자동 병합을 지원하는 다중 헤더
@@ -64,6 +65,32 @@ data class User(
 )
 
 excelOf(users).writeTo(FileOutputStream("users.xlsx"))
+```
+
+### 어노테이션 스타일링
+
+```kotlin
+@Excel
+@HeaderStyle(bold = true, backgroundColor = StyleColor.LIGHT_GRAY)
+@BodyStyle(alignment = StyleAlignment.CENTER)
+data class StyledUser(
+    @Column("이름", order = 1)
+    @HeaderStyle(fontColor = StyleColor.BLUE)  // 프로퍼티 레벨 오버라이드
+    val name: String,
+
+    @Column("점수", order = 2)
+    @ConditionalStyle(ScoreStyler::class)  // 동적 스타일링
+    val score: Int
+)
+
+class ScoreStyler : ConditionalStyler<Int> {
+    override fun style(value: Int?): CellStyle? = when {
+        value == null -> null
+        value >= 90 -> CellStyle(fontColor = Color.GREEN)
+        value < 60 -> CellStyle(fontColor = Color.RED)
+        else -> null
+    }
+}
 ```
 
 ### 테마 적용

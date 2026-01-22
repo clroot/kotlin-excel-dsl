@@ -8,7 +8,8 @@ Kotlin DSL for creating Excel files with type safety and elegant syntax.
 
 - **Hybrid API**: Annotations for simple cases, DSL for complex ones
 - **Type Safety**: Compile-time verification of configurations
-- **CSS-like Styling**: Intuitive style definitions with themes
+- **Declarative Styling**: Intuitive style definitions with themes
+- **Annotation Styling**: `@HeaderStyle`, `@BodyStyle`, `@ConditionalStyle` for annotation-based styling
 - **Conditional Styling**: Dynamic styles based on cell values
 - **Formula Support**: Excel formulas with `formula("SUM(A1:A10)")`
 - **Header Groups**: Multi-row headers with automatic cell merging
@@ -64,6 +65,32 @@ data class User(
 )
 
 excelOf(users).writeTo(FileOutputStream("users.xlsx"))
+```
+
+### Annotation Styling
+
+```kotlin
+@Excel
+@HeaderStyle(bold = true, backgroundColor = StyleColor.LIGHT_GRAY)
+@BodyStyle(alignment = StyleAlignment.CENTER)
+data class StyledUser(
+    @Column("Name", order = 1)
+    @HeaderStyle(fontColor = StyleColor.BLUE)  // Property-level override
+    val name: String,
+
+    @Column("Score", order = 2)
+    @ConditionalStyle(ScoreStyler::class)  // Dynamic styling
+    val score: Int
+)
+
+class ScoreStyler : ConditionalStyler<Int> {
+    override fun style(value: Int?): CellStyle? = when {
+        value == null -> null
+        value >= 90 -> CellStyle(fontColor = Color.GREEN)
+        value < 60 -> CellStyle(fontColor = Color.RED)
+        else -> null
+    }
+}
 ```
 
 ### With Theme
