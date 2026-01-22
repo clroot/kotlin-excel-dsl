@@ -139,16 +139,34 @@ class PoiRenderer(
                     }
 
                     // Set column widths
+                    // Collect auto-width column indices first to avoid multiple row iterations
+                    val autoWidthColumns =
+                        sheetModel.columns.mapIndexedNotNull { index, column ->
+                            if (column.width is ColumnWidth.Auto) index else null
+                        }
+
+                    // Initialize value collectors with headers
+                    val autoWidthValues =
+                        autoWidthColumns.associateWith { index ->
+                            mutableListOf<Any?>(sheetModel.columns[index].header)
+                        }
+
+                    // Single pass through rows to collect all auto-width column values
+                    if (autoWidthColumns.isNotEmpty()) {
+                        sheetModel.rows.forEach { row ->
+                            autoWidthColumns.forEach { index ->
+                                row.cells.getOrNull(index)?.value?.let { autoWidthValues[index]?.add(it) }
+                            }
+                        }
+                    }
+
+                    // Apply column widths
                     sheetModel.columns.forEachIndexed { index, column ->
                         when (val width = column.width) {
                             is ColumnWidth.Fixed -> sheet.setColumnWidth(index, width.chars * 256)
                             is ColumnWidth.Auto -> {
-                                // Calculate width considering CJK characters
-                                val columnValues = mutableListOf<Any?>(column.header)
-                                sheetModel.rows.forEach { row ->
-                                    row.cells.getOrNull(index)?.value?.let { columnValues.add(it) }
-                                }
-                                val calculatedWidth = ColumnWidthCalculator.calculateWidth(columnValues)
+                                val values = autoWidthValues[index] ?: emptyList()
+                                val calculatedWidth = ColumnWidthCalculator.calculateWidth(values)
                                 sheet.setColumnWidth(index, calculatedWidth)
                             }
 
