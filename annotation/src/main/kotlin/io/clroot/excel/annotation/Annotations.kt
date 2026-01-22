@@ -3,6 +3,7 @@ package io.clroot.excel.annotation
 import io.clroot.excel.annotation.style.StyleAlignment
 import io.clroot.excel.annotation.style.StyleBorder
 import io.clroot.excel.annotation.style.StyleColor
+import kotlin.reflect.KClass
 
 /**
  * Marks a class as an Excel-exportable data class.
@@ -89,4 +90,29 @@ annotation class BodyStyle(
     val fontColorHex: String = "",
     val alignment: StyleAlignment = StyleAlignment.NONE,
     val border: StyleBorder = StyleBorder.NONE,
+)
+
+/**
+ * Specifies a conditional style for a column based on cell values.
+ *
+ * The specified [ConditionalStyler] implementation will be instantiated and called
+ * for each cell value to determine the style. The conditional style is merged with
+ * other styles, taking highest precedence.
+ *
+ * Example:
+ * ```kotlin
+ * @Excel
+ * data class Transaction(
+ *     @Column("Amount")
+ *     @ConditionalStyle(PriceStyler::class)
+ *     val amount: Int,
+ * )
+ * ```
+ *
+ * @param styler the ConditionalStyler implementation class
+ */
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ConditionalStyle(
+    val styler: KClass<out ConditionalStyler<*>>,
 )
