@@ -25,9 +25,11 @@ Kotlin DSL for creating Excel files with type safety and elegant syntax.
 
 ```kotlin
 dependencies {
-    implementation("io.clroot.excel:excel-dsl:0.1.0")
+    implementation("io.clroot.excel:excel-dsl:$version")
 }
 ```
+
+> Check [Releases](https://github.com/clroot/kotlin-excel-dsl/releases) for the latest version.
 
 ## Quick Start
 

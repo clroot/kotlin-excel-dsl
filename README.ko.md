@@ -25,9 +25,11 @@
 
 ```kotlin
 dependencies {
-    implementation("io.clroot.excel:excel-dsl:0.1.0")
+    implementation("io.clroot.excel:excel-dsl:$version")
 }
 ```
+
+> 최신 버전은 [Releases](https://github.com/clroot/kotlin-excel-dsl/releases)에서 확인하세요.
 
 ## 빠른 시작
 
