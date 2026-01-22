@@ -19,6 +19,7 @@ Kotlin DSL for creating Excel files with type safety and elegant syntax.
 - **Auto Date Formatting**: LocalDate/LocalDateTime automatic detection
 - **Streaming Support**: SXSSF for large datasets
 - **Detailed Error Messages**: Context-rich exceptions with helpful hints
+- **Excel Parsing**: Type-safe parsing of Excel files into data classes
 
 ## Quick Start
 
@@ -39,6 +40,7 @@ dependencies {
     implementation("io.clroot.excel:annotation:0.1.0")
     implementation("io.clroot.excel:render:0.1.0")
     implementation("io.clroot.excel:theme:0.1.0")
+    implementation("io.clroot.excel:parser:0.1.0")  // Excel parsing
 }
 ```
 
@@ -233,6 +235,87 @@ excel {
 }.writeTo(output)
 ```
 
+## Parsing Excel Files
+
+Parse Excel files into type-safe data classes using the same annotations.
+
+### Basic Parsing
+
+```kotlin
+@Excel
+data class User(
+    @Column("Name") val name: String,
+    @Column("Email") val email: String,
+)
+
+val result = parseExcel<User>(FileInputStream("users.xlsx"))
+
+when (result) {
+    is ParseResult.Success -> result.data.forEach { println(it) }
+    is ParseResult.Failure -> result.errors.forEach { println(it.message) }
+}
+```
+
+### Header Aliases
+
+Support alternative header names for flexibility:
+
+```kotlin
+@Excel
+data class User(
+    @Column("Name", aliases = ["Full Name", "이름"]) val name: String,
+    @Column("Email", aliases = ["E-mail", "이메일"]) val email: String,
+)
+```
+
+### Parse Configuration
+
+```kotlin
+val result = parseExcel<User>(inputStream) {
+    // Sheet selection
+    sheetName = "Users"        // or sheetIndex = 0
+    headerRow = 1              // 0-indexed
+    
+    // Header matching
+    headerMatching = HeaderMatching.FLEXIBLE  // case-insensitive, whitespace normalized
+    
+    // Error handling
+    onError = OnError.COLLECT  // collect all errors, or FAIL_FAST
+    
+    // Data processing
+    skipEmptyRows = true
+    trimWhitespace = true
+    treatBlankAsNull = true
+    
+    // Validation
+    validateRow { user -> 
+        require(user.email.contains("@")) { "Invalid email" }
+    }
+    validateAll { users ->
+        val duplicates = users.groupBy { it.email }.filter { it.value.size > 1 }
+        require(duplicates.isEmpty()) { "Duplicate emails: ${duplicates.keys}" }
+    }
+    
+    // Custom type converter
+    converter<Money> { value -> Money(BigDecimal(value.toString())) }
+}
+```
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `sheetIndex` | `Int` | `0` | Sheet index (0-based) |
+| `sheetName` | `String?` | `null` | Sheet name (overrides sheetIndex) |
+| `headerRow` | `Int` | `0` | Header row index |
+| `headerMatching` | `HeaderMatching` | `FLEXIBLE` | `EXACT` or `FLEXIBLE` |
+| `onError` | `OnError` | `COLLECT` | `COLLECT` or `FAIL_FAST` |
+| `skipEmptyRows` | `Boolean` | `true` | Skip empty rows |
+| `trimWhitespace` | `Boolean` | `true` | Trim string values |
+| `treatBlankAsNull` | `Boolean` | `true` | Treat blank strings as null |
+
+**Supported Types**: `String`, `Int`, `Long`, `Double`, `Float`, `Boolean`, `BigDecimal`, `LocalDate`, `LocalDateTime`
+
 ## Error Handling
 
 The library provides detailed, context-rich error messages:
@@ -257,6 +340,7 @@ excelOf(listOf(NoColumnClass()))
 | `ExcelConfigurationException` | Configuration errors (annotations, settings) |
 | `ExcelDataException`          | Data processing errors                       |
 | `ExcelWriteException`         | File writing errors                          |
+| `ExcelParseException`         | Excel parsing errors                         |
 | `ColumnNotFoundException`     | Column lookup failures                       |
 | `StyleException`              | Style application errors                     |
 
@@ -276,7 +360,8 @@ kotlin-excel-dsl/
 ├── core/        # Core models & DSL (pure Kotlin)
 ├── annotation/  # @Excel, @Column processing
 ├── render/      # Apache POI integration
-└── theme/       # Predefined themes
+├── theme/       # Predefined themes
+└── parser/      # Excel file parsing
 ```
 
 ## License
