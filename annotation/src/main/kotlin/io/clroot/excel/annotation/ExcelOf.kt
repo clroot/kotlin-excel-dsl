@@ -125,5 +125,17 @@ private fun mergeStyles(vararg styles: CellStyle?): CellStyle? {
 @Suppress("UNCHECKED_CAST")
 private fun createConditionalStyle(stylerClass: KClass<out ConditionalStyler<*>>): ConditionalStyle<Any?> {
     val styler = stylerClass.createInstance() as ConditionalStyler<Any?>
-    return ConditionalStyle { value -> styler.style(value) }
+    return ConditionalStyle { value ->
+        try {
+            styler.style(value)
+        } catch (e: ClassCastException) {
+            throw ExcelConfigurationException(
+                message = "ConditionalStyler type mismatch",
+                className = stylerClass.qualifiedName ?: stylerClass.simpleName ?: "Unknown",
+                hint =
+                    "Ensure the ConditionalStyler generic type matches the property type. " +
+                        "Got value of type: ${value?.let { it::class.simpleName } ?: "null"}",
+            )
+        }
+    }
 }
