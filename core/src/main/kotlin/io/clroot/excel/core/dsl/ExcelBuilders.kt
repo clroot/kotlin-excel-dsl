@@ -200,7 +200,17 @@ class SheetBuilder<T>(private val name: String) {
         format: String? = null,
         valueExtractor: (T) -> Any?,
     ) {
-        columns.add(ColumnDefinition(header, width, format, null, null, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = null,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -225,7 +235,17 @@ class SheetBuilder<T>(private val name: String) {
         valueExtractor: (T) -> Any?,
     ) {
         val cellStyle = CellStyleBuilder().apply(style).build()
-        columns.add(ColumnDefinition(header, width, format, null, cellStyle, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = cellStyle,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -257,7 +277,17 @@ class SheetBuilder<T>(private val name: String) {
     ) {
         val hStyle = headerStyle?.let { CellStyleBuilder().apply(it).build() }
         val bStyle = bodyStyle?.let { CellStyleBuilder().apply(it).build() }
-        columns.add(ColumnDefinition(header, width, format, hStyle, bStyle, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = hStyle,
+                bodyStyle = bStyle,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -341,7 +371,17 @@ class HeaderGroupBuilder<T>(private val title: String) {
         format: String? = null,
         valueExtractor: (T) -> Any?,
     ) {
-        columns.add(ColumnDefinition(header, width, format, null, null, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = null,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -361,7 +401,17 @@ class HeaderGroupBuilder<T>(private val title: String) {
         valueExtractor: (T) -> Any?,
     ) {
         val cellStyle = CellStyleBuilder().apply(style).build()
-        columns.add(ColumnDefinition(header, width, format, null, cellStyle, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = null,
+                bodyStyle = cellStyle,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     /**
@@ -384,7 +434,17 @@ class HeaderGroupBuilder<T>(private val title: String) {
     ) {
         val hStyle = headerStyle?.let { CellStyleBuilder().apply(it).build() }
         val bStyle = bodyStyle?.let { CellStyleBuilder().apply(it).build() }
-        columns.add(ColumnDefinition(header, width, format, hStyle, bStyle, valueExtractor))
+        columns.add(
+            ColumnDefinition(
+                header = header,
+                width = width,
+                format = format,
+                headerStyle = hStyle,
+                bodyStyle = bStyle,
+                conditionalStyle = null,
+                valueExtractor = valueExtractor,
+            ),
+        )
     }
 
     internal fun build(): HeaderGroup =
