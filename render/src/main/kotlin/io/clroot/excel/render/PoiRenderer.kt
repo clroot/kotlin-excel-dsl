@@ -124,15 +124,15 @@ class PoiRenderer(
                         }
                     }
 
-                    // Set up auto-width tracking
+                    // Set up auto-width tracking (track max width only, not all values)
                     val autoWidthColumns =
                         sheetModel.columns.mapIndexedNotNull { index, column ->
                             if (column.width is ColumnWidth.Auto) index else null
                         }
-                    val autoWidthValues =
+                    val autoWidthMaxWidths =
                         autoWidthColumns.associateWith { index ->
-                            mutableListOf<Any?>(sheetModel.columns[index].header)
-                        }
+                            ColumnWidthCalculator.calculateTextWidth(sheetModel.columns[index].header)
+                        }.toMutableMap()
 
                     // Create data rows - streaming mode or legacy mode
                     val dataSource = sheetModel.dataSource
@@ -152,9 +152,13 @@ class PoiRenderer(
                                     val columnHeader = column.header
                                     getBodyStyleForColumn(cellIndex, columnHeader)?.let { cell.cellStyle = it }
                                 }
-                                // Track auto-width values
+                                // Track max width for auto-width columns
                                 if (cellIndex in autoWidthColumns) {
-                                    autoWidthValues[cellIndex]?.add(value)
+                                    val textWidth = ColumnWidthCalculator.calculateTextWidth(value?.toString() ?: "")
+                                    val currentMax = autoWidthMaxWidths[cellIndex] ?: 0.0
+                                    if (textWidth > currentMax) {
+                                        autoWidthMaxWidths[cellIndex] = textWidth
+                                    }
                                 }
                             }
                             rowIndex++
@@ -171,9 +175,14 @@ class PoiRenderer(
                                     val columnHeader = sheetModel.columns.getOrNull(cellIndex)?.header ?: ""
                                     getBodyStyleForColumn(cellIndex, columnHeader)?.let { cell.cellStyle = it }
                                 }
-                                // Track auto-width values
+                                // Track max width for auto-width columns
                                 if (cellIndex in autoWidthColumns) {
-                                    autoWidthValues[cellIndex]?.add(cellModel.value)
+                                    val textWidth =
+                                        ColumnWidthCalculator.calculateTextWidth(cellModel.value?.toString() ?: "")
+                                    val currentMax = autoWidthMaxWidths[cellIndex] ?: 0.0
+                                    if (textWidth > currentMax) {
+                                        autoWidthMaxWidths[cellIndex] = textWidth
+                                    }
                                 }
                             }
                         }
@@ -184,9 +193,8 @@ class PoiRenderer(
                         when (val width = column.width) {
                             is ColumnWidth.Fixed -> sheet.setColumnWidth(index, width.chars * 256)
                             is ColumnWidth.Auto -> {
-                                val values = autoWidthValues[index] ?: emptyList()
-                                val calculatedWidth = ColumnWidthCalculator.calculateWidth(values)
-                                sheet.setColumnWidth(index, calculatedWidth)
+                                val maxWidth = autoWidthMaxWidths[index] ?: 0.0
+                                sheet.setColumnWidth(index, ColumnWidthCalculator.toPoiWidth(maxWidth))
                             }
 
                             is ColumnWidth.Percent -> {} // Handle percentage-based width if needed

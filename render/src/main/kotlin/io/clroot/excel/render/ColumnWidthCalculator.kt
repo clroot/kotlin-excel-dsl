@@ -45,10 +45,19 @@ internal object ColumnWidthCalculator {
                 calculateTextWidth(value?.toString() ?: "")
             }
 
-        val finalWidth =
-            (maxWidth + PADDING_CHARS)
-                .coerceIn(MIN_WIDTH_CHARS.toDouble(), MAX_WIDTH_CHARS.toDouble())
+        return toPoiWidth(maxWidth)
+    }
 
+    /**
+     * Converts a text width to POI width units with padding and clamping.
+     *
+     * @param textWidth the text width in character units
+     * @return the width in POI units (1/256th of a character)
+     */
+    fun toPoiWidth(textWidth: Double): Int {
+        val finalWidth =
+            (textWidth + PADDING_CHARS)
+                .coerceIn(MIN_WIDTH_CHARS.toDouble(), MAX_WIDTH_CHARS.toDouble())
         return (finalWidth * 256).toInt()
     }
 
