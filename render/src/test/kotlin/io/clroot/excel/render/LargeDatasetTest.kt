@@ -248,6 +248,61 @@ class LargeDatasetTest :
                 assert(memoryUsedMB < 50.0) { "Memory usage ($memoryUsedMB MB) exceeds 50MB limit" }
             }
 
+            it("auto-width 컬럼에서도 메모리 사용량이 일정하다") {
+                val runtime = Runtime.getRuntime()
+
+                // 데이터 먼저 생성 (메모리 측정에서 제외)
+                val data10k = generateLargeData(10_000)
+                val data100k = generateLargeData(100_000)
+
+                // 1만 행 + auto-width
+                System.gc()
+                Thread.sleep(100)
+                val memoryBefore10k = runtime.totalMemory() - runtime.freeMemory()
+
+                excel {
+                    sheet<LargeDataRow>("Data") {
+                        column("ID") { it.id } // auto-width
+                        column("Name") { it.name } // auto-width
+                        column("Value") { it.value } // auto-width
+                        rows(data10k)
+                    }
+                }.writeTo(ByteArrayOutputStream())
+
+                System.gc()
+                Thread.sleep(100)
+                val memoryAfter10k = runtime.totalMemory() - runtime.freeMemory()
+                val memoryUsed10k = (memoryAfter10k - memoryBefore10k) / 1_000_000.0
+
+                // 10만 행 + auto-width
+                System.gc()
+                Thread.sleep(100)
+                val memoryBefore100k = runtime.totalMemory() - runtime.freeMemory()
+
+                excel {
+                    sheet<LargeDataRow>("Data") {
+                        column("ID") { it.id } // auto-width
+                        column("Name") { it.name } // auto-width
+                        column("Value") { it.value } // auto-width
+                        rows(data100k)
+                    }
+                }.writeTo(ByteArrayOutputStream())
+
+                System.gc()
+                Thread.sleep(100)
+                val memoryAfter100k = runtime.totalMemory() - runtime.freeMemory()
+                val memoryUsed100k = (memoryAfter100k - memoryBefore100k) / 1_000_000.0
+
+                println("1만 행 + auto-width 메모리: ${memoryUsed10k}MB")
+                println("10만 행 + auto-width 메모리: ${memoryUsed100k}MB")
+                println("메모리 증가 비율: ${memoryUsed100k / memoryUsed10k.coerceAtLeast(0.1)}배 (행 수는 10배)")
+
+                // auto-width가 O(1) 메모리를 사용하면 행 수 10배 증가해도 메모리는 거의 동일
+                // 메모리 증가 비율이 3배 미만이어야 함
+                val memoryRatio = memoryUsed100k / memoryUsed10k.coerceAtLeast(0.1)
+                assert(memoryRatio < 3.0) { "Memory ratio ($memoryRatio) exceeds 3x limit for auto-width" }
+            }
+
             it("SXSSF 스트리밍으로 메모리 사용량이 행 수에 비례하지 않는다") {
                 val runtime = Runtime.getRuntime()
 
