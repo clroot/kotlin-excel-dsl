@@ -2,7 +2,10 @@ package io.clroot.excel.annotation
 
 import io.clroot.excel.core.ExcelConfigurationException
 import io.clroot.excel.core.dsl.ExcelTheme
-import io.clroot.excel.core.model.*
+import io.clroot.excel.core.model.ColumnDefinition
+import io.clroot.excel.core.model.ColumnWidth
+import io.clroot.excel.core.model.ExcelDocument
+import io.clroot.excel.core.model.Sheet
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
@@ -65,23 +68,13 @@ fun <T : Any> excelOf(
             )
         }
 
-    val rows =
-        data.map { item ->
-            Row(
-                cells =
-                    typedProps.map { prop ->
-                        Cell(value = prop.get(item))
-                    },
-            )
-        }
-
     return ExcelDocument(
         sheets =
             listOf(
                 Sheet(
                     name = sheetName,
                     columns = columns,
-                    rows = rows,
+                    dataSource = data,
                 ),
             ),
         headerStyle = theme?.headerStyle,

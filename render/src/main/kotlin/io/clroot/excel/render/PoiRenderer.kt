@@ -134,10 +134,9 @@ class PoiRenderer(
                             ColumnWidthCalculator.calculateTextWidth(sheetModel.columns[index].header)
                         }.toMutableMap()
 
-                    // Create data rows - streaming mode or legacy mode
+                    // Create data rows using streaming mode
                     val dataSource = sheetModel.dataSource
-                    if (sheetModel.isStreaming && dataSource != null) {
-                        // Streaming mode: iterate data source directly
+                    if (dataSource != null) {
                         @Suppress("UNCHECKED_CAST")
                         val columns = sheetModel.columns as List<ColumnDefinition<Any?>>
                         var rowIndex = 0
@@ -162,29 +161,6 @@ class PoiRenderer(
                                 }
                             }
                             rowIndex++
-                        }
-                    } else {
-                        // Legacy mode: use pre-computed rows
-                        sheetModel.rows.forEachIndexed { rowIndex, rowModel ->
-                            val row = sheet.createRow(currentRow + rowIndex)
-                            rowModel.cells.forEachIndexed { cellIndex, cellModel ->
-                                val cell = row.createCell(cellIndex)
-                                setCellValue(cell, cellModel.value, dateStyle, dateTimeStyle)
-                                // Apply body style only for non-date cells
-                                if (cellModel.value !is LocalDate && cellModel.value !is LocalDateTime) {
-                                    val columnHeader = sheetModel.columns.getOrNull(cellIndex)?.header ?: ""
-                                    getBodyStyleForColumn(cellIndex, columnHeader)?.let { cell.cellStyle = it }
-                                }
-                                // Track max width for auto-width columns
-                                if (cellIndex in autoWidthColumns) {
-                                    val textWidth =
-                                        ColumnWidthCalculator.calculateTextWidth(cellModel.value?.toString() ?: "")
-                                    val currentMax = autoWidthMaxWidths[cellIndex] ?: 0.0
-                                    if (textWidth > currentMax) {
-                                        autoWidthMaxWidths[cellIndex] = textWidth
-                                    }
-                                }
-                            }
                         }
                     }
 
