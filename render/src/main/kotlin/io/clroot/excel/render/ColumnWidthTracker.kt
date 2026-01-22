@@ -53,12 +53,4 @@ internal class ColumnWidthTracker(
         val maxWidth = maxWidths[columnIndex] ?: return null
         return ColumnWidthCalculator.toPoiWidth(maxWidth)
     }
-
-    /**
-     * Checks if a column uses auto-width.
-     *
-     * @param columnIndex the index of the column
-     * @return true if the column uses auto-width
-     */
-    fun isAutoWidth(columnIndex: Int): Boolean = columnIndex in autoWidthColumnIndices
 }

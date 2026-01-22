@@ -35,6 +35,11 @@ internal class SheetRenderer(
     private val widthTracker = ColumnWidthTracker(columns)
     private var currentRowIndex = 0
 
+    companion object {
+        /** Default column width in POI units (8 characters) */
+        private const val DEFAULT_COLUMN_WIDTH = 8 * 256
+    }
+
     /**
      * Renders the complete sheet including headers, data, and configuration.
      */
@@ -80,11 +85,7 @@ internal class SheetRenderer(
         // Second row: column headers
         val columnHeaderRow = sheet.createRow(currentRowIndex++)
         columns.forEachIndexed { index, column ->
-            val cell = columnHeaderRow.createCell(index)
-            cell.setCellValue(column.header)
-            styleResolver.resolveHeaderStyle(column)?.let {
-                cell.cellStyle = styleCache.getOrCreate(it)
-            }
+            createColumnHeaderCell(columnHeaderRow, index, column)
         }
     }
 
@@ -93,11 +94,19 @@ internal class SheetRenderer(
 
         val headerRow = sheet.createRow(currentRowIndex++)
         columns.forEachIndexed { index, column ->
-            val cell = headerRow.createCell(index)
-            cell.setCellValue(column.header)
-            styleResolver.resolveHeaderStyle(column)?.let {
-                cell.cellStyle = styleCache.getOrCreate(it)
-            }
+            createColumnHeaderCell(headerRow, index, column)
+        }
+    }
+
+    private fun createColumnHeaderCell(
+        row: Row,
+        index: Int,
+        column: ColumnDefinition<*>,
+    ) {
+        val cell = row.createCell(index)
+        cell.setCellValue(column.header)
+        styleResolver.resolveHeaderStyle(column)?.let {
+            cell.cellStyle = styleCache.getOrCreate(it)
         }
     }
 
@@ -172,7 +181,7 @@ internal class SheetRenderer(
             val width =
                 when (val w = column.width) {
                     is ColumnWidth.Fixed -> w.chars * 256
-                    is ColumnWidth.Auto -> widthTracker.getPoiWidth(index) ?: (8 * 256)
+                    is ColumnWidth.Auto -> widthTracker.getPoiWidth(index) ?: DEFAULT_COLUMN_WIDTH
                 }
             sheet.setColumnWidth(index, width)
         }
