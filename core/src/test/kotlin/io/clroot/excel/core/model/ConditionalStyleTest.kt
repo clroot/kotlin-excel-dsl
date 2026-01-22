@@ -12,13 +12,14 @@ class ConditionalStyleTest :
         describe("ConditionalStyle") {
             context("evaluate") {
                 it("조건이 참이면 스타일을 반환한다") {
-                    val conditionalStyle = ConditionalStyle<Int> { value ->
-                        if (value < 0) {
-                            CellStyle(fontColor = Color.RED)
-                        } else {
-                            null
+                    val conditionalStyle =
+                        ConditionalStyle<Int> { value ->
+                            if (value < 0) {
+                                CellStyle(fontColor = Color.RED)
+                            } else {
+                                null
+                            }
                         }
-                    }
 
                     val result = conditionalStyle.evaluate(-100)
 
@@ -27,13 +28,14 @@ class ConditionalStyleTest :
                 }
 
                 it("조건이 거짓이면 null을 반환한다") {
-                    val conditionalStyle = ConditionalStyle<Int> { value ->
-                        if (value < 0) {
-                            CellStyle(fontColor = Color.RED)
-                        } else {
-                            null
+                    val conditionalStyle =
+                        ConditionalStyle<Int> { value ->
+                            if (value < 0) {
+                                CellStyle(fontColor = Color.RED)
+                            } else {
+                                null
+                            }
                         }
-                    }
 
                     val result = conditionalStyle.evaluate(100)
 
@@ -41,13 +43,14 @@ class ConditionalStyleTest :
                 }
 
                 it("여러 조건을 when으로 처리할 수 있다") {
-                    val conditionalStyle = ConditionalStyle<Int> { value ->
-                        when {
-                            value < 0 -> CellStyle(fontColor = Color.RED)
-                            value > 1000000 -> CellStyle(fontColor = Color.GREEN, bold = true)
-                            else -> null
+                    val conditionalStyle =
+                        ConditionalStyle<Int> { value ->
+                            when {
+                                value < 0 -> CellStyle(fontColor = Color.RED)
+                                value > 1000000 -> CellStyle(fontColor = Color.GREEN, bold = true)
+                                else -> null
+                            }
                         }
-                    }
 
                     conditionalStyle.evaluate(-50)?.fontColor shouldBe Color.RED
                     conditionalStyle.evaluate(2000000)?.fontColor shouldBe Color.GREEN
@@ -56,13 +59,14 @@ class ConditionalStyleTest :
                 }
 
                 it("null 값을 처리할 수 있다") {
-                    val conditionalStyle = ConditionalStyle<String?> { value ->
-                        if (value.isNullOrEmpty()) {
-                            CellStyle(backgroundColor = Color.LIGHT_GRAY, italic = true)
-                        } else {
-                            null
+                    val conditionalStyle =
+                        ConditionalStyle<String?> { value ->
+                            if (value.isNullOrEmpty()) {
+                                CellStyle(backgroundColor = Color.LIGHT_GRAY, italic = true)
+                            } else {
+                                null
+                            }
                         }
-                    }
 
                     conditionalStyle.evaluate(null)?.backgroundColor shouldBe Color.LIGHT_GRAY
                     conditionalStyle.evaluate("")?.italic shouldBe true
@@ -72,13 +76,14 @@ class ConditionalStyleTest :
                 it("복잡한 객체 타입을 처리할 수 있다") {
                     data class Product(val name: String, val price: Int, val inStock: Boolean)
 
-                    val conditionalStyle = ConditionalStyle<Product> { product ->
-                        when {
-                            !product.inStock -> CellStyle(fontColor = Color.GRAY, italic = true)
-                            product.price > 10000 -> CellStyle(fontColor = Color.BLUE, bold = true)
-                            else -> null
+                    val conditionalStyle =
+                        ConditionalStyle<Product> { product ->
+                            when {
+                                !product.inStock -> CellStyle(fontColor = Color.GRAY, italic = true)
+                                product.price > 10000 -> CellStyle(fontColor = Color.BLUE, bold = true)
+                                else -> null
+                            }
                         }
-                    }
 
                     val outOfStock = Product("Item A", 5000, false)
                     conditionalStyle.evaluate(outOfStock)?.fontColor shouldBe Color.GRAY

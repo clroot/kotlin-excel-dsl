@@ -11,7 +11,9 @@
       "Skill(superpowers:writing-plans)",
       "Skill(superpowers:writing-plans:*)",
       "Skill(superpowers:subagent-driven-development)",
-      "Skill(superpowers:subagent-driven-development:*)"
+      "Skill(superpowers:subagent-driven-development:*)",
+      "Skill(superpowers:receiving-code-review)",
+      "Skill(superpowers:receiving-code-review:*)"
     ]
   }
 }

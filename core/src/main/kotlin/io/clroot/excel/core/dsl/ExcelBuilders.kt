@@ -325,9 +325,10 @@ class SheetBuilder<T>(private val name: String) {
         valueExtractor: (T) -> V?,
     ) {
         @Suppress("UNCHECKED_CAST")
-        val wrappedConditional = ConditionalStyle<Any?> { value ->
-            conditionalStyle(value as? V)
-        }
+        val wrappedConditional =
+            ConditionalStyle<Any?> { value ->
+                conditionalStyle(value as? V)
+            }
         columns.add(
             ColumnDefinition(
                 header = header,
@@ -376,9 +377,10 @@ class SheetBuilder<T>(private val name: String) {
         val bStyle = CellStyleBuilder().apply(bodyStyle).build()
 
         @Suppress("UNCHECKED_CAST")
-        val wrappedConditional = ConditionalStyle<Any?> { value ->
-            conditionalStyle(value as? V)
-        }
+        val wrappedConditional =
+            ConditionalStyle<Any?> { value ->
+                conditionalStyle(value as? V)
+            }
         columns.add(
             ColumnDefinition(
                 header = header,
