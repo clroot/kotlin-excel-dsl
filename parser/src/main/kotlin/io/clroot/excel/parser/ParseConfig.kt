@@ -40,6 +40,21 @@ data class ParseConfig<T : Any>(
     val rowValidator: ((T) -> Unit)?,
     val allValidator: ((List<T>) -> Unit)?,
 ) {
+    /**
+     * Builder for constructing [ParseConfig] instances.
+     *
+     * Example:
+     * ```kotlin
+     * parseConfig<User> {
+     *     headerRow = 1
+     *     sheetName = "Users"
+     *     headerMatching = HeaderMatching.FLEXIBLE
+     *     validateRow { require(it.age > 0) { "Age must be positive" } }
+     * }
+     * ```
+     *
+     * @param T the type of data class to parse into
+     */
     class Builder<T : Any> {
         var headerRow: Int = 0
         var sheetIndex: Int = 0
