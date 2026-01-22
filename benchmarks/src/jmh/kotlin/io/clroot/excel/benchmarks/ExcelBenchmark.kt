@@ -30,25 +30,24 @@ open class ExcelBenchmark {
         val date: LocalDate,
     )
 
-    private lateinit var data100k: List<BenchmarkRow>
-    private lateinit var data500k: List<BenchmarkRow>
-    private lateinit var data1m: List<BenchmarkRow>
-
     private val memoryMXBean = ManagementFactory.getMemoryMXBean()
 
     // 피크 메모리 결과 저장
     private val peakMemoryResults = mutableMapOf<String, MutableList<Double>>()
 
-    @Setup
-    fun setup() {
-        data100k = generateData(100_000)
-        data500k = generateData(500_000)
-        data1m = generateData(1_000_000)
-
-        // GC로 데이터 생성 메모리 정리
-        repeat(3) { System.gc() }
-        Thread.sleep(500)
-    }
+    /**
+     * 데이터를 Sequence로 lazy하게 생성.
+     * 메모리에 전체 데이터를 올리지 않고 하나씩 생성하여 렌더링 메모리만 측정 가능.
+     */
+    private fun generateDataSequence(count: Int): Sequence<BenchmarkRow> =
+        (1..count).asSequence().map { i ->
+            BenchmarkRow(
+                id = i.toLong(),
+                name = "Name-$i",
+                value = i * 1.5,
+                date = LocalDate.of(2024, 1, 1).plusDays(i.toLong() % 365),
+            )
+        }
 
     @TearDown(Level.Trial)
     fun tearDown() {
@@ -75,16 +74,6 @@ open class ExcelBenchmark {
         }
     }
 
-    private fun generateData(count: Int): List<BenchmarkRow> =
-        (1..count).map { i ->
-            BenchmarkRow(
-                id = i.toLong(),
-                name = "Name-$i",
-                value = i * 1.5,
-                date = LocalDate.of(2024, 1, 1).plusDays(i.toLong() % 365),
-            )
-        }
-
     private object NullOutputStream : OutputStream() {
         override fun write(b: Int) {}
 
@@ -94,7 +83,8 @@ open class ExcelBenchmark {
             b: ByteArray,
             off: Int,
             len: Int,
-        ) {}
+        ) {
+        }
     }
 
     private inline fun measurePeakMemory(
@@ -146,7 +136,7 @@ open class ExcelBenchmark {
                         column("Name") { it.name }
                         column("Value") { it.value }
                         column("Date") { it.date }
-                        rows(data100k)
+                        rows(generateDataSequence(100_000).asIterable())
                     }
                 }
             document.writeTo(NullOutputStream)
@@ -164,7 +154,7 @@ open class ExcelBenchmark {
                         column("Name") { it.name }
                         column("Value") { it.value }
                         column("Date") { it.date }
-                        rows(data500k)
+                        rows(generateDataSequence(500_000).asIterable())
                     }
                 }
             document.writeTo(NullOutputStream)
@@ -182,7 +172,7 @@ open class ExcelBenchmark {
                         column("Name") { it.name }
                         column("Value") { it.value }
                         column("Date") { it.date }
-                        rows(data1m)
+                        rows(generateDataSequence(1_000_000).asIterable())
                     }
                 }
             document.writeTo(NullOutputStream)
