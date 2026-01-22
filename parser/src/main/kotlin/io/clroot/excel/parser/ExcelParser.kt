@@ -69,6 +69,21 @@ internal class ExcelParserImpl<T : Any>(
                 )
             }
 
+            // Check for missing required columns
+            val foundPropertyNames = headerMapping.values.map { it.propertyName }.toSet()
+            val missingColumns = columns.filter { !it.isNullable && it.propertyName !in foundPropertyNames }
+            if (missingColumns.isNotEmpty()) {
+                val missingErrors =
+                    missingColumns.map {
+                        ParseError(
+                            rowIndex = config.headerRow,
+                            columnHeader = it.header,
+                            message = "필수 컬럼 '${it.header}'을(를) 찾을 수 없습니다.",
+                        )
+                    }
+                return ParseResult.Failure(missingErrors)
+            }
+
             val dataStartRow = config.headerRow + 1
             val lastRowNum = sheet.lastRowNum
 

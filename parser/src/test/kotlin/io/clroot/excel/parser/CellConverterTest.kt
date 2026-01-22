@@ -1,7 +1,9 @@
 package io.clroot.excel.parser
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -20,8 +22,12 @@ class CellConverterTest : DescribeSpec({
             converter.convert(123.0, String::class) shouldBe "123"
         }
 
-        it("null은 빈 문자열로 변환한다 (nullable=false)") {
-            converter.convert(null, String::class, isNullable = false) shouldBe ""
+        it("null은 예외를 발생시킨다 (nullable=false)") {
+            val exception =
+                shouldThrow<IllegalArgumentException> {
+                    converter.convert(null, String::class, isNullable = false)
+                }
+            exception.message shouldContain "null을 허용하지 않지만"
         }
 
         it("null은 null로 반환한다 (nullable=true)") {

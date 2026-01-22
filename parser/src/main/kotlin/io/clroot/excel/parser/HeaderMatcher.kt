@@ -50,6 +50,10 @@ class HeaderMatcher(private val strategy: HeaderMatching) {
 
 /**
  * Metadata extracted from @Column annotation.
+ *
+ * Note: [equals] and [hashCode] are intentionally implemented based on [propertyName] only.
+ * This ensures that a `Set<ColumnMeta>` will correctly identify columns as unique based on their
+ * corresponding property, regardless of other metadata like [header] or [aliases].
  */
 data class ColumnMeta(
     val header: String,

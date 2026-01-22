@@ -30,7 +30,13 @@ class CellConverter(
         }
 
         if (value == null) {
-            return if (isNullable) null else defaultValue(targetType)
+            if (isNullable) {
+                return null
+            } else {
+                throw IllegalArgumentException(
+                    "${targetType.simpleName} 타입은 null을 허용하지 않지만, 셀 값이 비어있습니다.",
+                )
+            }
         }
 
         val processedValue = if (trimWhitespace && value is String) value.trim() else value
@@ -47,19 +53,6 @@ class CellConverter(
             BigDecimal::class -> convertToBigDecimal(processedValue)
             else -> throw IllegalArgumentException("Unsupported type: ${targetType.simpleName}")
         } as T?
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> defaultValue(targetType: KClass<T>): T? {
-        return when (targetType) {
-            String::class -> "" as T
-            Int::class -> 0 as T
-            Long::class -> 0L as T
-            Double::class -> 0.0 as T
-            Float::class -> 0f as T
-            Boolean::class -> false as T
-            else -> null
-        }
     }
 
     private fun convertToString(value: Any): String {
