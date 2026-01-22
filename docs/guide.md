@@ -14,6 +14,12 @@ This guide covers styling, advanced features, and detailed usage of the Excel DS
   - [Conditional Styling](#conditional-styling)
   - [Style Priority](#style-priority)
   - [Themes](#themes)
+- [Annotation Styling](#annotation-styling)
+  - [HeaderStyle and BodyStyle](#headerstyle-and-bodystyle)
+  - [ConditionalStyle](#conditionalstyle)
+  - [Style Enums](#style-enums)
+  - [HEX Color Support](#hex-color-support)
+  - [Annotation Style Priority](#annotation-style-priority)
 - [Advanced Features](#advanced-features)
   - [Header Groups](#header-groups)
   - [Column Width](#column-width)
@@ -195,6 +201,158 @@ excel(theme = Theme.Modern) {
 | `Theme.Modern` | Blue header with white text, centered |
 | `Theme.Minimal` | Bold header, no background |
 | `Theme.Classic` | Gray header, medium borders |
+
+## Annotation Styling
+
+When using the annotation approach (`@Excel`, `@Column`), you can apply styles using `@HeaderStyle`, `@BodyStyle`, and `@ConditionalStyle` annotations.
+
+### HeaderStyle and BodyStyle
+
+Apply styles at class level (all columns) or property level (specific column):
+
+```kotlin
+@Excel
+@HeaderStyle(bold = true, backgroundColor = StyleColor.LIGHT_GRAY)
+@BodyStyle(alignment = StyleAlignment.CENTER)
+data class User(
+    @Column("Name", order = 1)
+    @HeaderStyle(fontColor = StyleColor.BLUE)  // Override class-level
+    val name: String,
+
+    @Column("Age", order = 2)
+    @BodyStyle(bold = true)  // Override class-level
+    val age: Int,
+
+    @Column("Email", order = 3)
+    val email: String  // Uses class-level styles
+)
+
+excelOf(users).writeTo(output)
+```
+
+Available attributes:
+- `bold` - Bold font (default: false)
+- `italic` - Italic font (default: false)
+- `backgroundColor` - Background color using `StyleColor` enum
+- `backgroundColorHex` - Background color using HEX string (e.g., "#FF5733")
+- `fontColor` - Font color using `StyleColor` enum
+- `fontColorHex` - Font color using HEX string
+- `alignment` - Text alignment using `StyleAlignment` enum
+- `border` - Border style using `StyleBorder` enum
+
+### ConditionalStyle
+
+Apply dynamic styles based on cell values using the `@ConditionalStyle` annotation and `ConditionalStyler<T>` interface:
+
+```kotlin
+class ScoreStyler : ConditionalStyler<Int> {
+    override fun style(value: Int?): CellStyle? = when {
+        value == null -> null
+        value >= 90 -> CellStyle(fontColor = Color.GREEN, bold = true)
+        value >= 70 -> CellStyle(fontColor = Color.BLUE)
+        value < 60 -> CellStyle(fontColor = Color.RED)
+        else -> null
+    }
+}
+
+class StatusStyler : ConditionalStyler<String> {
+    override fun style(value: String?): CellStyle? = when (value) {
+        "ACTIVE" -> CellStyle(backgroundColor = Color(200, 255, 200))
+        "INACTIVE" -> CellStyle(backgroundColor = Color(255, 200, 200))
+        else -> null
+    }
+}
+
+@Excel
+data class Student(
+    @Column("Name", order = 1)
+    val name: String,
+
+    @Column("Score", order = 2)
+    @ConditionalStyle(ScoreStyler::class)
+    val score: Int,
+
+    @Column("Status", order = 3)
+    @ConditionalStyle(StatusStyler::class)
+    val status: String
+)
+```
+
+**Important:** The generic type of `ConditionalStyler<T>` must match the property type. A type mismatch will throw `ExcelConfigurationException` at runtime.
+
+### Style Enums
+
+Use these enums for type-safe style definitions:
+
+**StyleColor:**
+```kotlin
+enum class StyleColor {
+    NONE,        // No color (inherit)
+    WHITE, BLACK, GRAY, LIGHT_GRAY,
+    RED, GREEN, BLUE, YELLOW, ORANGE
+}
+```
+
+**StyleAlignment:**
+```kotlin
+enum class StyleAlignment {
+    NONE,    // No alignment (inherit)
+    LEFT, CENTER, RIGHT
+}
+```
+
+**StyleBorder:**
+```kotlin
+enum class StyleBorder {
+    NONE,    // No border (inherit)
+    THIN, MEDIUM, THICK
+}
+```
+
+### HEX Color Support
+
+For colors not available in `StyleColor`, use HEX strings:
+
+```kotlin
+@Excel
+@HeaderStyle(backgroundColorHex = "#4A90D9", fontColorHex = "#FFFFFF")
+data class CustomStyled(
+    @Column("Value", order = 1)
+    @BodyStyle(backgroundColorHex = "#F5F5F5")
+    val value: String
+)
+```
+
+Supported formats:
+- 6-digit HEX: `"#RRGGBB"` (e.g., "#FF5733")
+- 6-digit without #: `"RRGGBB"` (e.g., "FF5733")
+
+**Note:** If both enum color and HEX color are specified, HEX takes precedence.
+
+### Annotation Style Priority
+
+Styles are applied in this order (highest priority first):
+
+1. **ConditionalStyle** - Dynamic styles from `ConditionalStyler`
+2. **Property-level annotations** - `@HeaderStyle`/`@BodyStyle` on properties
+3. **Class-level annotations** - `@HeaderStyle`/`@BodyStyle` on class
+4. **Theme styles** - From `excelOf(data, theme = Theme.Modern)`
+
+Example:
+```kotlin
+@Excel
+@HeaderStyle(bold = true)  // Priority 3
+@BodyStyle(alignment = StyleAlignment.LEFT)  // Priority 3
+data class Report(
+    @Column("Score", order = 1)
+    @BodyStyle(alignment = StyleAlignment.RIGHT)  // Priority 2 - overrides class
+    @ConditionalStyle(ScoreStyler::class)  // Priority 1 - adds conditional
+    val score: Int
+)
+
+// With theme:
+excelOf(reports, theme = Theme.Modern)  // Theme is Priority 4
+```
 
 ## Advanced Features
 
