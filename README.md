@@ -4,51 +4,30 @@
 
 Kotlin DSL for creating Excel files with type safety and elegant syntax.
 
+## Features
+
+- **Hybrid API**: Annotations for simple cases, DSL for complex ones
+- **Type Safety**: Compile-time verification of configurations
+- **CSS-like Styling**: Intuitive style definitions with themes
+- **Header Groups**: Multi-row headers with automatic cell merging
+- **Freeze Panes / Auto Filter / Zebra Stripes**: Common Excel features
+- **Streaming Support**: SXSSF for large datasets (1M+ rows)
+- **Excel Parsing**: Type-safe parsing of Excel files into data classes
+
 ## Requirements
 
 - Kotlin 2.2.0+
 - JDK 21+
 
-## Features
-
-- **Hybrid API**: Annotations for simple cases, DSL for complex ones
-- **Type Safety**: Compile-time verification of configurations
-- **CSS-like Styling**: Intuitive style definitions with column-level granularity
-- **Predefined Themes**: Modern, Minimal, Classic
-- **Header Groups**: Multi-row headers with automatic cell merging
-- **Auto Date Formatting**: LocalDate/LocalDateTime automatic detection
-- **Streaming Support**: SXSSF for large datasets
-- **Detailed Error Messages**: Context-rich exceptions with helpful hints
-- **Excel Parsing**: Type-safe parsing of Excel files into data classes
-
-## Quick Start
-
-### Gradle
+## Installation
 
 ```kotlin
 dependencies {
-    // All-in-one (recommended)
     implementation("io.clroot.excel:excel-dsl:0.1.0")
 }
 ```
 
-Or individual modules:
-
-```kotlin
-dependencies {
-    implementation("io.clroot.excel:core:0.1.0")
-    implementation("io.clroot.excel:annotation:0.1.0")
-    implementation("io.clroot.excel:render:0.1.0")
-    implementation("io.clroot.excel:theme:0.1.0")
-    implementation("io.clroot.excel:parser:0.1.0")  // Excel parsing
-}
-```
-
-## Usage
-
-```kotlin
-import io.clroot.excel.*
-```
+## Quick Start
 
 ### DSL Approach
 
@@ -75,14 +54,9 @@ excel {
 ```kotlin
 @Excel
 data class User(
-    @Column("Name", order = 1)
-    val name: String,
-
-    @Column("Age", order = 2)
-    val age: Int,
-
-    @Column("Joined", order = 3)
-    val joinedAt: LocalDate
+    @Column("Name", order = 1) val name: String,
+    @Column("Age", order = 2) val age: Int,
+    @Column("Joined", order = 3) val joinedAt: LocalDate
 )
 
 excelOf(users).writeTo(FileOutputStream("users.xlsx"))
@@ -100,146 +74,7 @@ excel(theme = Theme.Modern) {
 }.writeTo(output)
 ```
 
-### Custom Styles
-
-#### Global Styles
-
-```kotlin
-excel {
-    styles {
-        header {
-            backgroundColor(Color.GRAY)
-            fontColor(Color.WHITE)
-            bold()
-            align(Alignment.CENTER)
-        }
-        body {
-            border(BorderStyle.THIN)
-        }
-    }
-    sheet<User>("Users") {
-        column("Name") { it.name }
-        column("Age") { it.age }
-        rows(users)
-    }
-}.writeTo(output)
-```
-
-#### Column-Level Styles (via styles DSL)
-
-```kotlin
-excel {
-    styles {
-        header {
-            backgroundColor(Color.GRAY)
-            bold()
-        }
-        column("Price") {
-            header {
-                backgroundColor(Color.BLUE)
-            }
-            body {
-                align(Alignment.RIGHT)
-                numberFormat("#,##0")
-            }
-        }
-    }
-    sheet<Product>("Products") {
-        column("Name") { it.name }
-        column("Price") { it.price }
-        rows(products)
-    }
-}.writeTo(output)
-```
-
-#### Inline Column Styles
-
-```kotlin
-excel {
-    sheet<Product>("Products") {
-        column("Name") { it.name }
-        column("Price", style = { align(Alignment.RIGHT); bold() }) { it.price }
-        rows(products)
-    }
-}.writeTo(output)
-```
-
-#### Separate Header and Body Styles per Column
-
-```kotlin
-excel {
-    sheet<Product>("Products") {
-        column("Name") { it.name }
-        column(
-            "Price",
-            headerStyle = { backgroundColor(Color.BLUE); bold() },
-            bodyStyle = { align(Alignment.RIGHT) }
-        ) { it.price }
-        rows(products)
-    }
-}.writeTo(output)
-```
-
-**Style Priority**: Inline > Column-specific (styles DSL) > Global
-
-### Header Groups (Multi-row Headers)
-
-```kotlin
-excel {
-    sheet<Student>("Report") {
-        headerGroup("Student Info") {
-            column("Name") { it.name }
-            column("ID") { it.studentId }
-        }
-        headerGroup("Scores") {
-            column("Math") { it.math }
-            column("English") { it.english }
-        }
-        rows(students)
-    }
-}.writeTo(output)
-```
-
-Result:
-
-```
-+-------Student Info-------+--------Scores--------+
-+----Name----+-----ID------+---Math---+--English--+
-|   Alice    |   20241     |    95    |    88     |
-```
-
-### Column Width
-
-```kotlin
-sheet<User>("Users") {
-    column("Name", width = 20.chars) { it.name }
-    column("Description", width = 50.chars) { it.description }
-    rows(users)
-}
-```
-
-### Multi-Sheet
-
-```kotlin
-excel {
-    sheet<Product>("Products") {
-        column("Name") { it.name }
-        column("Price") { it.price }
-        rows(products)
-    }
-    sheet<Order>("Orders") {
-        column("Order ID") { it.id }
-        column("Amount") { it.amount }
-        rows(orders)
-    }
-}.writeTo(output)
-```
-
-## Parsing Excel Files
-
-Parse Excel files into type-safe data classes using the same annotations.
-
-### Basic Parsing
+### Parsing Excel Files
 
 ```kotlin
 @Excel
@@ -249,132 +84,25 @@ data class User(
 )
 
 val result = parseExcel<User>(FileInputStream("users.xlsx"))
-
 when (result) {
     is ParseResult.Success -> result.data.forEach { println(it) }
     is ParseResult.Failure -> result.errors.forEach { println(it.message) }
 }
 ```
 
-### Header Aliases
+## Documentation
 
-Support alternative header names for flexibility:
-
-```kotlin
-@Excel
-data class User(
-    @Column("Name", aliases = ["Full Name", "이름"]) val name: String,
-    @Column("Email", aliases = ["E-mail", "이메일"]) val email: String,
-)
-```
-
-### Parse Configuration
-
-```kotlin
-val result = parseExcel<User>(inputStream) {
-    // Sheet selection
-    sheetName = "Users"        // or sheetIndex = 0
-    headerRow = 1              // 0-indexed
-    
-    // Header matching
-    headerMatching = HeaderMatching.FLEXIBLE  // case-insensitive, whitespace normalized
-    
-    // Error handling
-    onError = OnError.COLLECT  // collect all errors, or FAIL_FAST
-    
-    // Data processing
-    skipEmptyRows = true
-    trimWhitespace = true
-    treatBlankAsNull = true
-    
-    // Validation
-    validateRow { user -> 
-        require(user.email.contains("@")) { "Invalid email" }
-    }
-    validateAll { users ->
-        val duplicates = users.groupBy { it.email }.filter { it.value.size > 1 }
-        require(duplicates.isEmpty()) { "Duplicate emails: ${duplicates.keys}" }
-    }
-    
-    // Custom type converter
-    converter<Money> { value -> Money(BigDecimal(value.toString())) }
-}
-```
-
-### Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `sheetIndex` | `Int` | `0` | Sheet index (0-based) |
-| `sheetName` | `String?` | `null` | Sheet name (overrides sheetIndex) |
-| `headerRow` | `Int` | `0` | Header row index |
-| `headerMatching` | `HeaderMatching` | `FLEXIBLE` | `EXACT` or `FLEXIBLE` |
-| `onError` | `OnError` | `COLLECT` | `COLLECT` or `FAIL_FAST` |
-| `skipEmptyRows` | `Boolean` | `true` | Skip empty rows |
-| `trimWhitespace` | `Boolean` | `true` | Trim string values |
-| `treatBlankAsNull` | `Boolean` | `true` | Treat blank strings as null |
-
-**Supported Types**: `String`, `Int`, `Long`, `Double`, `Float`, `Boolean`, `BigDecimal`, `LocalDate`, `LocalDateTime`
-
-## Error Handling
-
-The library provides detailed, context-rich error messages:
-
-```kotlin
-// Missing @Excel annotation
-excelOf(listOf(NonAnnotatedClass()))
-// ExcelConfigurationException: Missing @Excel annotation [class=NonAnnotatedClass]
-// Hint: Add @Excel annotation to your data class: @Excel data class NonAnnotatedClass(...)
-
-// Missing @Column annotations
-excelOf(listOf(NoColumnClass()))
-// ExcelConfigurationException: No properties annotated with @Column [class=NoColumnClass]
-// Hint: Add @Column annotation to properties. Available properties: name, age
-```
-
-### Exception Types
-
-| Exception                     | Description                                  |
-| ----------------------------- | -------------------------------------------- |
-| `ExcelException`              | Base exception for all Excel-related errors  |
-| `ExcelConfigurationException` | Configuration errors (annotations, settings) |
-| `ExcelDataException`          | Data processing errors                       |
-| `ExcelWriteException`         | File writing errors                          |
-| `ExcelParseException`         | Excel parsing errors                         |
-| `ColumnNotFoundException`     | Column lookup failures                       |
-| `StyleException`              | Style application errors                     |
-
-## Available Themes
-
-| Theme           | Description                           |
-| --------------- | ------------------------------------- |
-| `Theme.Modern`  | Blue header with white text, centered |
-| `Theme.Minimal` | Bold header, no background            |
-| `Theme.Classic` | Gray header, medium borders           |
-
-## Performance Benchmarks
-
-The library uses Apache POI's SXSSF (Streaming Usermodel API) for memory-efficient large dataset handling.
-
-**Test Environment**: MacBook Pro 14" M3 Pro (JMH benchmark with Sequence-based lazy data generation)
-
-| Rows | Time | Peak Memory (min) | Peak Memory (avg) |
-|------|------|-------------------|-------------------|
-| 100,000 | ~0.4s | ~34 MB | ~101 MB |
-| 500,000 | ~1.8s | ~51 MB | ~165 MB |
-| 1,000,000 | ~3.5s | ~59 MB | ~134 MB |
-
-**Key Features**:
-- **True Streaming**: Data is processed row-by-row without loading entire dataset into memory
-- **O(1) Memory for Auto-width**: Column width calculation tracks only max width, not all values
-- **Near-constant Memory**: 10x more rows only increases peak memory by ~1.7x (min) due to SXSSF streaming
+- [Usage Guide](docs/guide.md) - Styling, themes, and advanced features
+- [Parsing](docs/parsing.md) - Excel file parsing configuration
+- [Error Handling](docs/error-handling.md) - Exception types and handling
+- [Performance](docs/performance.md) - Benchmarks and best practices
 
 ## Module Structure
 
 ```
 kotlin-excel-dsl/
 ├── excel-dsl/   # All-in-one module (recommended)
-├── core/        # Core models & DSL (pure Kotlin)
+├── core/        # Core models & DSL
 ├── annotation/  # @Excel, @Column processing
 ├── render/      # Apache POI integration
 ├── theme/       # Predefined themes

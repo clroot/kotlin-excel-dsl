@@ -13,5 +13,4 @@ typealias HeaderGroup = io.clroot.excel.core.model.HeaderGroup
 
 // Column width extensions
 val Int.chars: ColumnWidth get() = CoreColumnWidth.Fixed(this)
-val Int.percent: ColumnWidth get() = CoreColumnWidth.Percent(this)
 val auto: ColumnWidth = CoreColumnWidth.Auto

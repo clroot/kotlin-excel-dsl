@@ -13,7 +13,26 @@ data class CellStyle(
     val alignment: Alignment? = null,
     val border: BorderStyle? = null,
     val numberFormat: String? = null,
-)
+) {
+    /**
+     * Merges this style with another style.
+     * Properties from [other] take precedence when both are set,
+     * except for boolean properties which use OR logic.
+     *
+     * @param other the style to merge with (its properties override this style's)
+     * @return a new CellStyle with merged properties
+     */
+    fun merge(other: CellStyle): CellStyle =
+        CellStyle(
+            backgroundColor = other.backgroundColor ?: this.backgroundColor,
+            fontColor = other.fontColor ?: this.fontColor,
+            bold = this.bold || other.bold,
+            italic = this.italic || other.italic,
+            alignment = other.alignment ?: this.alignment,
+            border = other.border ?: this.border,
+            numberFormat = other.numberFormat ?: this.numberFormat,
+        )
+}
 
 /**
  * Color representation for styling.
