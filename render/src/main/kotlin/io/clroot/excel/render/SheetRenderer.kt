@@ -145,8 +145,8 @@ internal class SheetRenderer(
         // Determine date format if applicable
         val dateFormat = getDateFormat(value)
 
-        // Resolve and apply style
-        val finalStyle = styleResolver.resolveFinalStyle(column, sheetModel, isAlternateRow, dateFormat)
+        // Resolve and apply style (pass value for conditional style evaluation)
+        val finalStyle = styleResolver.resolveFinalStyle(column, sheetModel, isAlternateRow, dateFormat, value)
         finalStyle?.let { cell.cellStyle = styleCache.getOrCreate(it) }
 
         // Track width for auto-width columns

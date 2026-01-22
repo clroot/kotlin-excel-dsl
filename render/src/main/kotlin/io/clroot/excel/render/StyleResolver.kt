@@ -93,12 +93,20 @@ internal class StyleResolver(
     }
 
     /**
-     * Resolves the final style for a cell, including date format if applicable.
+     * Resolves the final style for a cell, including date format and conditional style if applicable.
+     *
+     * Style priority (lowest to highest):
+     * 1. alternateRowStyle
+     * 2. globalBodyStyle
+     * 3. columnStyle (from styles DSL)
+     * 4. inlineBodyStyle
+     * 5. conditionalStyle (highest priority)
      *
      * @param column the column definition
      * @param sheet the sheet containing alternate row style configuration
      * @param isAlternateRow whether this is an alternate (even-indexed) row
      * @param dateFormat the date format to apply, or null if not a date cell
+     * @param cellValue the cell value to evaluate conditional style against
      * @return the resolved style with date format applied, or null if no style is needed
      */
     fun resolveFinalStyle(
@@ -106,8 +114,20 @@ internal class StyleResolver(
         sheet: Sheet,
         isAlternateRow: Boolean,
         dateFormat: String?,
+        cellValue: Any? = null,
     ): CellStyle? {
-        val mergedStyle = resolveBodyStyleWithAlternate(column, sheet, isAlternateRow)
+        val baseStyle = resolveBodyStyleWithAlternate(column, sheet, isAlternateRow)
+
+        // Evaluate conditional style if present
+        val conditionalStyle = column.conditionalStyle?.evaluate(cellValue)
+
+        // Merge base style with conditional style (conditional has highest priority)
+        val mergedStyle =
+            if (conditionalStyle != null) {
+                baseStyle?.merge(conditionalStyle) ?: conditionalStyle
+            } else {
+                baseStyle
+            }
 
         return if (dateFormat != null) {
             (mergedStyle ?: CellStyle()).copy(numberFormat = dateFormat)
