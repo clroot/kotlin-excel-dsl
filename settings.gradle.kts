@@ -14,6 +14,7 @@ rootProject.name = "kotlin-excel-dsl"
 include("core")
 include("annotation")
 include("render")
+include("parser")
 include("theme")
 include("excel-dsl")
 

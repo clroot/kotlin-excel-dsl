@@ -14,6 +14,7 @@ annotation class Excel
  * @param width Column width in characters (0 = auto)
  * @param format Format pattern for dates/numbers
  * @param order Column order (lower values appear first)
+ * @param aliases Alternative header names for matching during Excel parsing
  */
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
@@ -22,4 +23,5 @@ annotation class Column(
     val width: Int = 0,
     val format: String = "",
     val order: Int = Int.MAX_VALUE,
+    val aliases: Array<String> = [],
 )
