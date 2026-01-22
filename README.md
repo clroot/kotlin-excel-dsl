@@ -356,18 +356,18 @@ excelOf(listOf(NoColumnClass()))
 
 The library uses Apache POI's SXSSF (Streaming Usermodel API) for memory-efficient large dataset handling.
 
-**Test Environment**: MacBook Pro 14" M3 Pro
+**Test Environment**: MacBook Pro 14" M3 Pro (JMH benchmark)
 
-| Rows | Time | Memory (POI Rendering) | File Size |
-|------|------|------------------------|-----------|
-| 100,000 | ~1.3s | ~2.6 MB | ~2.7 MB |
-| 500,000 | ~1.3s | - | ~10.1 MB |
-| 1,000,000 | ~2.5s | ~0.01 MB | ~20.4 MB |
+| Rows | Time | Peak Memory (min) | Peak Memory (avg) |
+|------|------|-------------------|-------------------|
+| 100,000 | ~0.5s | ~252 MB | ~252 MB |
+| 500,000 | ~1.8s | ~416 MB | ~518 MB |
+| 1,000,000 | ~3.5s | ~458 MB | ~544 MB |
 
 **Key Features**:
 - **True Streaming**: Data is processed row-by-row without loading entire dataset into memory
 - **O(1) Memory for Auto-width**: Column width calculation tracks only max width, not all values
-- **Constant Memory Usage**: Memory consumption remains nearly constant regardless of row count
+- **Near-constant Memory**: 10x more rows only increases peak memory by ~1.8x (min) due to SXSSF streaming
 
 ## Module Structure
 
