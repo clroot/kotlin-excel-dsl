@@ -4,51 +4,30 @@
 
 타입 안전하고 우아한 문법으로 Excel 파일을 생성하는 Kotlin DSL 라이브러리.
 
+## 특징
+
+- **하이브리드 API**: 간단한 경우 어노테이션, 복잡한 경우 DSL
+- **타입 안전성**: 컴파일 타임에 설정 오류 검증
+- **CSS-like 스타일링**: 테마와 함께 직관적인 스타일 정의
+- **헤더 그룹**: 셀 자동 병합을 지원하는 다중 헤더
+- **틀 고정 / 자동 필터 / 줄무늬 행**: 일반적인 Excel 기능 지원
+- **스트리밍 지원**: 대용량 데이터를 위한 SXSSF (100만+ 행)
+- **엑셀 파싱**: 엑셀 파일을 데이터 클래스로 타입 안전하게 파싱
+
 ## 요구사항
 
 - Kotlin 2.2.0+
 - JDK 21+
 
-## 특징
-
-- **하이브리드 API**: 간단한 경우 어노테이션, 복잡한 경우 DSL
-- **타입 안전성**: 컴파일 타임에 설정 오류 검증
-- **CSS-like 스타일링**: 컬럼 단위 세밀한 스타일 제어
-- **미리 정의된 테마**: Modern, Minimal, Classic
-- **헤더 그룹**: 셀 자동 병합을 지원하는 다중 헤더
-- **날짜 자동 포맷**: LocalDate/LocalDateTime 자동 감지
-- **스트리밍 지원**: 대용량 데이터를 위한 SXSSF
-- **상세한 에러 메시지**: 힌트가 포함된 컨텍스트 기반 예외
-- **엑셀 파싱**: 엑셀 파일을 데이터 클래스로 타입 안전하게 파싱
-
-## 빠른 시작
-
-### Gradle
+## 설치
 
 ```kotlin
 dependencies {
-    // 통합 모듈 (권장)
     implementation("io.clroot.excel:excel-dsl:0.1.0")
 }
 ```
 
-개별 모듈 사용:
-
-```kotlin
-dependencies {
-    implementation("io.clroot.excel:core:0.1.0")
-    implementation("io.clroot.excel:annotation:0.1.0")
-    implementation("io.clroot.excel:render:0.1.0")
-    implementation("io.clroot.excel:theme:0.1.0")
-    implementation("io.clroot.excel:parser:0.1.0")  // 엑셀 파싱
-}
-```
-
-## 사용법
-
-```kotlin
-import io.clroot.excel.*
-```
+## 빠른 시작
 
 ### DSL 방식
 
@@ -75,14 +54,9 @@ excel {
 ```kotlin
 @Excel
 data class User(
-    @Column("이름", order = 1)
-    val name: String,
-    
-    @Column("나이", order = 2)
-    val age: Int,
-    
-    @Column("가입일", order = 3)
-    val joinedAt: LocalDate
+    @Column("이름", order = 1) val name: String,
+    @Column("나이", order = 2) val age: Int,
+    @Column("가입일", order = 3) val joinedAt: LocalDate
 )
 
 excelOf(users).writeTo(FileOutputStream("users.xlsx"))
@@ -100,145 +74,7 @@ excel(theme = Theme.Modern) {
 }.writeTo(output)
 ```
 
-### 커스텀 스타일
-
-#### 전역 스타일
-
-```kotlin
-excel {
-    styles {
-        header {
-            backgroundColor(Color.GRAY)
-            fontColor(Color.WHITE)
-            bold()
-            align(Alignment.CENTER)
-        }
-        body {
-            border(BorderStyle.THIN)
-        }
-    }
-    sheet<User>("사용자") {
-        column("이름") { it.name }
-        column("나이") { it.age }
-        rows(users)
-    }
-}.writeTo(output)
-```
-
-#### 컬럼별 스타일 (styles DSL)
-
-```kotlin
-excel {
-    styles {
-        header {
-            backgroundColor(Color.GRAY)
-            bold()
-        }
-        column("가격") {
-            header {
-                backgroundColor(Color.BLUE)
-            }
-            body {
-                align(Alignment.RIGHT)
-                numberFormat("#,##0")
-            }
-        }
-    }
-    sheet<Product>("상품") {
-        column("상품명") { it.name }
-        column("가격") { it.price }
-        rows(products)
-    }
-}.writeTo(output)
-```
-
-#### 인라인 컬럼 스타일
-
-```kotlin
-excel {
-    sheet<Product>("상품") {
-        column("상품명") { it.name }
-        column("가격", style = { align(Alignment.RIGHT); bold() }) { it.price }
-        rows(products)
-    }
-}.writeTo(output)
-```
-
-#### 컬럼별 헤더/바디 스타일 분리
-
-```kotlin
-excel {
-    sheet<Product>("상품") {
-        column("상품명") { it.name }
-        column(
-            "가격",
-            headerStyle = { backgroundColor(Color.BLUE); bold() },
-            bodyStyle = { align(Alignment.RIGHT) }
-        ) { it.price }
-        rows(products)
-    }
-}.writeTo(output)
-```
-
-**스타일 우선순위**: 인라인 > 컬럼별(styles DSL) > 전역
-
-### 헤더 그룹 (다중 헤더)
-
-```kotlin
-excel {
-    sheet<Student>("성적표") {
-        headerGroup("학생 정보") {
-            column("이름") { it.name }
-            column("학번") { it.studentId }
-        }
-        headerGroup("성적") {
-            column("국어") { it.korean }
-            column("영어") { it.english }
-        }
-        rows(students)
-    }
-}.writeTo(output)
-```
-
-결과:
-```
-+-------학생 정보-------+--------성적--------+
-+----이름----+---학번---+---국어---+---영어---+
-|   김철수   |  20241   |    95    |    88    |
-```
-
-### 컬럼 너비
-
-```kotlin
-sheet<User>("사용자") {
-    column("이름", width = 20.chars) { it.name }
-    column("설명", width = 50.chars) { it.description }
-    rows(users)
-}
-```
-
-### 멀티 시트
-
-```kotlin
-excel {
-    sheet<Product>("상품") {
-        column("상품명") { it.name }
-        column("가격") { it.price }
-        rows(products)
-    }
-    sheet<Order>("주문") {
-        column("주문번호") { it.id }
-        column("수량") { it.amount }
-        rows(orders)
-    }
-}.writeTo(output)
-```
-
-## 엑셀 파싱
-
-동일한 어노테이션을 사용하여 엑셀 파일을 타입 안전한 데이터 클래스로 파싱합니다.
-
-### 기본 파싱
+### 엑셀 파싱
 
 ```kotlin
 @Excel
@@ -248,132 +84,25 @@ data class User(
 )
 
 val result = parseExcel<User>(FileInputStream("users.xlsx"))
-
 when (result) {
     is ParseResult.Success -> result.data.forEach { println(it) }
     is ParseResult.Failure -> result.errors.forEach { println(it.message) }
 }
 ```
 
-### 헤더 별칭
+## 문서
 
-유연한 매칭을 위한 대체 헤더명 지원:
-
-```kotlin
-@Excel
-data class User(
-    @Column("이름", aliases = ["Name", "성명"]) val name: String,
-    @Column("이메일", aliases = ["Email", "E-mail"]) val email: String,
-)
-```
-
-### 파싱 설정
-
-```kotlin
-val result = parseExcel<User>(inputStream) {
-    // 시트 선택
-    sheetName = "사용자"       // 또는 sheetIndex = 0
-    headerRow = 1              // 0부터 시작
-    
-    // 헤더 매칭
-    headerMatching = HeaderMatching.FLEXIBLE  // 대소문자 무시, 공백 정규화
-    
-    // 에러 처리
-    onError = OnError.COLLECT  // 모든 에러 수집, 또는 FAIL_FAST
-    
-    // 데이터 처리
-    skipEmptyRows = true
-    trimWhitespace = true
-    treatBlankAsNull = true
-    
-    // 검증
-    validateRow { user -> 
-        require(user.email.contains("@")) { "이메일 형식 오류" }
-    }
-    validateAll { users ->
-        val duplicates = users.groupBy { it.email }.filter { it.value.size > 1 }
-        require(duplicates.isEmpty()) { "중복 이메일: ${duplicates.keys}" }
-    }
-    
-    // 커스텀 타입 컨버터
-    converter<Money> { value -> Money(BigDecimal(value.toString())) }
-}
-```
-
-### 설정 옵션
-
-| 옵션 | 타입 | 기본값 | 설명 |
-|------|------|--------|------|
-| `sheetIndex` | `Int` | `0` | 시트 인덱스 (0부터 시작) |
-| `sheetName` | `String?` | `null` | 시트 이름 (설정 시 sheetIndex보다 우선) |
-| `headerRow` | `Int` | `0` | 헤더 행 인덱스 |
-| `headerMatching` | `HeaderMatching` | `FLEXIBLE` | `EXACT` 또는 `FLEXIBLE` |
-| `onError` | `OnError` | `COLLECT` | `COLLECT` 또는 `FAIL_FAST` |
-| `skipEmptyRows` | `Boolean` | `true` | 빈 행 건너뛰기 |
-| `trimWhitespace` | `Boolean` | `true` | 문자열 앞뒤 공백 제거 |
-| `treatBlankAsNull` | `Boolean` | `true` | 공백 문자열을 null로 처리 |
-
-**지원 타입**: `String`, `Int`, `Long`, `Double`, `Float`, `Boolean`, `BigDecimal`, `LocalDate`, `LocalDateTime`
-
-## 에러 처리
-
-상세한 컨텍스트가 포함된 에러 메시지를 제공합니다:
-
-```kotlin
-// @Excel 어노테이션 누락
-excelOf(listOf(NonAnnotatedClass()))
-// ExcelConfigurationException: Missing @Excel annotation [class=NonAnnotatedClass]
-// Hint: Add @Excel annotation to your data class: @Excel data class NonAnnotatedClass(...)
-
-// @Column 어노테이션 누락
-excelOf(listOf(NoColumnClass()))
-// ExcelConfigurationException: No properties annotated with @Column [class=NoColumnClass]
-// Hint: Add @Column annotation to properties. Available properties: name, age
-```
-
-### 예외 타입
-
-| 예외                          | 설명                                     |
-| ----------------------------- | ---------------------------------------- |
-| `ExcelException`              | 모든 Excel 관련 에러의 기본 예외         |
-| `ExcelConfigurationException` | 설정 오류 (어노테이션, 설정값)           |
-| `ExcelDataException`          | 데이터 처리 오류                         |
-| `ExcelWriteException`         | 파일 쓰기 오류                           |
-| `ExcelParseException`         | 엑셀 파싱 오류                           |
-| `ColumnNotFoundException`     | 컬럼 조회 실패                           |
-| `StyleException`              | 스타일 적용 오류                         |
-
-## 제공 테마
-
-| 테마 | 설명 |
-|------|------|
-| `Theme.Modern` | 파란 헤더, 흰색 글자, 가운데 정렬 |
-| `Theme.Minimal` | 볼드 헤더, 배경색 없음 |
-| `Theme.Classic` | 회색 헤더, 중간 두께 테두리 |
-
-## 성능 벤치마크
-
-Apache POI의 SXSSF (Streaming Usermodel API)를 사용하여 메모리 효율적인 대용량 데이터 처리를 지원합니다.
-
-**테스트 환경**: MacBook Pro 14" M3 Pro (JMH 벤치마크, Sequence 기반 지연 데이터 생성)
-
-| 행 수 | 시간 | 피크 메모리 (min) | 피크 메모리 (avg) |
-|-------|------|-------------------|-------------------|
-| 100,000 | ~0.4초 | ~34 MB | ~101 MB |
-| 500,000 | ~1.8초 | ~51 MB | ~165 MB |
-| 1,000,000 | ~3.5초 | ~59 MB | ~134 MB |
-
-**주요 특징**:
-- **진정한 스트리밍**: 전체 데이터셋을 메모리에 로드하지 않고 행 단위로 처리
-- **O(1) 메모리 Auto-width**: 컬럼 너비 계산 시 모든 값을 저장하지 않고 최대 너비만 추적
-- **준-일정한 메모리**: SXSSF 스트리밍 덕분에 행 수 10배 증가 시 피크 메모리는 ~1.7배(min 기준)만 증가
+- [사용 가이드](docs/guide.ko.md) - 스타일링, 테마, 고급 기능
+- [파싱](docs/parsing.ko.md) - 엑셀 파일 파싱 설정
+- [에러 처리](docs/error-handling.ko.md) - 예외 타입 및 처리
+- [성능](docs/performance.ko.md) - 벤치마크 및 모범 사례
 
 ## 모듈 구조
 
 ```
 kotlin-excel-dsl/
 ├── excel-dsl/   # 통합 모듈 (권장)
-├── core/        # 핵심 모델 & DSL (순수 Kotlin)
+├── core/        # 핵심 모델 & DSL
 ├── annotation/  # @Excel, @Column 처리
 ├── render/      # Apache POI 연동
 ├── theme/       # 미리 정의된 테마

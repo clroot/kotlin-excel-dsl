@@ -177,19 +177,21 @@ class PoiRenderer(
                                 // Build merged style: bodyStyle + alternateRowStyle (if applicable)
                                 val columnHeader = column.header
                                 val bodyDomainStyle = getBodyDomainStyleForColumn(cellIndex, columnHeader)
-                                val mergedStyle = if (isAlternateRow) {
-                                    bodyDomainStyle?.merge(sheetModel.alternateRowStyle!!)
-                                        ?: sheetModel.alternateRowStyle
-                                } else {
-                                    bodyDomainStyle
-                                }
+                                val mergedStyle =
+                                    if (isAlternateRow) {
+                                        bodyDomainStyle?.merge(sheetModel.alternateRowStyle!!)
+                                            ?: sheetModel.alternateRowStyle
+                                    } else {
+                                        bodyDomainStyle
+                                    }
 
                                 // Apply style (with date format if needed)
-                                val finalStyle = if (baseDateFormat != null) {
-                                    (mergedStyle ?: CellStyle()).copy(numberFormat = baseDateFormat)
-                                } else {
-                                    mergedStyle
-                                }
+                                val finalStyle =
+                                    if (baseDateFormat != null) {
+                                        (mergedStyle ?: CellStyle()).copy(numberFormat = baseDateFormat)
+                                    } else {
+                                        mergedStyle
+                                    }
                                 finalStyle?.let { cell.cellStyle = styleCache.getOrCreate(it) }
 
                                 // Track max width for auto-width columns
