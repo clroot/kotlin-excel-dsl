@@ -8,11 +8,11 @@ The library uses Apache POI's SXSSF (Streaming Usermodel API) for memory-efficie
 
 **Test Environment**: MacBook Pro 14" M3 Pro (JMH benchmark with Sequence-based lazy data generation)
 
-| Rows | Time | Peak Memory (min) | Peak Memory (avg) |
-|------|------|-------------------|-------------------|
-| 100,000 | ~0.4s | ~34 MB | ~101 MB |
-| 500,000 | ~1.8s | ~51 MB | ~165 MB |
-| 1,000,000 | ~3.5s | ~59 MB | ~134 MB |
+| Rows | Time | Peak Memory (min) | Peak Memory (avg) | Peak Memory (max) |
+|------|------|-------------------|-------------------|-------------------|
+| 100,000 | ~432ms | ~34 MB | ~106 MB | ~189 MB |
+| 500,000 | ~1.8s | ~42 MB | ~133 MB | ~193 MB |
+| 1,000,000 | ~3.5s | ~59 MB | ~136 MB | ~193 MB |
 
 ## Key Features
 
