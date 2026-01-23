@@ -58,7 +58,7 @@ class CellConverter(
                 return null
             } else {
                 throw IllegalArgumentException(
-                    "${targetType.simpleName} 타입은 null을 허용하지 않지만, 셀 값이 비어있습니다.",
+                    "${targetType.simpleName} does not allow null, but cell value is empty.",
                 )
             }
         }
@@ -71,7 +71,7 @@ class CellConverter(
                 return null
             } else {
                 throw IllegalArgumentException(
-                    "${targetType.simpleName} 타입은 null을 허용하지 않지만, 셀 값이 비어있습니다.",
+                    "${targetType.simpleName} does not allow null, but cell value is empty.",
                 )
             }
         }

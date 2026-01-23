@@ -83,7 +83,7 @@ internal class ExcelParserImpl<T : Any>(
                         ParseError(
                             rowIndex = config.headerRow,
                             columnHeader = it.header,
-                            message = "필수 컬럼 '${it.header}'을(를) 찾을 수 없습니다.",
+                            message = "Required column '${it.header}' not found.",
                         )
                     }
                 return ParseResult.Failure(missingErrors)

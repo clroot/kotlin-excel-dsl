@@ -11,7 +11,7 @@ import io.clroot.excel.core.style.Color
  *
  * Example:
  * ```kotlin
- * column("가격", conditionalStyle = { value: Int? ->
+ * column("Price", conditionalStyle = { value: Int? ->
  *     if (value != null && value < 0) fontColor(Color.RED) else null
  * }) { it.price }
  * ```
@@ -27,8 +27,8 @@ fun fontColor(color: Color): CellStyle = CellStyle(fontColor = color)
  *
  * Example:
  * ```kotlin
- * column("상태", conditionalStyle = { value: String? ->
- *     if (value == "경고") backgroundColor(Color.YELLOW) else null
+ * column("Status", conditionalStyle = { value: String? ->
+ *     if (value == "WARNING") backgroundColor(Color.YELLOW) else null
  * }) { it.status }
  * ```
  *

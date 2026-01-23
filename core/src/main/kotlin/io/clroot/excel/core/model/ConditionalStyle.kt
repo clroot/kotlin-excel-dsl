@@ -13,7 +13,7 @@ import io.clroot.excel.core.style.CellStyle
  *
  * Example:
  * ```kotlin
- * column("금액") {
+ * column("Amount") {
  *     conditionalStyle { value: Int ->
  *         when {
  *             value < 0 -> CellStyle(fontColor = Color.RED)
