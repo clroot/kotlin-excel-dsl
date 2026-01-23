@@ -2,51 +2,35 @@
 
 [한국어](performance.ko.md)
 
-The library uses Apache POI's SXSSF (Streaming Usermodel API) for memory-efficient large dataset handling.
+Streaming based on Apache POI SXSSF for memory-efficient large dataset processing.
 
 ## Benchmarks
 
-**Test Environment**: MacBook Pro 14" M3 Pro (JMH benchmark with Sequence-based lazy data generation)
+**Environment**
+- MacBook Pro 14" M3 Pro
+- JDK 21.0.8 (Amazon Corretto)
+- JMH 1.37 (2 warmup, 3 measurement iterations, 10s each)
 
-| Rows | Time | Peak Memory (min) | Peak Memory (avg) | Peak Memory (max) |
-|------|------|-------------------|-------------------|-------------------|
-| 100,000 | ~432ms | ~34 MB | ~106 MB | ~189 MB |
-| 500,000 | ~1.8s | ~42 MB | ~133 MB | ~193 MB |
-| 1,000,000 | ~3.5s | ~59 MB | ~136 MB | ~193 MB |
+| Rows | Time | Memory (min / avg / max) |
+|------|------|-------------------------|
+| 100K | ~430ms | 34 / 106 / 189 MB |
+| 500K | ~1.8s | 42 / 133 / 193 MB |
+| 1M | ~3.5s | 59 / 136 / 193 MB |
+
+Max memory stays constant at ~193MB even with 10x data increase.
 
 ## Key Features
 
-### True Streaming
+- **Streaming rendering**: Row-by-row processing, only configured window (default 100 rows) kept in memory
+- **O(1) Auto-width**: Tracks max width only, no cell value storage
+- **Style caching**: Reuses identical styles
 
-Data is processed row-by-row without loading the entire dataset into memory. This is achieved through Apache POI's SXSSF API, which only keeps a configurable window of rows in memory.
+## Optimization Tips
 
 ```kotlin
-// Even with millions of rows, memory usage remains constant
-excel {
-    sheet<LargeData>("Data") {
-        column("ID") { it.id }
-        column("Value") { it.value }
-        rows(largeDataSequence)  // Sequence is processed lazily
-    }
-}.writeTo(output)
+// Pass large data as Sequence
+rows(largeDataSequence)
+
+// Fixed width is slightly more efficient
+column("Amount", width = 15.chars) { it.amount }
 ```
-
-### O(1) Memory for Auto-width
-
-Column width calculation tracks only the maximum width encountered, not all cell values. This ensures auto-width doesn't become a memory bottleneck for large datasets.
-
-### Near-constant Memory
-
-Due to SXSSF streaming, increasing rows by 10x only increases peak memory by ~1.7x (min). The memory growth is primarily from POI's internal buffering, not from data storage.
-
-## Configuration
-
-The default row access window size is 100 rows. This can be adjusted if needed through the `PoiRenderer` constructor, though the default is suitable for most use cases.
-
-## Best Practices
-
-1. **Use Sequences for large datasets**: Pass `Sequence<T>` instead of `List<T>` to `rows()` for lazy evaluation.
-
-2. **Avoid loading all data into memory**: Stream data from database or file sources directly.
-
-3. **Consider fixed column widths**: For very large datasets, using fixed widths (`width = 20.chars`) is slightly more efficient than auto-width.
