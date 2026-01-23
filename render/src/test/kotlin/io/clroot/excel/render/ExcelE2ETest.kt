@@ -3,8 +3,8 @@ package io.clroot.excel.render
 import io.clroot.excel.annotation.Column
 import io.clroot.excel.annotation.Excel
 import io.clroot.excel.annotation.excelOf
-import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.fontColor
 import io.clroot.excel.core.dsl.excel
+import io.clroot.excel.core.dsl.fontColor
 import io.clroot.excel.core.model.chars
 import io.clroot.excel.core.model.formula
 import io.clroot.excel.core.style.Alignment

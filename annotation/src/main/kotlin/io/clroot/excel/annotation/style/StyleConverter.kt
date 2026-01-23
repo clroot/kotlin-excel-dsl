@@ -2,6 +2,8 @@ package io.clroot.excel.annotation.style
 
 import io.clroot.excel.annotation.BodyStyle
 import io.clroot.excel.annotation.HeaderStyle
+import io.clroot.excel.core.style.Alignment
+import io.clroot.excel.core.style.BorderStyle
 import io.clroot.excel.core.style.CellStyle
 import io.clroot.excel.core.style.Color
 
@@ -77,8 +79,8 @@ object StyleConverter {
         fg: Color?,
         bold: Boolean,
         italic: Boolean,
-        align: io.clroot.excel.core.style.Alignment?,
-        border: io.clroot.excel.core.style.BorderStyle?,
+        align: Alignment?,
+        border: BorderStyle?,
     ): CellStyle? {
         if (bg == null && fg == null && !bold && !italic && align == null && border == null) {
             return null

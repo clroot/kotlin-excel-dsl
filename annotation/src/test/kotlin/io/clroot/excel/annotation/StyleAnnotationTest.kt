@@ -2,7 +2,9 @@ package io.clroot.excel.annotation
 
 import io.clroot.excel.annotation.style.StyleAlignment
 import io.clroot.excel.annotation.style.StyleColor
+import io.clroot.excel.core.dsl.ExcelTheme
 import io.clroot.excel.core.style.Alignment
+import io.clroot.excel.core.style.CellStyle
 import io.clroot.excel.core.style.Color
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.nulls.shouldBeNull
@@ -93,11 +95,11 @@ class StyleAnnotationTest : DescribeSpec({
 
     describe("@ConditionalStyle") {
         class PriceStyler : ConditionalStyler<Int> {
-            override fun style(value: Int?): io.clroot.excel.core.style.CellStyle? =
+            override fun style(value: Int?): CellStyle? =
                 when {
                     value == null -> null
-                    value < 0 -> io.clroot.excel.core.style.CellStyle(fontColor = Color.RED)
-                    value > 1000 -> io.clroot.excel.core.style.CellStyle(fontColor = Color.GREEN)
+                    value < 0 -> CellStyle(fontColor = Color.RED)
+                    value > 1000 -> CellStyle(fontColor = Color.GREEN)
                     else -> null
                 }
         }
@@ -176,9 +178,9 @@ class StyleAnnotationTest : DescribeSpec({
 
         it("테마 < 클래스 레벨 순서로 병합된다") {
             val theme =
-                object : io.clroot.excel.core.dsl.ExcelTheme {
-                    override val headerStyle = io.clroot.excel.core.style.CellStyle(bold = true)
-                    override val bodyStyle = io.clroot.excel.core.style.CellStyle()
+                object : ExcelTheme {
+                    override val headerStyle = CellStyle(bold = true)
+                    override val bodyStyle = CellStyle()
                 }
             val doc = excelOf(listOf(WithTheme("테스트")), theme = theme)
             val column = doc.sheets.first().columns.first()

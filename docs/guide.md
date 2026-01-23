@@ -128,8 +128,8 @@ excel {
         column("Amount", conditionalStyle = { value: Int? ->
             when {
                 value == null -> null
-                value < 0 -> CellStyleBuilder.fontColor(Color.RED)
-                value > 1000000 -> CellStyleBuilder.fontColor(Color.GREEN)
+                value < 0 -> fontColor(Color.RED)
+                value > 1000000 -> fontColor(Color.GREEN)
                 else -> null
             }
         }) { it.amount }
@@ -147,7 +147,7 @@ excel {
             "Amount",
             bodyStyle = { bold(); align(Alignment.RIGHT) },
             conditionalStyle = { value: Int? ->
-                if (value != null && value < 0) CellStyleBuilder.fontColor(Color.RED) else null
+                if (value != null && value < 0) fontColor(Color.RED) else null
             }
         ) { it.amount }
         // Negative values will be: bold + right-aligned + red
@@ -160,8 +160,8 @@ excel {
 **Convenience functions** for simple cases:
 
 ```kotlin
-import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.fontColor
-import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.backgroundColor
+import io.clroot.excel.core.dsl.fontColor
+import io.clroot.excel.core.dsl.backgroundColor
 
 column("Status", conditionalStyle = { value: String? ->
     when (value) {

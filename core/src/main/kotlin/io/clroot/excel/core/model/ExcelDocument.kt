@@ -76,8 +76,8 @@ data class ColumnDefinition<T>(
     val header: String,
     val width: ColumnWidth = ColumnWidth.Auto,
     val format: String? = null,
-    val headerStyle: io.clroot.excel.core.style.CellStyle? = null,
-    val bodyStyle: io.clroot.excel.core.style.CellStyle? = null,
+    val headerStyle: CellStyle? = null,
+    val bodyStyle: CellStyle? = null,
     val conditionalStyle: ConditionalStyle<Any?>? = null,
     val valueExtractor: (T) -> Any?,
 )
