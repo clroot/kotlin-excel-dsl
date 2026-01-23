@@ -8,8 +8,8 @@ package io.clroot.excel.core.model
  *
  * Example:
  * ```kotlin
- * column("합계") { formula("SUM(A2:A100)") }
- * column("평균") { formula("=AVERAGE(B2:B100)") }  // Leading '=' is optional
+ * column("Total") { formula("SUM(A2:A100)") }
+ * column("Average") { formula("=AVERAGE(B2:B100)") }  // Leading '=' is optional
  * ```
  *
  * @property expression the original formula expression as provided

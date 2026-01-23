@@ -222,7 +222,7 @@ class SheetBuilder<T>(private val name: String) {
      *
      * Example:
      * ```kotlin
-     * column("가격", conditionalStyle = { value: Int? ->
+     * column("Price", conditionalStyle = { value: Int? ->
      *     when {
      *         value == null -> null
      *         value < 0 -> fontColor(Color.RED)
@@ -272,7 +272,7 @@ class SheetBuilder<T>(private val name: String) {
      * Example:
      * ```kotlin
      * column(
-     *     "가격",
+     *     "Price",
      *     bodyStyle = { bold() },
      *     conditionalStyle = { value: Int? ->
      *         if (value != null && value < 0) fontColor(Color.RED) else null

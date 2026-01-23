@@ -93,7 +93,7 @@ sealed class ColumnWidth {
 
 /**
  * Extension property to create Fixed column width.
- * Usage: column("이름", width = 20.chars) { it.name }
+ * Usage: column("Name", width = 20.chars) { it.name }
  */
 val Int.chars: ColumnWidth get() = ColumnWidth.Fixed(this)
 

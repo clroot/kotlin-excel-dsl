@@ -27,7 +27,7 @@ class CellConverterTest : DescribeSpec({
                 shouldThrow<IllegalArgumentException> {
                     converter.convert(null, String::class, isNullable = false)
                 }
-            exception.message shouldContain "null을 허용하지 않지만"
+            exception.message shouldContain "does not allow null"
         }
 
         it("null은 null로 반환한다 (nullable=true)") {
