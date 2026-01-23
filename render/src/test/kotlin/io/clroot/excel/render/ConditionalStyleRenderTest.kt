@@ -1,6 +1,6 @@
 package io.clroot.excel.render
 
-import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.fontColor
+import io.clroot.excel.core.dsl.fontColor
 import io.clroot.excel.core.dsl.excel
 import io.clroot.excel.core.style.Color
 import io.kotest.core.spec.style.DescribeSpec

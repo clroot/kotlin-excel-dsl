@@ -114,8 +114,8 @@ excel {
         column("Amount", conditionalStyle = { value: Int? ->
             when {
                 value == null -> null
-                value < 0 -> CellStyleBuilder.fontColor(Color.RED)
-                value > 1000000 -> CellStyleBuilder.fontColor(Color.GREEN)
+                value < 0 -> fontColor(Color.RED)
+                value > 1000000 -> fontColor(Color.GREEN)
                 else -> null
             }
         }) { it.amount }

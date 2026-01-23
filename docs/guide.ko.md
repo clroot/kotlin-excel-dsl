@@ -128,8 +128,8 @@ excel {
         column("금액", conditionalStyle = { value: Int? ->
             when {
                 value == null -> null
-                value < 0 -> CellStyleBuilder.fontColor(Color.RED)
-                value > 1000000 -> CellStyleBuilder.fontColor(Color.GREEN)
+                value < 0 -> fontColor(Color.RED)
+                value > 1000000 -> fontColor(Color.GREEN)
                 else -> null
             }
         }) { it.amount }
@@ -147,7 +147,7 @@ excel {
             "금액",
             bodyStyle = { bold(); align(Alignment.RIGHT) },
             conditionalStyle = { value: Int? ->
-                if (value != null && value < 0) CellStyleBuilder.fontColor(Color.RED) else null
+                if (value != null && value < 0) fontColor(Color.RED) else null
             }
         ) { it.amount }
         // 음수: bold + 우측 정렬 + 빨간색
@@ -160,8 +160,8 @@ excel {
 **편의 함수** - 간단한 경우에 사용합니다:
 
 ```kotlin
-import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.fontColor
-import io.clroot.excel.core.dsl.CellStyleBuilder.Companion.backgroundColor
+import io.clroot.excel.core.dsl.fontColor
+import io.clroot.excel.core.dsl.backgroundColor
 
 column("상태", conditionalStyle = { value: String? ->
     when (value) {
