@@ -3,90 +3,12 @@
 package io.clroot.excel.core.dsl
 
 import io.clroot.excel.core.model.ColumnDefinition
-import io.clroot.excel.core.model.ColumnStyleConfig
 import io.clroot.excel.core.model.ColumnWidth
 import io.clroot.excel.core.model.ConditionalStyle
-import io.clroot.excel.core.model.ExcelDocument
 import io.clroot.excel.core.model.FreezePane
 import io.clroot.excel.core.model.HeaderGroup
 import io.clroot.excel.core.model.Sheet
 import io.clroot.excel.core.style.CellStyle
-
-/**
- * Builder for constructing an [ExcelDocument].
- *
- * Use this builder via the [excel] DSL function to create Excel documents
- * with multiple sheets, styles, and data.
- *
- * Example:
- * ```kotlin
- * excel {
- *     sheet<User>("Users") {
- *         column("Name") { it.name }
- *         column("Age") { it.age }
- *         rows(users)
- *     }
- *     styles {
- *         header { bold(); backgroundColor(Color.LIGHT_BLUE) }
- *     }
- * }
- * ```
- *
- * @see excel
- * @see SheetBuilder
- */
-@ExcelDslMarker
-class ExcelBuilder(private val theme: ExcelTheme? = null) {
-    private val sheets = mutableListOf<Sheet>()
-    private var stylesConfig: StylesConfig? = null
-
-    /**
-     * Adds a new sheet to the Excel document.
-     *
-     * @param T the type of data objects that will populate this sheet
-     * @param name the name of the sheet (displayed as tab name in Excel)
-     * @param block the builder block to configure columns and rows
-     */
-    fun <T> sheet(
-        name: String,
-        block: SheetBuilder<T>.() -> Unit,
-    ) {
-        sheets.add(SheetBuilder<T>(name).apply(block).build())
-    }
-
-    /**
-     * Configures global styles for the Excel document.
-     *
-     * Styles defined here apply to all sheets unless overridden at the column level.
-     *
-     * @param block the builder block to configure header, body, and column-specific styles
-     * @see StylesBuilder
-     */
-    fun styles(block: StylesBuilder.() -> Unit) {
-        stylesConfig = StylesBuilder().apply(block).build()
-    }
-
-    internal fun build(): ExcelDocument {
-        val headerStyle = stylesConfig?.headerStyle ?: theme?.headerStyle
-        val bodyStyle = stylesConfig?.bodyStyle ?: theme?.bodyStyle
-
-        // Convert DSL ColumnStyleConfig to model ColumnStyleConfig
-        val columnStyles =
-            stylesConfig?.columnStyles?.mapValues { (_, config) ->
-                ColumnStyleConfig(
-                    headerStyle = config.headerStyle,
-                    bodyStyle = config.bodyStyle,
-                )
-            } ?: emptyMap()
-
-        return ExcelDocument(
-            sheets = sheets.toList(),
-            headerStyle = headerStyle,
-            bodyStyle = bodyStyle,
-            columnStyles = columnStyles,
-        )
-    }
-}
 
 /**
  * Builder for constructing a [Sheet] within an Excel document.
@@ -117,7 +39,7 @@ class SheetBuilder<T>(private val name: String) {
     private var dataSource: Iterable<T>? = null
     private var freezePaneConfig: FreezePane? = null
     private var autoFilterEnabled: Boolean = false
-    private var alternateStyle: io.clroot.excel.core.style.CellStyle? = null
+    private var alternateStyle: CellStyle? = null
 
     /**
      * Freezes rows and/or columns in the sheet.
@@ -445,115 +367,5 @@ class SheetBuilder<T>(private val name: String) {
             freezePane = freezePaneConfig,
             autoFilter = autoFilterEnabled,
             alternateRowStyle = alternateStyle,
-        )
-}
-
-/**
- * Builder for creating header groups within a sheet.
- *
- * Header groups allow grouping related columns under a common title
- * that spans across multiple columns in the header row.
- *
- * @param T the type of data objects for value extraction
- * @see SheetBuilder.headerGroup
- */
-@ExcelDslMarker
-class HeaderGroupBuilder<T>(private val title: String) {
-    private val columns = mutableListOf<ColumnDefinition<T>>()
-
-    /**
-     * Defines a column within the header group.
-     *
-     * @param header the column header text
-     * @param width the column width specification
-     * @param format the number format pattern
-     * @param valueExtractor a function to extract the cell value from each data object
-     */
-    fun column(
-        header: String,
-        width: ColumnWidth = ColumnWidth.Auto,
-        format: String? = null,
-        valueExtractor: (T) -> Any?,
-    ) {
-        columns.add(
-            ColumnDefinition(
-                header = header,
-                width = width,
-                format = format,
-                headerStyle = null,
-                bodyStyle = null,
-                conditionalStyle = null,
-                valueExtractor = valueExtractor,
-            ),
-        )
-    }
-
-    /**
-     * Defines a column with inline style applied to body cells.
-     *
-     * @param header the column header text
-     * @param width the column width specification
-     * @param format the number format pattern
-     * @param style the style builder block for body cells
-     * @param valueExtractor a function to extract the cell value from each data object
-     */
-    fun column(
-        header: String,
-        width: ColumnWidth = ColumnWidth.Auto,
-        format: String? = null,
-        style: CellStyleBuilder.() -> Unit,
-        valueExtractor: (T) -> Any?,
-    ) {
-        val cellStyle = CellStyleBuilder().apply(style).build()
-        columns.add(
-            ColumnDefinition(
-                header = header,
-                width = width,
-                format = format,
-                headerStyle = null,
-                bodyStyle = cellStyle,
-                conditionalStyle = null,
-                valueExtractor = valueExtractor,
-            ),
-        )
-    }
-
-    /**
-     * Defines a column with separate header and body styles.
-     *
-     * @param header the column header text
-     * @param width the column width specification
-     * @param format the number format pattern
-     * @param headerStyle the style builder block for the header cell (optional)
-     * @param bodyStyle the style builder block for body cells (optional)
-     * @param valueExtractor a function to extract the cell value from each data object
-     */
-    fun column(
-        header: String,
-        width: ColumnWidth = ColumnWidth.Auto,
-        format: String? = null,
-        headerStyle: (CellStyleBuilder.() -> Unit)? = null,
-        bodyStyle: (CellStyleBuilder.() -> Unit)? = null,
-        valueExtractor: (T) -> Any?,
-    ) {
-        val hStyle = headerStyle?.let { CellStyleBuilder().apply(it).build() }
-        val bStyle = bodyStyle?.let { CellStyleBuilder().apply(it).build() }
-        columns.add(
-            ColumnDefinition(
-                header = header,
-                width = width,
-                format = format,
-                headerStyle = hStyle,
-                bodyStyle = bStyle,
-                conditionalStyle = null,
-                valueExtractor = valueExtractor,
-            ),
-        )
-    }
-
-    internal fun build(): HeaderGroup =
-        HeaderGroup(
-            title = title,
-            columns = columns.toList(),
         )
 }
