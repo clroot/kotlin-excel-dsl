@@ -112,5 +112,4 @@ class CellStyleBuilder {
             border = border,
             numberFormat = numberFormat,
         )
-
 }

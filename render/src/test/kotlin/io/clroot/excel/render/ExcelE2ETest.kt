@@ -3,8 +3,8 @@ package io.clroot.excel.render
 import io.clroot.excel.annotation.Column
 import io.clroot.excel.annotation.Excel
 import io.clroot.excel.annotation.excelOf
-import io.clroot.excel.core.dsl.fontColor
 import io.clroot.excel.core.dsl.excel
+import io.clroot.excel.core.dsl.fontColor
 import io.clroot.excel.core.model.chars
 import io.clroot.excel.core.model.formula
 import io.clroot.excel.core.style.Alignment
@@ -858,14 +858,14 @@ class ExcelE2ETest :
                     val salaryCell = sheet.getRow(1).getCell(1)
                     val salaryFont =
                         workbook.getFontAt(salaryCell.cellStyle.fontIndex)
-                                as org.apache.poi.xssf.usermodel.XSSFFont
+                            as org.apache.poi.xssf.usermodel.XSSFFont
                     salaryFont.xssfColor?.rgb?.get(1) shouldBe 0x80.toByte() // Green component
 
                     // 식비 (-150000): 빨간색
                     val expenseCell = sheet.getRow(2).getCell(1)
                     val expenseFont =
                         workbook.getFontAt(expenseCell.cellStyle.fontIndex)
-                                as org.apache.poi.xssf.usermodel.XSSFFont
+                            as org.apache.poi.xssf.usermodel.XSSFFont
                     expenseFont.xssfColor?.rgb?.get(0) shouldBe 0xFF.toByte() // Red component
                 }
             }
