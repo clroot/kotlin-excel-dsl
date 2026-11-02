@@ -2,14 +2,21 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    kotlin("jvm") version "2.2.0" apply false
-    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
+    kotlin("jvm") version "2.3.21" apply false
+    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
     `maven-publish`
     signing
 }
 
 allprojects {
     apply(plugin = "maven-publish")
+
+    // Preserve the existing lint rules while upgrading the Gradle integration.
+    pluginManager.withPlugin("org.jlleitschuh.gradle.ktlint") {
+        configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+            version.set("1.0.1")
+        }
+    }
 
     group = "io.clroot.excel"
     version = findProperty("version")?.toString()?.takeIf { it != "unspecified" } ?: "0.1.0-SNAPSHOT"
@@ -38,8 +45,21 @@ subprojects {
         "testImplementation"("io.kotest:kotest-assertions-core:6.0.7")
     }
 
-    tasks.withType<Test> {
+    val testJavaVersion = providers.gradleProperty("testJavaVersion").map(String::toInt).orElse(21)
+    val javaToolchains = extensions.getByType<JavaToolchainService>()
+    tasks.withType<Test>().configureEach {
         useJUnitPlatform()
+        javaLauncher.set(
+            javaToolchains.launcherFor {
+                languageVersion.set(testJavaVersion.map(JavaLanguageVersion::of))
+            },
+        )
+        // Print the worker JVM's actual version, even without Gradle --info.
+        jvmArgs("-showversion")
+        doFirst {
+            val launcher = javaLauncher.get()
+            logger.lifecycle("Test JVM: ${launcher.executablePath} (${launcher.metadata.languageVersion})")
+        }
     }
 
     configure<KotlinJvmProjectExtension> {

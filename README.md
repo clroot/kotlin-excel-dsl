@@ -174,3 +174,7 @@ kotlin-excel-dsl/
 ## License
 
 MIT License
+
+## Development
+
+Build with JDK 21 or 25. Compilation and published JVM bytecode remain on Java 21. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, test JVM selection, and publication checks.
