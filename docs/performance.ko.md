@@ -2,35 +2,37 @@
 
 [English](performance.md)
 
-Apache POI SXSSF 기반 스트리밍으로 대용량 데이터를 메모리 효율적으로 처리합니다.
+Apache POI SXSSF로 행을 스트리밍합니다. 기본 윈도우는 100행이며 스타일을 재사용합니다.
 
-## 벤치마크
+## 측정 방법
 
-**환경**
-- MacBook Pro 14" M3 Pro
-- JDK 21.0.8 (Amazon Corretto)
-- JMH 1.37 (warmup 2회, measurement 3회, 각 10초)
+생성 시간과 할당량을 별도로 실행합니다. GC 프로파일러의 할당량은 누적 할당 바이트이며 피크 힙이나 잔존 메모리가 아닙니다. 기존 GC 전후 힙 차이와 샘플링 결과는 비교 기준에서 제외했습니다.
 
-| 행 수 | 처리 시간 | 메모리 (min / avg / max) |
-|-------|----------|-------------------------|
-| 100K | ~430ms | 34 / 106 / 189 MB |
-| 500K | ~1.8초 | 42 / 133 / 193 MB |
-| 1M | ~3.5초 | 59 / 136 / 193 MB |
+```bash
+./gradlew :benchmarks:jmh --rerun-tasks
+./gradlew :benchmarks:jmh -PallocationProfile --rerun-tasks
+```
 
-데이터가 10배 증가해도 최대 메모리는 ~193MB로 일정합니다.
+JMH 1.37, fork 1개, 스레드 1개, warmup 2회 × 1초, 측정 3회 × 1초입니다. 각 작업은 4개 컬럼과 10만/50만/100만 행의 지연 데이터 생성, DSL 구성, XLSX 렌더링을 포함합니다. 출력은 null 스트림으로 보내며 디스크 저장 비용은 제외합니다. 측정 구간에 강제 GC·sleep·샘플링 스레드가 없습니다.
 
-## 핵심 특징
+짧은 로컬 기준 측정이므로 성능 보장이나 합격 기준으로 사용하지 않습니다. CI의 30분 timeout은 작업 정지 방지용입니다. 안정적인 비교에는 같은 장비·JDK·힙 설정에서 더 긴 warmup과 여러 fork를 사용하세요.
 
-- **스트리밍 렌더링**: 행 단위 처리, 설정된 윈도우(기본 100행)만 메모리 유지
-- **O(1) Auto-width**: 최대 너비만 추적, 셀 값 저장 없음
-- **스타일 캐싱**: 동일 스타일 재사용
+## Sequence 예제
 
-## 최적화 팁
+`rows`는 `Iterable`을 받으므로 `asIterable()`로 변환합니다. 전체 목록을 만들지 않습니다.
 
 ```kotlin
-// 대용량 데이터는 Sequence로 전달
-rows(largeDataSequence)
-
-// 고정 너비 사용 시 약간 더 효율적
-column("금액", width = 15.chars) { it.amount }
+rows(largeDataSequence.asIterable())
 ```
+
+[Executable DSL / annotation / parsing examples](../excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt) · JDK 21+
+
+[Raw results and environment](../benchmarks/results/README.md)
+
+2026-11-02 · Intel Core Ultra 7 270K Plus · WSL2 x86_64 · Temurin 21.0.13+9
+
+| Rows | ms/op (mean) |
+|---|---:|
+| 100k | 330.46 |
+| 1m | 3268.07 |
+| 500k | 1683.16 |

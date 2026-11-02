@@ -525,3 +525,5 @@ excel {
     }
 }.writeTo(output)
 ```
+
+DSL·Sequence·어노테이션·파싱의 [실행 가능한 공통 예제](../excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt)는 CI의 `:excel-dsl:test`에서 검증합니다. JDK 21 이상이 필요합니다.
