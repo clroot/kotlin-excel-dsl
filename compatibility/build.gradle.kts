@@ -15,7 +15,7 @@ kotlin {
 }
 dependencies {
     testImplementation("io.clroot.excel:excel-dsl:${providers.gradleProperty("artifactVersion").get()}")
-    testImplementation("io.kotest:kotest-runner-junit5:6.0.7")
-    testImplementation("io.kotest:kotest-assertions-core:6.0.7")
+    testImplementation(libs.kotest.runner)
+    testImplementation(libs.kotest.assertions)
 }
 tasks.test { useJUnitPlatform() }

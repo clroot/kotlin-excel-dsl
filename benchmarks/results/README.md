@@ -27,3 +27,29 @@ cp benchmarks/build/results/jmh/results.json benchmarks/results/allocation.json
 | 100k | 330.46 |
 | 1m | 3268.07 |
 | 500k | 1683.16 |
+
+
+## POI 6 comparison (2026-11-02)
+
+Same machine, JDK 21, Kotlin 2.3.21 and JMH settings as the baseline; sequential
+timing and allocation runs. POI changed from 5.5.1 to 6.0.0.
+
+| Rows | POI 5.5.1 ms/op | POI 6.0.0 ms/op | Change |
+|---|---:|---:|---:|
+| 100k | 330.46 | 359.80 | +8.9% |
+| 500k | 1683.16 | 1716.10 | +2.0% |
+| 1m | 3268.07 | 3393.91 | +3.9% |
+
+These short runs have uncontrolled host activity and broad uncertainty; the
+observed increases do not establish a statistically reliable regression.
+Use longer warmup and multiple forks before setting a performance threshold.
+Raw results: [timing](poi6-timing.json), [allocation](poi6-allocation.json).
+Full invocation output is retained in the corresponding poi6-*-output.txt files.
+
+GC profiler cumulative allocation (bytes/op, not peak heap):
+
+| Rows | POI 5.5.1 | POI 6.0.0 |
+|---|---:|---:|
+| rows100k | 287275252 | 291105618 |
+| rows1m | 2864243072 | 2925406723 |
+| rows500k | 1450226056 | 1450056576 |

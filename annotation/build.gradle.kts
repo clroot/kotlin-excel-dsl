@@ -9,5 +9,5 @@ dependencies {
     implementation(kotlin("reflect"))
 
     testImplementation(project(":render"))
-    testImplementation("org.apache.poi:poi-ooxml:5.5.1")
+    testImplementation(libs.poi.ooxml)
 }

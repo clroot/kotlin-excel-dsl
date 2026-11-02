@@ -1,0 +1,21 @@
+[versions]
+kotlin = "2.3.21"
+poi = "6.0.0"
+kotest = "6.2.6"
+ktlint-plugin = "14.2.0"
+ktlint = "1.0.1"
+jmh-plugin = "0.7.2"
+jmh = "1.37"
+
+[libraries]
+poi = { module = "org.apache.poi:poi", version.ref = "poi" }
+poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi" }
+kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
+jmh-generator = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
+jmh = { id = "me.champeau.jmh", version.ref = "jmh-plugin" }

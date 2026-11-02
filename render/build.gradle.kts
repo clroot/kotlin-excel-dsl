@@ -8,8 +8,8 @@ dependencies {
     api(project(":core"))
 
     // Apache POI for Excel file generation
-    implementation("org.apache.poi:poi:5.5.1")
-    implementation("org.apache.poi:poi-ooxml:5.5.1")
+    implementation(libs.poi)
+    implementation(libs.poi.ooxml)
 
     // Test dependencies
     testImplementation(project(":annotation"))
