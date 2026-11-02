@@ -84,6 +84,60 @@ class ExcelParserTest : DescribeSpec({
         }
     }
 
+    describe("정수와 Boolean Excel 변환") {
+        @Excel
+        data class Raw(
+            @Column("value") val value: String,
+        )
+
+        @Excel
+        data class IntegerRow(
+            @Column("value") val value: Long,
+        )
+
+        @Excel
+        data class BooleanRow(
+            @Column("value") val value: Boolean,
+        )
+
+        fun workbook(vararg values: String): ByteArray {
+            val output = ByteArrayOutputStream()
+            excelOf(values.map { Raw(it) }).writeTo(output)
+            return output.toByteArray()
+        }
+
+        it("텍스트 셀의 큰 정수를 정확히 읽는다") {
+            val result = parseExcel<IntegerRow>(ByteArrayInputStream(workbook("9007199254740993")))
+            result.getOrThrow().single().value shouldBe 9007199254740993L
+        }
+
+        it("정수 변환 오류의 행과 열을 정책에 맞게 보고한다") {
+            val bytes = workbook("9007199254740993", "1.9", "9223372036854775808", "NaN")
+            for (policy in listOf(OnError.FAIL_FAST, OnError.COLLECT)) {
+                val result = parseExcel<IntegerRow>(ByteArrayInputStream(bytes)) { onError = policy }
+                result.shouldBeInstanceOf<ParseResult.Failure<IntegerRow>>()
+                val errors = (result as ParseResult.Failure).errors
+                errors.map { it.rowIndex } shouldBe if (policy == OnError.FAIL_FAST) listOf(2) else listOf(2, 3, 4)
+                errors.forEach {
+                    it.columnHeader shouldBe "value"
+                    it.cause.shouldBeInstanceOf<IllegalArgumentException>()
+                }
+            }
+        }
+
+        it("잘못된 Boolean 입력을 정책에 맞게 보고한다") {
+            for (policy in listOf(OnError.FAIL_FAST, OnError.COLLECT)) {
+                val result =
+                    parseExcel<BooleanRow>(ByteArrayInputStream(workbook("true", "typo", "2"))) {
+                        onError = policy
+                    }
+                result.shouldBeInstanceOf<ParseResult.Failure<BooleanRow>>()
+                (result as ParseResult.Failure).errors.map { it.rowIndex } shouldBe
+                    if (policy == OnError.FAIL_FAST) listOf(2) else listOf(2, 3)
+            }
+        }
+    }
+
     describe("검증") {
         it("validateRow가 실패하면 에러를 수집한다") {
             @Excel

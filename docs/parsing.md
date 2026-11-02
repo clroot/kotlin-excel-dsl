@@ -120,3 +120,26 @@ val result = parseExcel<Product>(inputStream) {
     converter<Money> { value -> Money(BigDecimal(value.toString())) }
 }
 ```
+
+## Integer and Boolean conversion policy
+
+Built-in Int/Long converters parse text without going through Double. Values must be mathematically integral and within the target range. Decimal and exponent notation such as `42.0` and `4.2e1` are accepted; fractional values, overflow, NaN, and Infinity fail with IllegalArgumentException. Numeric cells are checked using their stored value; precision already lost in Excel cannot be recovered. Store large integer identifiers as text.
+
+Boolean accepts native Boolean values, case-insensitive `true`/`false` strings, and numeric 0/1 only. Strings `"0"`/`"1"`, other numbers, and unrecognized strings fail. Whitespace trimming and nullable/blank handling still follow the existing configuration. Custom converters retain priority and receive the original raw value.
+
+This changes the previous permissive behavior: fractions are no longer truncated, overflow no longer saturates/wraps, and invalid Boolean strings no longer become false. Clean source data or explicitly register a converter if your application needs the old policy, for example:
+
+```kotlin
+parseExcel<MyRow>(input) {
+    converter<Int> { value -> value.toString().toDouble().toInt() }
+    converter<Boolean> { value ->
+        when (value) {
+            is Boolean -> value
+            is Number -> value.toInt() != 0
+            else -> value.toString().trim().equals("true", ignoreCase = true)
+        }
+    }
+}
+```
+
+These opt-in converters intentionally restore lossy conversion. Conversion failures remain ParseError entries with row and column context: FAIL_FAST returns after the first failing row, while COLLECT gathers errors across rows.
