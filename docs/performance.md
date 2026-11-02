@@ -2,35 +2,37 @@
 
 [한국어](performance.ko.md)
 
-Streaming based on Apache POI SXSSF for memory-efficient large dataset processing.
+Apache POI SXSSF streams rows with a default window of 100 rows and reuses styles.
 
-## Benchmarks
+## Method
 
-**Environment**
-- MacBook Pro 14" M3 Pro
-- JDK 21.0.8 (Amazon Corretto)
-- JMH 1.37 (2 warmup, 3 measurement iterations, 10s each)
+Run timing and allocation profiling separately. GC profiler allocation counts cumulative allocated bytes, not peak heap or retained memory. Previous GC heap deltas and sampled memory figures are excluded from this baseline.
 
-| Rows | Time | Memory (min / avg / max) |
-|------|------|-------------------------|
-| 100K | ~430ms | 34 / 106 / 189 MB |
-| 500K | ~1.8s | 42 / 133 / 193 MB |
-| 1M | ~3.5s | 59 / 136 / 193 MB |
+```bash
+./gradlew :benchmarks:jmh --rerun-tasks
+./gradlew :benchmarks:jmh -PallocationProfile --rerun-tasks
+```
 
-Max memory stays constant at ~193MB even with 10x data increase.
+JMH 1.37 uses one fork, one thread, 2 × 1s warmup and 3 × 1s measurement iterations. Each operation includes lazy input generation, DSL construction and XLSX rendering for four columns and 100K/500K/1M rows. Output goes to a null stream; disk persistence is excluded. There is no forced GC, sleep or sampling thread inside the measured operation.
 
-## Key Features
+This short local baseline is not a performance guarantee or pass threshold. CI's 30-minute timeout prevents stalled jobs. For stable comparisons use the same hardware, JDK and heap settings with longer warmup and multiple forks.
 
-- **Streaming rendering**: Row-by-row processing, only configured window (default 100 rows) kept in memory
-- **O(1) Auto-width**: Tracks max width only, no cell value storage
-- **Style caching**: Reuses identical styles
+## Sequence example
 
-## Optimization Tips
+`rows` accepts `Iterable`, so adapt the sequence with `asIterable()` without materializing a list.
 
 ```kotlin
-// Pass large data as Sequence
-rows(largeDataSequence)
-
-// Fixed width is slightly more efficient
-column("Amount", width = 15.chars) { it.amount }
+rows(largeDataSequence.asIterable())
 ```
+
+[Executable DSL / annotation / parsing examples](../excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt) · JDK 21+
+
+[Raw results and environment](../benchmarks/results/README.md)
+
+2026-11-02 · Intel Core Ultra 7 270K Plus · WSL2 x86_64 · Temurin 21.0.13+9
+
+| Rows | ms/op (mean) |
+|---|---:|
+| 100k | 330.46 |
+| 1m | 3268.07 |
+| 500k | 1683.16 |

@@ -525,3 +525,5 @@ excel {
     }
 }.writeTo(output)
 ```
+
+The [shared executable examples](../excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt) cover DSL, Sequence, annotations and parsing in CI via `:excel-dsl:test`. JDK 21 or later is required.

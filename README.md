@@ -178,3 +178,5 @@ MIT License
 ## Development
 
 Build with JDK 21 or 25. Compilation and published JVM bytecode remain on Java 21. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, test JVM selection, and publication checks.
+
+The [shared executable examples](excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt) cover DSL, Sequence, annotations and parsing in CI via `:excel-dsl:test`. JDK 21 or later is required.

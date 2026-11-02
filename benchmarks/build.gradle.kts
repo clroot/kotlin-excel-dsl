@@ -16,6 +16,10 @@ jmh {
     warmupIterations = 2
     iterations = 3
     fork = 1
-    // 메모리 측정을 위한 GC 프로파일러
-    profilers.add("gc")
+    warmup = "1s"
+    timeOnIteration = "1s"
+    resultFormat = "JSON"
+    if (providers.gradleProperty("allocationProfile").isPresent) {
+        profilers.add("gc")
+    }
 }

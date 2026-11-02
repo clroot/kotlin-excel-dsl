@@ -143,3 +143,5 @@ parseExcel<MyRow>(input) {
 ```
 
 These opt-in converters intentionally restore lossy conversion. Conversion failures remain ParseError entries with row and column context: FAIL_FAST returns after the first failing row, while COLLECT gathers errors across rows.
+
+The [shared executable examples](../excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt) cover DSL, Sequence, annotations and parsing in CI via `:excel-dsl:test`. JDK 21 or later is required.

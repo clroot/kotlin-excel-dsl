@@ -178,3 +178,5 @@ MIT License
 ## 개발 환경
 
 빌드는 JDK 21·25를 지원하며, 컴파일 toolchain과 배포 JAR의 JVM target은 21을 유지합니다. 설치와 빌드 명령, 테스트 JVM 선택 및 publication 검증 방법은 [개발 안내](CONTRIBUTING.md)를 참고하세요.
+
+DSL·Sequence·어노테이션·파싱의 [실행 가능한 공통 예제](excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt)는 CI의 `:excel-dsl:test`에서 검증합니다. JDK 21 이상이 필요합니다.

@@ -143,3 +143,5 @@ parseExcel<MyRow>(input) {
 ```
 
 위 전환 예시는 값 손실을 허용하는 변환을 의도적으로 복원합니다. 변환 실패는 기존처럼 행·열 정보가 담긴 ParseError로 보고됩니다. FAIL_FAST는 첫 실패 행에서 반환하고, COLLECT는 여러 행의 오류를 모읍니다.
+
+DSL·Sequence·어노테이션·파싱의 [실행 가능한 공통 예제](../excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt)는 CI의 `:excel-dsl:test`에서 검증합니다. JDK 21 이상이 필요합니다.
