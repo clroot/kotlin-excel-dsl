@@ -1,0 +1,163 @@
+> Task :theme:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :benchmarks:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :render:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :theme:processResources NO-SOURCE
+> Task :render:processResources NO-SOURCE
+> Task :benchmarks:processResources NO-SOURCE
+> Task :benchmarks:processTestResources NO-SOURCE
+> Task :benchmarks:processJmhResources NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:compileKotlin
+> Task :core:compileJava NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar
+> Task :theme:compileKotlin
+> Task :theme:compileJava NO-SOURCE
+> Task :theme:classes UP-TO-DATE
+> Task :theme:jar
+> Task :render:compileKotlin
+> Task :render:compileJava NO-SOURCE
+> Task :render:classes UP-TO-DATE
+> Task :render:jar
+> Task :benchmarks:compileKotlin NO-SOURCE
+> Task :benchmarks:compileJava NO-SOURCE
+> Task :benchmarks:classes UP-TO-DATE
+> Task :benchmarks:jar
+> Task :benchmarks:compileTestKotlin NO-SOURCE
+> Task :benchmarks:compileTestJava NO-SOURCE
+> Task :benchmarks:testClasses UP-TO-DATE
+> Task :benchmarks:compileJmhKotlin
+> Task :benchmarks:compileJmhJava NO-SOURCE
+> Task :benchmarks:jmhClasses UP-TO-DATE
+
+> Task :benchmarks:jmhRunBytecodeGenerator
+Processing 0 classes from /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/classes/java/jmh with "reflection" generator
+Writing out Java source to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-sources and resources to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-resources
+Processing 3 classes from /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/classes/kotlin/jmh with "reflection" generator
+Writing out Java source to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-sources and resources to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-resources
+Processing 0 classes from /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/classes/java/test with "reflection" generator
+Writing out Java source to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-sources and resources to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-resources
+Processing 0 classes from /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/classes/kotlin/test with "reflection" generator
+Writing out Java source to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-sources and resources to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-resources
+
+> Task :benchmarks:jmhCompileGeneratedClasses
+> Task :benchmarks:jmhJar
+
+> Task :benchmarks:jmh
+# JMH version: 1.37
+# VM version: JDK 21.0.13, OpenJDK 64-Bit Server VM, 21.0.13+9-LTS
+# VM invoker: /home/clroot/.jdks/temurin-21.0.13/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: io.clroot.excel.benchmarks.ExcelBenchmark.rows100k
+
+# Run progress: 0.00% complete, ETA 00:00:15
+# Fork: 1 of 1
+# Warmup Iteration   1: 2026-11-02T09:16:17.577695528Z io.clroot.excel.benchmarks.ExcelBenchmark.rows100k-jmh-worker-1 ERROR Log4j API could not find a logging provider.
+1447.884 ms/op
+# Warmup Iteration   2: 508.070 ms/op
+Iteration   1: 364.900 ms/op
+Iteration   2: 367.554 ms/op
+Iteration   3: 346.936 ms/op
+
+
+Result "io.clroot.excel.benchmarks.ExcelBenchmark.rows100k":
+  359.797 ±(99.9%) 204.629 ms/op [Average]
+  (min, avg, max) = (346.936, 359.797, 367.554), stdev = 11.216
+  CI (99.9%): [155.168, 564.426] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.13, OpenJDK 64-Bit Server VM, 21.0.13+9-LTS
+# VM invoker: /home/clroot/.jdks/temurin-21.0.13/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: io.clroot.excel.benchmarks.ExcelBenchmark.rows1m
+
+# Run progress: 33.33% complete, ETA 00:00:11
+# Fork: 1 of 1
+# Warmup Iteration   1: 2026-11-02T09:16:23.502260925Z io.clroot.excel.benchmarks.ExcelBenchmark.rows1m-jmh-worker-1 ERROR Log4j API could not find a logging provider.
+4463.928 ms/op
+# Warmup Iteration   2: 3458.967 ms/op
+Iteration   1: 3374.943 ms/op
+Iteration   2: 3404.230 ms/op
+Iteration   3: 3402.556 ms/op
+
+
+Result "io.clroot.excel.benchmarks.ExcelBenchmark.rows1m":
+  3393.910 ±(99.9%) 300.059 ms/op [Average]
+  (min, avg, max) = (3374.943, 3393.910, 3404.230), stdev = 16.447
+  CI (99.9%): [3093.850, 3693.969] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.13, OpenJDK 64-Bit Server VM, 21.0.13+9-LTS
+# VM invoker: /home/clroot/.jdks/temurin-21.0.13/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: io.clroot.excel.benchmarks.ExcelBenchmark.rows500k
+
+# Run progress: 66.67% complete, ETA 00:00:12
+# Fork: 1 of 1
+# Warmup Iteration   1: 2026-11-02T09:16:41.807652333Z io.clroot.excel.benchmarks.ExcelBenchmark.rows500k-jmh-worker-1 ERROR Log4j API could not find a logging provider.
+2665.102 ms/op
+# Warmup Iteration   2: 1796.956 ms/op
+Iteration   1: 1635.059 ms/op
+Iteration   2: 1631.672 ms/op
+Iteration   3: 1881.557 ms/op
+
+
+Result "io.clroot.excel.benchmarks.ExcelBenchmark.rows500k":
+  1716.096 ±(99.9%) 2614.386 ms/op [Average]
+  (min, avg, max) = (1631.672, 1716.096, 1881.557), stdev = 143.303
+  CI (99.9%): [≈ 0, 4330.482] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:00:34
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                Mode  Cnt     Score      Error  Units
+ExcelBenchmark.rows100k  avgt    3   359.797 ±  204.629  ms/op
+ExcelBenchmark.rows1m    avgt    3  3393.910 ±  300.059  ms/op
+ExcelBenchmark.rows500k  avgt    3  1716.096 ± 2614.386  ms/op
+
+Benchmark result is saved to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/results/jmh/results.json
+
+[Incubating] Problems report is available at: file:///home/clroot/workspace/io.clroot/kotlin-excel-dsl/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 42s
+12 actionable tasks: 12 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html

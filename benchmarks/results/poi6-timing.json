@@ -1,0 +1,166 @@
+[
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "io.clroot.excel.benchmarks.ExcelBenchmark.rows100k",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/home/clroot/.jdks/temurin-21.0.13/bin/java",
+        "jvmArgs" : [
+            "-Dfile.encoding=UTF-8",
+            "-Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh",
+            "-Duser.country",
+            "-Duser.language=en",
+            "-Duser.variant"
+        ],
+        "jdkVersion" : "21.0.13",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "21.0.13+9-LTS",
+        "warmupIterations" : 2,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 3,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 359.796753,
+            "scoreError" : 204.62903983346533,
+            "scoreConfidence" : [
+                155.1677131665347,
+                564.4257928334654
+            ],
+            "scorePercentiles" : {
+                "0.0" : 346.9360883333333,
+                "50.0" : 364.900326,
+                "90.0" : 367.5538446666667,
+                "95.0" : 367.5538446666667,
+                "99.0" : 367.5538446666667,
+                "99.9" : 367.5538446666667,
+                "99.99" : 367.5538446666667,
+                "99.999" : 367.5538446666667,
+                "99.9999" : 367.5538446666667,
+                "100.0" : 367.5538446666667
+            },
+            "scoreUnit" : "ms/op",
+            "rawData" : [
+                [
+                    364.900326,
+                    367.5538446666667,
+                    346.9360883333333
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "io.clroot.excel.benchmarks.ExcelBenchmark.rows1m",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/home/clroot/.jdks/temurin-21.0.13/bin/java",
+        "jvmArgs" : [
+            "-Dfile.encoding=UTF-8",
+            "-Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh",
+            "-Duser.country",
+            "-Duser.language=en",
+            "-Duser.variant"
+        ],
+        "jdkVersion" : "21.0.13",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "21.0.13+9-LTS",
+        "warmupIterations" : 2,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 3,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 3393.9095426666668,
+            "scoreError" : 300.0592655012987,
+            "scoreConfidence" : [
+                3093.850277165368,
+                3693.9688081679656
+            ],
+            "scorePercentiles" : {
+                "0.0" : 3374.942506,
+                "50.0" : 3402.555786,
+                "90.0" : 3404.230336,
+                "95.0" : 3404.230336,
+                "99.0" : 3404.230336,
+                "99.9" : 3404.230336,
+                "99.99" : 3404.230336,
+                "99.999" : 3404.230336,
+                "99.9999" : 3404.230336,
+                "100.0" : 3404.230336
+            },
+            "scoreUnit" : "ms/op",
+            "rawData" : [
+                [
+                    3374.942506,
+                    3404.230336,
+                    3402.555786
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "io.clroot.excel.benchmarks.ExcelBenchmark.rows500k",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/home/clroot/.jdks/temurin-21.0.13/bin/java",
+        "jvmArgs" : [
+            "-Dfile.encoding=UTF-8",
+            "-Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh",
+            "-Duser.country",
+            "-Duser.language=en",
+            "-Duser.variant"
+        ],
+        "jdkVersion" : "21.0.13",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "21.0.13+9-LTS",
+        "warmupIterations" : 2,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 3,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 1716.0959673333334,
+            "scoreError" : 2614.3864004138013,
+            "scoreConfidence" : [
+                -898.2904330804679,
+                4330.482367747135
+            ],
+            "scorePercentiles" : {
+                "0.0" : 1631.672041,
+                "50.0" : 1635.059004,
+                "90.0" : 1881.556857,
+                "95.0" : 1881.556857,
+                "99.0" : 1881.556857,
+                "99.9" : 1881.556857,
+                "99.99" : 1881.556857,
+                "99.999" : 1881.556857,
+                "99.9999" : 1881.556857,
+                "100.0" : 1881.556857
+            },
+            "scoreUnit" : "ms/op",
+            "rawData" : [
+                [
+                    1635.059004,
+                    1631.672041,
+                    1881.556857
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    }
+]
+
+

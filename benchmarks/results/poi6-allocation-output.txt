@@ -1,0 +1,280 @@
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :render:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :benchmarks:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :theme:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :benchmarks:processResources NO-SOURCE
+> Task :render:processResources NO-SOURCE
+> Task :theme:processResources NO-SOURCE
+> Task :benchmarks:processTestResources NO-SOURCE
+> Task :benchmarks:processJmhResources NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:compileKotlin
+> Task :core:compileJava NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar
+> Task :theme:compileKotlin
+> Task :theme:compileJava NO-SOURCE
+> Task :theme:classes UP-TO-DATE
+> Task :theme:jar
+> Task :render:compileKotlin
+> Task :render:compileJava NO-SOURCE
+> Task :render:classes UP-TO-DATE
+> Task :render:jar
+> Task :benchmarks:compileKotlin NO-SOURCE
+> Task :benchmarks:compileJava NO-SOURCE
+> Task :benchmarks:classes UP-TO-DATE
+> Task :benchmarks:jar
+> Task :benchmarks:compileTestKotlin NO-SOURCE
+> Task :benchmarks:compileTestJava NO-SOURCE
+> Task :benchmarks:testClasses UP-TO-DATE
+> Task :benchmarks:compileJmhKotlin
+> Task :benchmarks:compileJmhJava NO-SOURCE
+> Task :benchmarks:jmhClasses UP-TO-DATE
+
+> Task :benchmarks:jmhRunBytecodeGenerator
+Processing 0 classes from /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/classes/java/jmh with "reflection" generator
+Writing out Java source to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-sources and resources to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-resources
+Processing 3 classes from /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/classes/kotlin/jmh with "reflection" generator
+Writing out Java source to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-sources and resources to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-resources
+Processing 0 classes from /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/classes/java/test with "reflection" generator
+Writing out Java source to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-sources and resources to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-resources
+Processing 0 classes from /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/classes/kotlin/test with "reflection" generator
+Writing out Java source to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-sources and resources to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/jmh-generated-resources
+
+> Task :benchmarks:jmhCompileGeneratedClasses
+> Task :benchmarks:jmhJar
+
+> Task :benchmarks:jmh
+# JMH version: 1.37
+# VM version: JDK 21.0.13, OpenJDK 64-Bit Server VM, 21.0.13+9-LTS
+# VM invoker: /home/clroot/.jdks/temurin-21.0.13/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: io.clroot.excel.benchmarks.ExcelBenchmark.rows100k
+
+# Run progress: 0.00% complete, ETA 00:00:15
+# Fork: 1 of 1
+# Warmup Iteration   1: 2026-11-02T09:17:06.231960258Z io.clroot.excel.benchmarks.ExcelBenchmark.rows100k-jmh-worker-1 ERROR Log4j API could not find a logging provider.
+1522.764 ms/op
+# Warmup Iteration   2: 378.051 ms/op
+Iteration   1: 337.115 ms/op
+                 gc.alloc.rate:      823.354 MB/sec
+                 gc.alloc.rate.norm: 291105698.667 B/op
+                 gc.count:           3.000 counts
+                 gc.time:            8.000 ms
+
+Iteration   2: 338.501 ms/op
+                 gc.alloc.rate:      820.020 MB/sec
+                 gc.alloc.rate.norm: 291105864.000 B/op
+                 gc.count:           3.000 counts
+                 gc.time:            8.000 ms
+
+Iteration   3: 350.637 ms/op
+                 gc.alloc.rate:      791.384 MB/sec
+                 gc.alloc.rate.norm: 291105290.667 B/op
+                 gc.count:           3.000 counts
+                 gc.time:            8.000 ms
+
+
+
+Result "io.clroot.excel.benchmarks.ExcelBenchmark.rows100k":
+  342.085 ±(99.9%) 135.720 ms/op [Average]
+  (min, avg, max) = (337.115, 342.085, 350.637), stdev = 7.439
+  CI (99.9%): [206.365, 477.805] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows100k:gc.alloc.rate":
+  811.586 ±(99.9%) 320.621 MB/sec [Average]
+  (min, avg, max) = (791.384, 811.586, 823.354), stdev = 17.574
+  CI (99.9%): [490.965, 1132.207] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows100k:gc.alloc.rate.norm":
+  291105617.778 ±(99.9%) 5383.754 B/op [Average]
+  (min, avg, max) = (291105290.667, 291105617.778, 291105864.000), stdev = 295.102
+  CI (99.9%): [291100234.023, 291111001.532] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows100k:gc.count":
+  9.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (3.000, 3.000, 3.000), stdev = 0.001
+  CI (99.9%): [9.000, 9.000] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows100k:gc.time":
+  24.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (8.000, 8.000, 8.000), stdev = 0.001
+  CI (99.9%): [24.000, 24.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.13, OpenJDK 64-Bit Server VM, 21.0.13+9-LTS
+# VM invoker: /home/clroot/.jdks/temurin-21.0.13/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: io.clroot.excel.benchmarks.ExcelBenchmark.rows1m
+
+# Run progress: 33.33% complete, ETA 00:00:11
+# Fork: 1 of 1
+# Warmup Iteration   1: 2026-11-02T09:17:12.234407240Z io.clroot.excel.benchmarks.ExcelBenchmark.rows1m-jmh-worker-1 ERROR Log4j API could not find a logging provider.
+4617.903 ms/op
+# Warmup Iteration   2: 3500.503 ms/op
+Iteration   1: 3288.539 ms/op
+                 gc.alloc.rate:      851.337 MB/sec
+                 gc.alloc.rate.norm: 2936074128.000 B/op
+                 gc.count:           8.000 counts
+                 gc.time:            19.000 ms
+
+Iteration   2: 3281.638 ms/op
+                 gc.alloc.rate:      853.199 MB/sec
+                 gc.alloc.rate.norm: 2936073016.000 B/op
+                 gc.count:           7.000 counts
+                 gc.time:            13.000 ms
+
+Iteration   3: 3565.788 ms/op
+                 gc.alloc.rate:      776.659 MB/sec
+                 gc.alloc.rate.norm: 2904073024.000 B/op
+                 gc.count:           8.000 counts
+                 gc.time:            14.000 ms
+
+
+
+Result "io.clroot.excel.benchmarks.ExcelBenchmark.rows1m":
+  3378.655 ±(99.9%) 2957.282 ms/op [Average]
+  (min, avg, max) = (3281.638, 3378.655, 3565.788), stdev = 162.099
+  CI (99.9%): [421.373, 6335.937] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows1m:gc.alloc.rate":
+  827.065 ±(99.9%) 796.564 MB/sec [Average]
+  (min, avg, max) = (776.659, 827.065, 853.199), stdev = 43.662
+  CI (99.9%): [30.501, 1623.629] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows1m:gc.alloc.rate.norm":
+  2925406722.667 ±(99.9%) 337062354.395 B/op [Average]
+  (min, avg, max) = (2904073024.000, 2925406722.667, 2936074128.000), stdev = 18475525.010
+  CI (99.9%): [2588344368.271, 3262469077.062] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows1m:gc.count":
+  23.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (7.000, 7.667, 8.000), stdev = 0.577
+  CI (99.9%): [23.000, 23.000] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows1m:gc.time":
+  46.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (13.000, 15.333, 19.000), stdev = 3.215
+  CI (99.9%): [46.000, 46.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.13, OpenJDK 64-Bit Server VM, 21.0.13+9-LTS
+# VM invoker: /home/clroot/.jdks/temurin-21.0.13/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: io.clroot.excel.benchmarks.ExcelBenchmark.rows500k
+
+# Run progress: 66.67% complete, ETA 00:00:12
+# Fork: 1 of 1
+# Warmup Iteration   1: 2026-11-02T09:17:30.738567608Z io.clroot.excel.benchmarks.ExcelBenchmark.rows500k-jmh-worker-1 ERROR Log4j API could not find a logging provider.
+2518.136 ms/op
+# Warmup Iteration   2: 1934.035 ms/op
+Iteration   1: 1769.640 ms/op
+                 gc.alloc.rate:      781.333 MB/sec
+                 gc.alloc.rate.norm: 1450056936.000 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            9.000 ms
+
+Iteration   2: 1756.005 ms/op
+                 gc.alloc.rate:      787.346 MB/sec
+                 gc.alloc.rate.norm: 1450055472.000 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            7.000 ms
+
+Iteration   3: 1723.314 ms/op
+                 gc.alloc.rate:      802.361 MB/sec
+                 gc.alloc.rate.norm: 1450057320.000 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            5.000 ms
+
+
+
+Result "io.clroot.excel.benchmarks.ExcelBenchmark.rows500k":
+  1749.653 ±(99.9%) 434.331 ms/op [Average]
+  (min, avg, max) = (1723.314, 1749.653, 1769.640), stdev = 23.807
+  CI (99.9%): [1315.322, 2183.984] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows500k:gc.alloc.rate":
+  790.347 ±(99.9%) 197.585 MB/sec [Average]
+  (min, avg, max) = (781.333, 790.347, 802.361), stdev = 10.830
+  CI (99.9%): [592.762, 987.931] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows500k:gc.alloc.rate.norm":
+  1450056576.000 ±(99.9%) 17790.913 B/op [Average]
+  (min, avg, max) = (1450055472.000, 1450056576.000, 1450057320.000), stdev = 975.180
+  CI (99.9%): [1450038785.087, 1450074366.913] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows500k:gc.count":
+  14.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (4.000, 4.667, 5.000), stdev = 0.577
+  CI (99.9%): [14.000, 14.000] (assumes normal distribution)
+
+Secondary result "io.clroot.excel.benchmarks.ExcelBenchmark.rows500k:gc.time":
+  21.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (5.000, 7.000, 9.000), stdev = 2.000
+  CI (99.9%): [21.000, 21.000] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:00:34
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                   Mode  Cnt           Score           Error   Units
+ExcelBenchmark.rows100k                     avgt    3         342.085 ±       135.720   ms/op
+ExcelBenchmark.rows100k:gc.alloc.rate       avgt    3         811.586 ±       320.621  MB/sec
+ExcelBenchmark.rows100k:gc.alloc.rate.norm  avgt    3   291105617.778 ±      5383.754    B/op
+ExcelBenchmark.rows100k:gc.count            avgt    3           9.000                  counts
+ExcelBenchmark.rows100k:gc.time             avgt    3          24.000                      ms
+ExcelBenchmark.rows1m                       avgt    3        3378.655 ±      2957.282   ms/op
+ExcelBenchmark.rows1m:gc.alloc.rate         avgt    3         827.065 ±       796.564  MB/sec
+ExcelBenchmark.rows1m:gc.alloc.rate.norm    avgt    3  2925406722.667 ± 337062354.395    B/op
+ExcelBenchmark.rows1m:gc.count              avgt    3          23.000                  counts
+ExcelBenchmark.rows1m:gc.time               avgt    3          46.000                      ms
+ExcelBenchmark.rows500k                     avgt    3        1749.653 ±       434.331   ms/op
+ExcelBenchmark.rows500k:gc.alloc.rate       avgt    3         790.347 ±       197.585  MB/sec
+ExcelBenchmark.rows500k:gc.alloc.rate.norm  avgt    3  1450056576.000 ±     17790.913    B/op
+ExcelBenchmark.rows500k:gc.count            avgt    3          14.000                  counts
+ExcelBenchmark.rows500k:gc.time             avgt    3          21.000                      ms
+
+Benchmark result is saved to /home/clroot/workspace/io.clroot/kotlin-excel-dsl/benchmarks/build/results/jmh/results.json
+
+[Incubating] Problems report is available at: file:///home/clroot/workspace/io.clroot/kotlin-excel-dsl/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 41s
+12 actionable tasks: 12 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html

@@ -97,3 +97,63 @@ Only stable numeric versions are accepted; missing versions, snapshots and malfo
 versions fail before building or publishing. The workflow signs and uploads the six
 libraries to Maven Central and attests their JARs, including parser. Central and GPG
 credentials are required only for public publication. Local verification needs none.
+
+## Dependency updates
+
+Shared dependency and plugin versions live in `gradle/libs.versions.toml`.
+The standalone consumer imports the same library catalog, but its Kotlin plugin
+is deliberately selected by `consumerKotlin` to verify the minimum supported
+compiler independently. Keep the Kotlin 2.2.0 consumer CI entry as a compatibility
+floor rather than automatically updating it with the producer.
+
+Dependabot checks Gradle builds and GitHub Actions weekly. Minor and patch
+updates are grouped; major updates remain separate for review. Require all CI
+build and consumer matrix checks in the repository's branch protection/ruleset
+before merging updates. The YAML configuration does not itself enforce branch
+protection. The active repository ruleset now requires build (21), build (25),
+consumer (2.2.0, 21), and consumer (2.3.21, 25), with the branch up to date.
+Automatic merging is not enabled.
+
+Kotlin remains at 2.3.21 with a minimum tested consumer of 2.2.0.
+Compiler upgrades are compatibility decisions: they can change Kotlin metadata,
+stdlib/reflect dependencies and what older compilers can consume. Do not raise
+the compiler just to match the latest release. Kotlin updates are excluded from
+Dependabot's grouped updates and require independent consumer verification.
+
+Issue #16 upgrades POI to 6.0.0, Kotest to 6.2.6 and the ktlint Gradle plugin to
+14.2.0. The ktlint engine remains 1.0.1 to preserve the existing formatting rules.
+Gradle's publishing/signing plugins follow the wrapper version.
+
+Official release references checked on 2026-11-02:
+[Kotlin](https://kotlinlang.org/docs/releases.html),
+[POI changes](https://poi.apache.org/changes.html),
+[Kotest](https://github.com/kotest/kotest/releases/tag/v6.2.6),
+[ktlint Gradle](https://plugins.gradle.org/plugin/org.jlleitschuh.gradle.ktlint).
+Kotlin 2.4.21 is deferred to a dedicated compatibility proposal, including
+metadata and transitive stdlib/reflect checks against the supported consumers.
+POI 6 removes deprecated APIs and changes DataFormatter's formula-cache default;
+the parser reads cell types directly and does not use DataFormatter.
+See [POI security guidance](https://poi.apache.org/security.html).
+A complete vulnerability audit is outside this dependency migration.
+
+The verified POI runtime graph resolves XMLBeans 5.4.1, Commons Compress 1.28.0,
+Commons IO 2.22.0 and Log4j API 2.26.1 (no Log4j Core). Reproduce with
+`./gradlew :render:dependencies --configuration runtimeClasspath`.
+The minimum consumer test runs with these published dependencies, including
+stdlib/reflect 2.3.21; it does not claim compatibility with every older Kotlin
+version or every consumer dependency constraint.
+
+Security advisory review on 2026-11-02: the resolved versions are outside the
+affected ranges for POI CVE-2025-31672, XMLBeans CVE-2021-23926,
+Commons Compress CVE-2024-25710/CVE-2024-26308, Commons IO CVE-2024-47554,
+and Log4j API CVE-2026-49844 (fixed in 2.26.1).
+Sources: [POI](https://poi.apache.org/security.html),
+[XMLBeans](https://xmlbeans.apache.org/status.html),
+[Compress](https://commons.apache.org/proper/commons-compress/security.html),
+[IO](https://commons.apache.org/proper/commons-io/security.html),
+[Log4j](https://logging.apache.org/security.html).
+This is a review of those published advisories, not a guarantee against all vulnerabilities.
+
+The ktlint engine 1.8.0 upgrade remains a separate formatting migration because
+it adds/promotes rules. JMH plugin 0.7.4 is deferred to a separate benchmark-tooling
+change so this POI comparison preserves the 0.7.2 baseline environment.

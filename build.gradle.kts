@@ -3,11 +3,13 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
-    kotlin("jvm") version "2.3.21" apply false
-    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.ktlint)
     `maven-publish`
     signing
 }
+
+val catalog = libs
 
 val publishedModules = setOf("core", "annotation", "render", "parser", "theme", "excel-dsl")
 
@@ -16,7 +18,7 @@ allprojects {
     // Preserve the existing lint rules while upgrading the Gradle integration.
     pluginManager.withPlugin("org.jlleitschuh.gradle.ktlint") {
         configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-            version.set("1.0.1")
+            version.set(catalog.versions.ktlint.asProvider().get())
         }
     }
 
@@ -41,8 +43,8 @@ subprojects {
     }
 
     dependencies {
-        "testImplementation"("io.kotest:kotest-runner-junit5:6.0.7")
-        "testImplementation"("io.kotest:kotest-assertions-core:6.0.7")
+        "testImplementation"(catalog.kotest.runner)
+        "testImplementation"(catalog.kotest.assertions)
     }
 
     val testJavaVersion = providers.gradleProperty("testJavaVersion").map(String::toInt).orElse(21)
