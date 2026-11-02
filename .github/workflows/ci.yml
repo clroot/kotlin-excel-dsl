@@ -48,3 +48,36 @@ jobs:
         with:
           name: test-results-jdk-${{ matrix.java }}
           path: "**/build/reports/tests/"
+
+  consumer:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - kotlin: "2.2.0"
+            java: "21"
+          - kotlin: "2.3.21"
+            java: "25"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: temurin
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Publish and verify temporary repository
+        run: |
+          ./gradlew checkKotlinAbi publishAllPublicationsToVerificationRepository -Pversion=0.0.0-verification
+          python3 scripts/verify-publication.py build/verification-repository 0.0.0-verification
+      - name: Compile and run independent consumer
+        run: >-
+          ./gradlew -p compatibility test
+          -PconsumerKotlin=${{ matrix.kotlin }}
+          -PconsumerJava=${{ matrix.java }}
+          -PartifactVersion=0.0.0-verification
+          -PartifactRepository="$GITHUB_WORKSPACE/build/verification-repository"

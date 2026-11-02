@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
     kotlin("jvm") version "2.3.21" apply false
@@ -8,8 +9,9 @@ plugins {
     signing
 }
 
+val publishedModules = setOf("core", "annotation", "render", "parser", "theme", "excel-dsl")
+
 allprojects {
-    apply(plugin = "maven-publish")
 
     // Preserve the existing lint rules while upgrading the Gradle integration.
     pluginManager.withPlugin("org.jlleitschuh.gradle.ktlint") {
@@ -29,8 +31,6 @@ allprojects {
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
-    apply(plugin = "maven-publish")
-    apply(plugin = "signing")
 
     configure<JavaPluginExtension> {
         toolchain {
@@ -69,7 +69,23 @@ subprojects {
         }
     }
 
+    if (name !in publishedModules) return@subprojects
+
+    configure<KotlinJvmProjectExtension> {
+        @OptIn(ExperimentalAbiValidation::class)
+        extensions.configure<org.jetbrains.kotlin.gradle.dsl.abi.AbiValidationExtension> { enabled.set(true) }
+    }
+
+    apply(plugin = "maven-publish")
+    apply(plugin = "signing")
+
     configure<PublishingExtension> {
+        repositories {
+            maven {
+                name = "verification"
+                url = rootProject.layout.buildDirectory.dir("verification-repository").get().asFile.toURI()
+            }
+        }
         publications {
             create<MavenPublication>("maven") {
                 from(components["java"])

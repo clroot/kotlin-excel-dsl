@@ -1,0 +1,30 @@
+public final class io/clroot/excel/theme/ClassicTheme : io/clroot/excel/theme/Theme {
+	public static final field INSTANCE Lio/clroot/excel/theme/ClassicTheme;
+	public fun getBodyStyle ()Lio/clroot/excel/core/style/CellStyle;
+	public fun getHeaderStyle ()Lio/clroot/excel/core/style/CellStyle;
+}
+
+public final class io/clroot/excel/theme/MinimalTheme : io/clroot/excel/theme/Theme {
+	public static final field INSTANCE Lio/clroot/excel/theme/MinimalTheme;
+	public fun getBodyStyle ()Lio/clroot/excel/core/style/CellStyle;
+	public fun getHeaderStyle ()Lio/clroot/excel/core/style/CellStyle;
+}
+
+public final class io/clroot/excel/theme/ModernTheme : io/clroot/excel/theme/Theme {
+	public static final field INSTANCE Lio/clroot/excel/theme/ModernTheme;
+	public fun getBodyStyle ()Lio/clroot/excel/core/style/CellStyle;
+	public fun getHeaderStyle ()Lio/clroot/excel/core/style/CellStyle;
+}
+
+public abstract interface class io/clroot/excel/theme/Theme : io/clroot/excel/core/dsl/ExcelTheme {
+	public static final field Companion Lio/clroot/excel/theme/Theme$Companion;
+	public abstract fun getBodyStyle ()Lio/clroot/excel/core/style/CellStyle;
+	public abstract fun getHeaderStyle ()Lio/clroot/excel/core/style/CellStyle;
+}
+
+public final class io/clroot/excel/theme/Theme$Companion {
+	public final fun getClassic ()Lio/clroot/excel/theme/Theme;
+	public final fun getMinimal ()Lio/clroot/excel/theme/Theme;
+	public final fun getModern ()Lio/clroot/excel/theme/Theme;
+}
+

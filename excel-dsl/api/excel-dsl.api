@@ -1,0 +1,11 @@
+public final class io/clroot/excel/ExcelDslKt {
+	public static final fun excel (Lio/clroot/excel/core/dsl/ExcelTheme;Lkotlin/jvm/functions/Function1;)Lio/clroot/excel/core/model/ExcelDocument;
+	public static final fun excel (Lkotlin/jvm/functions/Function1;)Lio/clroot/excel/core/model/ExcelDocument;
+	public static final fun writeTo (Lio/clroot/excel/core/model/ExcelDocument;Ljava/io/OutputStream;)V
+}
+
+public final class io/clroot/excel/ModelsKt {
+	public static final fun getAuto ()Lio/clroot/excel/core/model/ColumnWidth;
+	public static final fun getChars (I)Lio/clroot/excel/core/model/ColumnWidth;
+}
+

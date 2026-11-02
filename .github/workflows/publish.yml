@@ -7,7 +7,7 @@ on:
     inputs:
       version:
         description: "Version to publish (e.g., 0.1.0)"
-        required: false
+        required: true
         type: string
 
 jobs:
@@ -35,19 +35,18 @@ jobs:
 
       - name: Extract version
         id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            VERSION="${{ github.event.release.tag_name }}"
-            VERSION="${VERSION#v}"
-          elif [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
-          else
-            VERSION="0.1.0"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          VERSION=$(python3 scripts/release-version.py "$EVENT_NAME" "$RELEASE_TAG" "$INPUT_VERSION")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build and verify
-        run: ./gradlew build -Pversion=${{ steps.version.outputs.version }}
+        run: |
+          ./gradlew build publishAllPublicationsToVerificationRepository -Pversion=${{ steps.version.outputs.version }}
+          python3 scripts/verify-publication.py build/verification-repository "${{ steps.version.outputs.version }}"
 
       - name: Publish to Maven Central
         run: ./gradlew publishAggregationToCentralPortal -Pversion=${{ steps.version.outputs.version }}
@@ -64,5 +63,6 @@ jobs:
             core/build/libs/*.jar
             annotation/build/libs/*.jar
             render/build/libs/*.jar
+            parser/build/libs/*.jar
             theme/build/libs/*.jar
             excel-dsl/build/libs/*.jar

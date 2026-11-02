@@ -1,0 +1,18 @@
+public abstract interface class io/clroot/excel/render/ExcelRenderer {
+	public abstract fun render (Lio/clroot/excel/core/model/ExcelDocument;Ljava/io/OutputStream;)V
+}
+
+public final class io/clroot/excel/render/ExtensionsKt {
+	public static final fun toByteArray (Lio/clroot/excel/core/model/ExcelDocument;Lio/clroot/excel/render/ExcelRenderer;)[B
+	public static synthetic fun toByteArray$default (Lio/clroot/excel/core/model/ExcelDocument;Lio/clroot/excel/render/ExcelRenderer;ILjava/lang/Object;)[B
+	public static final fun writeTo (Lio/clroot/excel/core/model/ExcelDocument;Ljava/io/OutputStream;Lio/clroot/excel/render/ExcelRenderer;)V
+	public static synthetic fun writeTo$default (Lio/clroot/excel/core/model/ExcelDocument;Ljava/io/OutputStream;Lio/clroot/excel/render/ExcelRenderer;ILjava/lang/Object;)V
+}
+
+public final class io/clroot/excel/render/PoiRenderer : io/clroot/excel/render/ExcelRenderer {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun render (Lio/clroot/excel/core/model/ExcelDocument;Ljava/io/OutputStream;)V
+}
+
