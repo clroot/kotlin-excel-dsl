@@ -9,6 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ["21", "25"]
 
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +23,12 @@ jobs:
           java-version: "21"
           distribution: "temurin"
 
+      - name: Set up runtime JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: "temurin"
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -26,11 +36,14 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: |
+          java -version
+          ./gradlew --version
+          ./gradlew build generatePomFileForMavenPublication generateMetadataFileForMavenPublication -PtestJavaVersion=${{ matrix.java }} --warning-mode=fail
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
+          name: test-results-jdk-${{ matrix.java }}
           path: "**/build/reports/tests/"

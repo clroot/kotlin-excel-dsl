@@ -174,3 +174,7 @@ kotlin-excel-dsl/
 ## 라이선스
 
 MIT License
+
+## 개발 환경
+
+빌드는 JDK 21·25를 지원하며, 컴파일 toolchain과 배포 JAR의 JVM target은 21을 유지합니다. 설치와 빌드 명령, 테스트 JVM 선택 및 publication 검증 방법은 [개발 안내](CONTRIBUTING.md)를 참고하세요.
