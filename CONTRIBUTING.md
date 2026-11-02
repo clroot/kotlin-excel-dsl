@@ -60,3 +60,40 @@ Version choices follow the official [Gradle Java 25 support notes](https://docs.
 [Kotlin Gradle compatibility table](https://kotlinlang.org/docs/gradle-configure-project.html),
 and [ktlint plugin Java 25 support release](https://github.com/JLLeitschuh/ktlint-gradle/releases/tag/v14.0.1).
 General library dependency upgrades are handled separately from this build migration.
+
+## API compatibility and releases
+
+The six published libraries are `core`, `annotation`, `render`, `parser`, `theme`,
+and `excel-dsl`. Benchmarks are never published. Each library's `api/*.api` is a
+reviewed public JVM ABI baseline (the umbrella module has an empty baseline).
+`build` and `checkKotlinAbi` compare compiled APIs with these files. Intentional
+changes require review of source, binary and behavioral compatibility before
+running `./gradlew updateKotlinAbi` and committing the diff. Never regenerate a
+baseline just to make CI pass. Incompatible releases require an explicit migration
+plan and version decision; additive APIs also appear in the baseline diff.
+ABI checks do not prove source or behavioral compatibility.
+
+CI also compiles and runs the documentation round-trip examples in the standalone
+`compatibility` build using Kotlin 2.2.0/JDK 21 and Kotlin 2.3.21/JDK 25.
+It resolves only published artifacts, with no project dependency or source sharing.
+Keep its examples in sync with `DocumentationTest.kt` when examples change.
+
+To reproduce locally with JDK 21 and 25 installed:
+
+```bash
+rm -rf build/verification-repository
+./gradlew build publishAllPublicationsToVerificationRepository -Pversion=0.0.0-verification
+python3 scripts/verify-publication.py build/verification-repository 0.0.0-verification
+./gradlew -p compatibility test -PconsumerKotlin=2.2.0 -PconsumerJava=21 \
+  -PartifactVersion=0.0.0-verification -PartifactRepository="$PWD/build/verification-repository"
+./gradlew -p compatibility clean test -PconsumerKotlin=2.3.21 -PconsumerJava=25 \
+  -PartifactVersion=0.0.0-verification -PartifactRepository="$PWD/build/verification-repository"
+```
+
+For a release, first require green CI on the exact commit, review the API diff,
+and run the publication checks above. Publish a GitHub release tagged `vX.Y.Z`
+(or `X.Y.Z`), or provide `X.Y.Z` explicitly to the manual publish workflow.
+Only stable numeric versions are accepted; missing versions, snapshots and malformed
+versions fail before building or publishing. The workflow signs and uploads the six
+libraries to Maven Central and attests their JARs, including parser. Central and GPG
+credentials are required only for public publication. Local verification needs none.

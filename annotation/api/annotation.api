@@ -1,0 +1,90 @@
+public abstract interface annotation class io/clroot/excel/annotation/BodyStyle : java/lang/annotation/Annotation {
+	public abstract fun alignment ()Lio/clroot/excel/annotation/style/StyleAlignment;
+	public abstract fun backgroundColor ()Lio/clroot/excel/annotation/style/StyleColor;
+	public abstract fun backgroundColorHex ()Ljava/lang/String;
+	public abstract fun bold ()Z
+	public abstract fun border ()Lio/clroot/excel/annotation/style/StyleBorder;
+	public abstract fun fontColor ()Lio/clroot/excel/annotation/style/StyleColor;
+	public abstract fun fontColorHex ()Ljava/lang/String;
+	public abstract fun italic ()Z
+}
+
+public abstract interface annotation class io/clroot/excel/annotation/Column : java/lang/annotation/Annotation {
+	public abstract fun aliases ()[Ljava/lang/String;
+	public abstract fun format ()Ljava/lang/String;
+	public abstract fun header ()Ljava/lang/String;
+	public abstract fun order ()I
+	public abstract fun width ()I
+}
+
+public abstract interface annotation class io/clroot/excel/annotation/ConditionalStyle : java/lang/annotation/Annotation {
+	public abstract fun styler ()Ljava/lang/Class;
+}
+
+public abstract interface class io/clroot/excel/annotation/ConditionalStyler {
+	public abstract fun style (Ljava/lang/Object;)Lio/clroot/excel/core/style/CellStyle;
+}
+
+public abstract interface annotation class io/clroot/excel/annotation/Excel : java/lang/annotation/Annotation {
+}
+
+public final class io/clroot/excel/annotation/ExcelOfKt {
+	public static final fun excelOf (Lkotlin/reflect/KClass;Ljava/lang/Iterable;Ljava/lang/String;Lio/clroot/excel/core/dsl/ExcelTheme;)Lio/clroot/excel/core/model/ExcelDocument;
+	public static synthetic fun excelOf$default (Lkotlin/reflect/KClass;Ljava/lang/Iterable;Ljava/lang/String;Lio/clroot/excel/core/dsl/ExcelTheme;ILjava/lang/Object;)Lio/clroot/excel/core/model/ExcelDocument;
+}
+
+public abstract interface annotation class io/clroot/excel/annotation/HeaderStyle : java/lang/annotation/Annotation {
+	public abstract fun alignment ()Lio/clroot/excel/annotation/style/StyleAlignment;
+	public abstract fun backgroundColor ()Lio/clroot/excel/annotation/style/StyleColor;
+	public abstract fun backgroundColorHex ()Ljava/lang/String;
+	public abstract fun bold ()Z
+	public abstract fun border ()Lio/clroot/excel/annotation/style/StyleBorder;
+	public abstract fun fontColor ()Lio/clroot/excel/annotation/style/StyleColor;
+	public abstract fun fontColorHex ()Ljava/lang/String;
+	public abstract fun italic ()Z
+}
+
+public final class io/clroot/excel/annotation/style/StyleAlignment : java/lang/Enum {
+	public static final field CENTER Lio/clroot/excel/annotation/style/StyleAlignment;
+	public static final field LEFT Lio/clroot/excel/annotation/style/StyleAlignment;
+	public static final field NONE Lio/clroot/excel/annotation/style/StyleAlignment;
+	public static final field RIGHT Lio/clroot/excel/annotation/style/StyleAlignment;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/clroot/excel/annotation/style/StyleAlignment;
+	public static fun values ()[Lio/clroot/excel/annotation/style/StyleAlignment;
+}
+
+public final class io/clroot/excel/annotation/style/StyleBorder : java/lang/Enum {
+	public static final field MEDIUM Lio/clroot/excel/annotation/style/StyleBorder;
+	public static final field NONE Lio/clroot/excel/annotation/style/StyleBorder;
+	public static final field THICK Lio/clroot/excel/annotation/style/StyleBorder;
+	public static final field THIN Lio/clroot/excel/annotation/style/StyleBorder;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/clroot/excel/annotation/style/StyleBorder;
+	public static fun values ()[Lio/clroot/excel/annotation/style/StyleBorder;
+}
+
+public final class io/clroot/excel/annotation/style/StyleColor : java/lang/Enum {
+	public static final field BLACK Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field BLUE Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field GRAY Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field GREEN Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field LIGHT_GRAY Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field NONE Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field ORANGE Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field RED Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field WHITE Lio/clroot/excel/annotation/style/StyleColor;
+	public static final field YELLOW Lio/clroot/excel/annotation/style/StyleColor;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/clroot/excel/annotation/style/StyleColor;
+	public static fun values ()[Lio/clroot/excel/annotation/style/StyleColor;
+}
+
+public final class io/clroot/excel/annotation/style/StyleConverter {
+	public static final field INSTANCE Lio/clroot/excel/annotation/style/StyleConverter;
+	public final fun parseHexColor (Ljava/lang/String;)Lio/clroot/excel/core/style/Color;
+	public final fun resolveColor (Lio/clroot/excel/annotation/style/StyleColor;Ljava/lang/String;)Lio/clroot/excel/core/style/Color;
+	public final fun toCellStyle (Lio/clroot/excel/annotation/BodyStyle;)Lio/clroot/excel/core/style/CellStyle;
+	public final fun toCellStyle (Lio/clroot/excel/annotation/HeaderStyle;)Lio/clroot/excel/core/style/CellStyle;
+}
+

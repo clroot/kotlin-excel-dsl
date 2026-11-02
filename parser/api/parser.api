@@ -1,0 +1,175 @@
+public final class io/clroot/excel/parser/AnnotationExtractor {
+	public static final field INSTANCE Lio/clroot/excel/parser/AnnotationExtractor;
+	public final fun extractColumns (Lkotlin/reflect/KClass;)Ljava/util/List;
+	public final fun getConstructorParameterOrder (Lkotlin/reflect/KClass;)Ljava/util/List;
+}
+
+public final class io/clroot/excel/parser/CellConverter {
+	public static final field Companion Lio/clroot/excel/parser/CellConverter$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;ZZ)V
+	public synthetic fun <init> (Ljava/util/Map;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun convert (Ljava/lang/Object;Lkotlin/reflect/KClass;Z)Ljava/lang/Object;
+	public static synthetic fun convert$default (Lio/clroot/excel/parser/CellConverter;Ljava/lang/Object;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class io/clroot/excel/parser/CellConverter$Companion {
+}
+
+public final class io/clroot/excel/parser/ColumnMeta {
+	public fun <init> (Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()[Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lkotlin/reflect/KClass;
+	public final fun component5 ()Z
+	public final fun copy (Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Z)Lio/clroot/excel/parser/ColumnMeta;
+	public static synthetic fun copy$default (Lio/clroot/excel/parser/ColumnMeta;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Lio/clroot/excel/parser/ColumnMeta;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAliases ()[Ljava/lang/String;
+	public final fun getHeader ()Ljava/lang/String;
+	public final fun getPropertyName ()Ljava/lang/String;
+	public final fun getPropertyType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
+	public final fun isNullable ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/clroot/excel/parser/ExcelParseException : io/clroot/excel/core/ExcelException {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getErrors ()Ljava/util/List;
+}
+
+public final class io/clroot/excel/parser/ExcelParserKt {
+	public static final fun parseExcel (Lkotlin/reflect/KClass;Ljava/io/InputStream;Lkotlin/jvm/functions/Function1;)Lio/clroot/excel/parser/ParseResult;
+	public static synthetic fun parseExcel$default (Lkotlin/reflect/KClass;Ljava/io/InputStream;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/clroot/excel/parser/ParseResult;
+}
+
+public final class io/clroot/excel/parser/HeaderMatcher {
+	public static final field Companion Lio/clroot/excel/parser/HeaderMatcher$Companion;
+	public fun <init> (Lio/clroot/excel/parser/HeaderMatching;)V
+	public final fun findMatch (Ljava/lang/String;Ljava/util/List;)Lio/clroot/excel/parser/ColumnMeta;
+	public final fun matches (Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)Z
+}
+
+public final class io/clroot/excel/parser/HeaderMatcher$Companion {
+}
+
+public final class io/clroot/excel/parser/HeaderMatching : java/lang/Enum {
+	public static final field EXACT Lio/clroot/excel/parser/HeaderMatching;
+	public static final field FLEXIBLE Lio/clroot/excel/parser/HeaderMatching;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/clroot/excel/parser/HeaderMatching;
+	public static fun values ()[Lio/clroot/excel/parser/HeaderMatching;
+}
+
+public final class io/clroot/excel/parser/OnError : java/lang/Enum {
+	public static final field COLLECT Lio/clroot/excel/parser/OnError;
+	public static final field FAIL_FAST Lio/clroot/excel/parser/OnError;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/clroot/excel/parser/OnError;
+	public static fun values ()[Lio/clroot/excel/parser/OnError;
+}
+
+public final class io/clroot/excel/parser/ParseConfig {
+	public fun <init> (IILjava/lang/String;Lio/clroot/excel/parser/HeaderMatching;Lio/clroot/excel/parser/OnError;ZZZLjava/util/Map;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public final fun component1 ()I
+	public final fun component10 ()Lkotlin/jvm/functions/Function1;
+	public final fun component11 ()Lkotlin/jvm/functions/Function1;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lio/clroot/excel/parser/HeaderMatching;
+	public final fun component5 ()Lio/clroot/excel/parser/OnError;
+	public final fun component6 ()Z
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun component9 ()Ljava/util/Map;
+	public final fun copy (IILjava/lang/String;Lio/clroot/excel/parser/HeaderMatching;Lio/clroot/excel/parser/OnError;ZZZLjava/util/Map;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lio/clroot/excel/parser/ParseConfig;
+	public static synthetic fun copy$default (Lio/clroot/excel/parser/ParseConfig;IILjava/lang/String;Lio/clroot/excel/parser/HeaderMatching;Lio/clroot/excel/parser/OnError;ZZZLjava/util/Map;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/clroot/excel/parser/ParseConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAllValidator ()Lkotlin/jvm/functions/Function1;
+	public final fun getConverters ()Ljava/util/Map;
+	public final fun getHeaderMatching ()Lio/clroot/excel/parser/HeaderMatching;
+	public final fun getHeaderRow ()I
+	public final fun getOnError ()Lio/clroot/excel/parser/OnError;
+	public final fun getRowValidator ()Lkotlin/jvm/functions/Function1;
+	public final fun getSheetIndex ()I
+	public final fun getSheetName ()Ljava/lang/String;
+	public final fun getSkipEmptyRows ()Z
+	public final fun getTreatBlankAsNull ()Z
+	public final fun getTrimWhitespace ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/clroot/excel/parser/ParseConfig$Builder {
+	public fun <init> ()V
+	public final fun build ()Lio/clroot/excel/parser/ParseConfig;
+	public final fun getConverters ()Ljava/util/Map;
+	public final fun getHeaderMatching ()Lio/clroot/excel/parser/HeaderMatching;
+	public final fun getHeaderRow ()I
+	public final fun getOnError ()Lio/clroot/excel/parser/OnError;
+	public final fun getSheetIndex ()I
+	public final fun getSheetName ()Ljava/lang/String;
+	public final fun getSkipEmptyRows ()Z
+	public final fun getTreatBlankAsNull ()Z
+	public final fun getTrimWhitespace ()Z
+	public final fun setHeaderMatching (Lio/clroot/excel/parser/HeaderMatching;)V
+	public final fun setHeaderRow (I)V
+	public final fun setOnError (Lio/clroot/excel/parser/OnError;)V
+	public final fun setSheetIndex (I)V
+	public final fun setSheetName (Ljava/lang/String;)V
+	public final fun setSkipEmptyRows (Z)V
+	public final fun setTreatBlankAsNull (Z)V
+	public final fun setTrimWhitespace (Z)V
+	public final fun validateAll (Lkotlin/jvm/functions/Function1;)V
+	public final fun validateRow (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/clroot/excel/parser/ParseError {
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/Throwable;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)Lio/clroot/excel/parser/ParseError;
+	public static synthetic fun copy$default (Lio/clroot/excel/parser/ParseError;ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)Lio/clroot/excel/parser/ParseError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCause ()Ljava/lang/Throwable;
+	public final fun getColumnHeader ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getRowIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/clroot/excel/parser/ParseResult {
+	public final fun getOrElse (Lkotlin/jvm/functions/Function0;)Ljava/util/List;
+	public final fun getOrNull ()Ljava/util/List;
+	public final fun getOrThrow ()Ljava/util/List;
+}
+
+public final class io/clroot/excel/parser/ParseResult$Failure : io/clroot/excel/parser/ParseResult {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/clroot/excel/parser/ParseResult$Failure;
+	public static synthetic fun copy$default (Lio/clroot/excel/parser/ParseResult$Failure;Ljava/util/List;ILjava/lang/Object;)Lio/clroot/excel/parser/ParseResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrors ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/clroot/excel/parser/ParseResult$Success : io/clroot/excel/parser/ParseResult {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/clroot/excel/parser/ParseResult$Success;
+	public static synthetic fun copy$default (Lio/clroot/excel/parser/ParseResult$Success;Ljava/util/List;ILjava/lang/Object;)Lio/clroot/excel/parser/ParseResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
