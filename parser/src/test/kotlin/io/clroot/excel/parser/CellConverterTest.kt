@@ -13,6 +13,49 @@ class CellConverterTest : DescribeSpec({
 
     val converter = CellConverter()
 
+    describe("정확한 정수와 Boolean 변환") {
+        it("Long 텍스트와 경계값을 정확히 보존한다") {
+            listOf(Long.MIN_VALUE, Long.MAX_VALUE, 9007199254740993L).forEach {
+                converter.convert(it.toString(), Long::class) shouldBe it
+            }
+            listOf(Int.MIN_VALUE, Int.MAX_VALUE).forEach {
+                converter.convert(it.toString(), Int::class) shouldBe it
+            }
+            converter.convert("42.0", Int::class) shouldBe 42
+            converter.convert("4.2e1", Long::class) shouldBe 42L
+        }
+
+        it("범위 초과와 소수 및 비유한 값을 거부한다") {
+            listOf("2147483648", "-2147483649", Long.MAX_VALUE).forEach {
+                shouldThrow<IllegalArgumentException> { converter.convert(it, Int::class) }
+            }
+            listOf("9223372036854775808", "-9223372036854775809", Long.MAX_VALUE.toDouble()).forEach {
+                shouldThrow<IllegalArgumentException> { converter.convert(it, Long::class) }
+            }
+            listOf("1.9", -1.9, "NaN", "Infinity", Double.NaN, Double.POSITIVE_INFINITY).forEach {
+                shouldThrow<IllegalArgumentException> { converter.convert(it, Int::class) }
+                shouldThrow<IllegalArgumentException> { converter.convert(it, Long::class) }
+            }
+        }
+
+        it("Boolean 숫자는 0과 1만 허용한다") {
+            converter.convert(0.0, Boolean::class) shouldBe false
+            converter.convert(1.0, Boolean::class) shouldBe true
+            listOf("typo", "1", "0", 2, -1, 0.5, Double.NaN, Double.POSITIVE_INFINITY).forEach {
+                shouldThrow<IllegalArgumentException> { converter.convert(it, Boolean::class) }
+            }
+        }
+
+        it("빈 값과 사용자 지정 변환의 우선순위를 유지한다") {
+            converter.convert(" ", Long::class, isNullable = true) shouldBe null
+            converter.convert(null, Boolean::class, isNullable = true) shouldBe null
+            shouldThrow<IllegalArgumentException> { converter.convert(" ", Int::class) }
+            val custom = CellConverter(customConverters = mapOf(Int::class to { _: Any? -> 7 }))
+            custom.convert(null, Int::class) shouldBe 7
+            custom.convert("1.9", Int::class) shouldBe 7
+        }
+    }
+
     describe("String 변환") {
         it("문자열을 그대로 반환한다") {
             converter.convert("hello", String::class) shouldBe "hello"

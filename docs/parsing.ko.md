@@ -120,3 +120,26 @@ val result = parseExcel<Product>(inputStream) {
     converter<Money> { value -> Money(BigDecimal(value.toString())) }
 }
 ```
+
+## 정수와 Boolean 변환 정책
+
+기본 Int/Long 변환기는 문자열을 Double을 거치지 않고 파싱합니다. 값은 수학적으로 정수이며 대상 타입의 범위 안에 있어야 합니다. `42.0`, `4.2e1` 같은 소수점·지수 표기는 허용하지만, 소수 부분이 있는 값, 범위 초과, NaN, Infinity는 IllegalArgumentException으로 처리합니다. 숫자 셀은 저장된 값을 기준으로 검사하므로 Excel에서 이미 손실된 정밀도는 복구할 수 없습니다. 큰 정수 식별자는 텍스트 셀로 저장하세요.
+
+Boolean은 Boolean 값, 대소문자를 구분하지 않는 `true`/`false` 문자열, 숫자 0/1만 허용합니다. 문자열 `"0"`/`"1"`, 그 밖의 숫자와 잘못된 문자열은 오류입니다. 공백 제거와 nullable/빈 셀 처리는 기존 설정을 따릅니다. 사용자 지정 converter는 계속 우선 적용되며 원본 값을 받습니다.
+
+기존 동작과 호환성이 달라집니다. 소수 부분을 버리거나 범위 초과를 보정하지 않으며, 잘못된 Boolean 문자열을 false로 처리하지 않습니다. 원본 데이터를 정리하거나 기존 정책이 필요한 경우 converter를 명시적으로 등록하세요.
+
+```kotlin
+parseExcel<MyRow>(input) {
+    converter<Int> { value -> value.toString().toDouble().toInt() }
+    converter<Boolean> { value ->
+        when (value) {
+            is Boolean -> value
+            is Number -> value.toInt() != 0
+            else -> value.toString().trim().equals("true", ignoreCase = true)
+        }
+    }
+}
+```
+
+위 전환 예시는 값 손실을 허용하는 변환을 의도적으로 복원합니다. 변환 실패는 기존처럼 행·열 정보가 담긴 ParseError로 보고됩니다. FAIL_FAST는 첫 실패 행에서 반환하고, COLLECT는 여러 행의 오류를 모읍니다.

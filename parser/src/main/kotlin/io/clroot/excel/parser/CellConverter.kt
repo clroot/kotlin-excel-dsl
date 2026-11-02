@@ -105,18 +105,30 @@ class CellConverter(
     }
 
     private fun convertToInt(value: Any): Int {
-        return when (value) {
-            is Number -> value.toInt()
-            is String -> value.toDoubleOrNull()?.toInt() ?: value.toInt()
-            else -> throw IllegalArgumentException("Cannot convert ${value::class.simpleName} to Int")
+        return try {
+            exactDecimal(value).intValueExact()
+        } catch (e: ArithmeticException) {
+            throw IllegalArgumentException("Value '$value' is not an exact Int in range", e)
         }
     }
 
     private fun convertToLong(value: Any): Long {
+        return try {
+            exactDecimal(value).longValueExact()
+        } catch (e: ArithmeticException) {
+            throw IllegalArgumentException("Value '$value' is not an exact Long in range", e)
+        }
+    }
+
+    private fun exactDecimal(value: Any): BigDecimal {
         return when (value) {
-            is Number -> value.toLong()
-            is String -> value.toDoubleOrNull()?.toLong() ?: value.toLong()
-            else -> throw IllegalArgumentException("Cannot convert ${value::class.simpleName} to Long")
+            // Preserve the actual binary value, including integers near Long boundaries.
+            is Double -> BigDecimal(value)
+            is Float -> BigDecimal(value.toDouble())
+            is BigDecimal -> value
+            is Number -> BigDecimal(value.toString())
+            is String -> BigDecimal(value)
+            else -> throw IllegalArgumentException("Cannot convert ${value::class.simpleName} to a number")
         }
     }
 
@@ -139,8 +151,18 @@ class CellConverter(
     private fun convertToBoolean(value: Any): Boolean {
         return when (value) {
             is Boolean -> value
-            is String -> value.lowercase() == "true"
-            is Number -> value.toInt() != 0
+            is String ->
+                when (value.lowercase()) {
+                    "true" -> true
+                    "false" -> false
+                    else -> throw IllegalArgumentException("Expected true or false, got '$value'")
+                }
+            is Number ->
+                when (exactDecimal(value).stripTrailingZeros()) {
+                    BigDecimal.ZERO -> false
+                    BigDecimal.ONE -> true
+                    else -> throw IllegalArgumentException("Expected 0 or 1, got '$value'")
+                }
             else -> throw IllegalArgumentException("Cannot convert ${value::class.simpleName} to Boolean")
         }
     }
