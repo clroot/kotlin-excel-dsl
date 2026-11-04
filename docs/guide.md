@@ -28,6 +28,7 @@ This guide covers styling, advanced features, and detailed usage of the Excel DS
   - [Alternate Row Styling](#alternate-row-styling)
   - [Formulas](#formulas)
   - [Multi-Sheet](#multi-sheet)
+  - [Annotation Column Order](#annotation-column-order)
 
 ## Styling
 
@@ -525,5 +526,25 @@ excel {
     }
 }.writeTo(output)
 ```
+
+### Annotation Column Order
+
+With `@Excel`/`@Column`, `excelOf` and `parseExcel` order columns by the same rule:
+
+1. Ascending `@Column(order = ...)`. The default is `Int.MAX_VALUE`, so columns with an explicit `order` come first.
+2. Columns with equal or omitted `order` follow the primary constructor parameter order.
+3. Annotated properties outside the primary constructor come last, in declaration order.
+
+```kotlin
+@Excel
+data class User(
+    @Column("Name") val name: String,           // 2nd
+    @Column("Age") val age: Int,                // 3rd
+    @Column("ID", order = 0) val id: Long,      // 1st
+)
+// Columns: ID, Name, Age
+```
+
+Parsing matches headers by name (and `aliases`), so column order does not affect parsing results.
 
 The [shared executable examples](../excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt) cover DSL, Sequence, annotations and parsing in CI via `:excel-dsl:test`. JDK 21 or later is required.

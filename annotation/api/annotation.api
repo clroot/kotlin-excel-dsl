@@ -17,6 +17,10 @@ public abstract interface annotation class io/clroot/excel/annotation/Column : j
 	public abstract fun width ()I
 }
 
+public final class io/clroot/excel/annotation/ColumnOrderingKt {
+	public static final fun columnProperties (Lkotlin/reflect/KClass;)Ljava/util/List;
+}
+
 public abstract interface annotation class io/clroot/excel/annotation/ConditionalStyle : java/lang/annotation/Annotation {
 	public abstract fun styler ()Ljava/lang/Class;
 }

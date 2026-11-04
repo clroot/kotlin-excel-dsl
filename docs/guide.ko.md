@@ -28,6 +28,7 @@ Excel DSL의 스타일링, 고급 기능 및 상세 사용법을 다룹니다.
   - [줄무늬 행 스타일](#줄무늬-행-스타일)
   - [수식](#수식)
   - [멀티 시트](#멀티-시트)
+  - [어노테이션 컬럼 순서](#어노테이션-컬럼-순서)
 
 ## 스타일링
 
@@ -525,5 +526,25 @@ excel {
     }
 }.writeTo(output)
 ```
+
+### 어노테이션 컬럼 순서
+
+`@Excel`/`@Column`을 쓰면 `excelOf`와 `parseExcel`은 같은 규칙으로 컬럼 순서를 정합니다.
+
+1. `@Column(order = ...)` 오름차순. 기본값이 `Int.MAX_VALUE`이므로 `order`를 지정한 컬럼이 먼저 옵니다.
+2. `order`가 같거나 생략된 컬럼은 주 생성자 파라미터 순서를 따릅니다.
+3. 주 생성자 밖에 선언한 프로퍼티는 맨 뒤에 선언 순서대로 옵니다.
+
+```kotlin
+@Excel
+data class User(
+    @Column("이름") val name: String,          // 2번째
+    @Column("나이") val age: Int,              // 3번째
+    @Column("ID", order = 0) val id: Long,     // 1번째
+)
+// 컬럼: ID, 이름, 나이
+```
+
+파싱은 헤더 이름(과 `aliases`)으로 매칭하므로 컬럼 순서는 파싱 결과에 영향을 주지 않습니다.
 
 DSL·Sequence·어노테이션·파싱의 [실행 가능한 공통 예제](../excel-dsl/src/test/kotlin/io/clroot/excel/examples/DocumentationTest.kt)는 CI의 `:excel-dsl:test`에서 검증합니다. JDK 21 이상이 필요합니다.
