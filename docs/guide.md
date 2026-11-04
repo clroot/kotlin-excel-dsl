@@ -12,6 +12,7 @@ This guide covers styling, advanced features, and detailed usage of the Excel DS
   - [Inline Column Styles](#inline-column-styles)
   - [Separate Header and Body Styles](#separate-header-and-body-styles)
   - [Conditional Styling](#conditional-styling)
+  - [Number and Date Formats](#number-and-date-formats)
   - [Style Priority](#style-priority)
   - [Themes](#themes)
 - [Annotation Styling](#annotation-styling)
@@ -171,6 +172,40 @@ column("Status", conditionalStyle = { value: String? ->
     }
 }) { it.status }
 ```
+
+### Number and Date Formats
+
+Set a column's body number format with the `format` parameter. It is written to the
+cell's Excel number format (`dataFormatString`); header cells are not affected:
+
+```kotlin
+excel {
+    sheet<Order>("Orders") {
+        column("Amount", format = "#,##0") { it.amount }
+        column("Ordered", format = "yyyy/mm/dd") { it.orderedAt }
+        rows(orders)
+    }
+}.writeTo(output)
+```
+
+Annotations use `@Column(format = "...")` with the same behavior:
+
+```kotlin
+@Excel
+data class Order(
+    @Column("Amount", format = "#,##0")
+    val amount: Long,
+)
+```
+
+Rules:
+- `format` takes precedence over any `numberFormat(...)` from global, column-specific
+  or inline body styles of the same column. Other style properties are still applied.
+- A conditional style that sets `numberFormat` overrides `format` for that cell.
+- `LocalDate` and `LocalDateTime` cells use `format` when it is set. Otherwise they use
+  `yyyy-mm-dd` and `yyyy-mm-dd hh:mm:ss`.
+- Patterns are Excel number format codes (for example `#,##0.00`, `0%`, `yyyy-mm-dd`),
+  not Java `DateTimeFormatter` patterns.
 
 ### Style Priority
 

@@ -100,7 +100,8 @@ internal class StyleResolver(
      * 2. globalBodyStyle
      * 3. columnStyle (from styles DSL)
      * 4. inlineBodyStyle
-     * 5. conditionalStyle (highest priority)
+     * 5. column format (`column(format = ...)` / `@Column(format = ...)`), applied as numberFormat
+     * 6. conditionalStyle (highest priority)
      *
      * @param column the column definition
      * @param sheet the sheet containing alternate row style configuration
@@ -116,7 +117,13 @@ internal class StyleResolver(
         dateFormat: String?,
         cellValue: Any? = null,
     ): CellStyle? {
-        val baseStyle = resolveBodyStyleWithAlternate(column, sheet, isAlternateRow)
+        val bodyStyle = resolveBodyStyleWithAlternate(column, sheet, isAlternateRow)
+
+        // The column format overrides any numberFormat coming from body styles
+        val baseStyle =
+            column.format?.let { format ->
+                (bodyStyle ?: CellStyle()).copy(numberFormat = format)
+            } ?: bodyStyle
 
         // Evaluate conditional style if present
         val conditionalStyle = column.conditionalStyle?.evaluate(cellValue)
@@ -129,7 +136,8 @@ internal class StyleResolver(
                 baseStyle
             }
 
-        return if (dateFormat != null) {
+        // Date cells fall back to the default date format unless the column defines its own format
+        return if (dateFormat != null && column.format == null) {
             (mergedStyle ?: CellStyle()).copy(numberFormat = dateFormat)
         } else {
             mergedStyle

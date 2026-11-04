@@ -115,7 +115,8 @@ class SheetBuilder<T>(private val name: String) {
      *
      * @param header the column header text displayed in the first row
      * @param width the column width specification (default: [ColumnWidth.Auto])
-     * @param format the number format pattern (e.g., "#,##0", "yyyy-MM-dd")
+     * @param format the Excel number format code for body cells (e.g., "#,##0", "yyyy/mm/dd").
+     *   It overrides `numberFormat` from body styles; a conditional style's `numberFormat` overrides it.
      * @param valueExtractor a function to extract the cell value from each data object
      */
     fun column(
@@ -147,7 +148,7 @@ class SheetBuilder<T>(private val name: String) {
      *
      * @param header the column header text
      * @param width the column width specification
-     * @param format the number format pattern
+     * @param format the Excel number format code for body cells (e.g., "#,##0"); overrides body style `numberFormat`
      * @param style the style builder block for body cells
      * @param valueExtractor a function to extract the cell value from each data object
      */
@@ -186,7 +187,7 @@ class SheetBuilder<T>(private val name: String) {
      *
      * @param header the column header text
      * @param width the column width specification
-     * @param format the number format pattern
+     * @param format the Excel number format code for body cells (e.g., "#,##0"); overrides body style `numberFormat`
      * @param headerStyle the style builder block for the header cell (optional)
      * @param bodyStyle the style builder block for body cells (optional)
      * @param valueExtractor a function to extract the cell value from each data object
@@ -234,7 +235,7 @@ class SheetBuilder<T>(private val name: String) {
      *
      * @param header the column header text
      * @param width the column width specification
-     * @param format the number format pattern
+     * @param format the Excel number format code for body cells (e.g., "#,##0"); overrides body style `numberFormat`
      * @param conditionalStyle function that returns a style based on cell value
      * @param valueExtractor a function to extract the cell value from each data object
      */
@@ -282,7 +283,7 @@ class SheetBuilder<T>(private val name: String) {
      *
      * @param header the column header text
      * @param width the column width specification
-     * @param format the number format pattern
+     * @param format the Excel number format code for body cells (e.g., "#,##0"); overrides body style `numberFormat`
      * @param bodyStyle the base style for body cells
      * @param conditionalStyle function that returns additional style based on cell value
      * @param valueExtractor a function to extract the cell value from each data object

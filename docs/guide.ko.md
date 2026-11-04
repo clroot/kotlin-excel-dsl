@@ -12,6 +12,7 @@ Excel DSL의 스타일링, 고급 기능 및 상세 사용법을 다룹니다.
   - [인라인 컬럼 스타일](#인라인-컬럼-스타일)
   - [헤더/바디 스타일 분리](#헤더바디-스타일-분리)
   - [조건부 스타일](#조건부-스타일)
+  - [숫자·날짜 서식](#숫자날짜-서식)
   - [스타일 우선순위](#스타일-우선순위)
   - [테마](#테마)
 - [어노테이션 스타일링](#어노테이션-스타일링)
@@ -171,6 +172,40 @@ column("상태", conditionalStyle = { value: String? ->
     }
 }) { it.status }
 ```
+
+### 숫자·날짜 서식
+
+`format` 파라미터로 컬럼 본문 셀의 숫자 서식을 지정합니다. 값은 셀의 Excel 표시 형식
+(`dataFormatString`)으로 저장되며, 헤더 셀에는 적용되지 않습니다:
+
+```kotlin
+excel {
+    sheet<Order>("주문") {
+        column("금액", format = "#,##0") { it.amount }
+        column("주문일", format = "yyyy/mm/dd") { it.orderedAt }
+        rows(orders)
+    }
+}.writeTo(output)
+```
+
+어노테이션에서는 `@Column(format = "...")`을 쓰며 동작은 같습니다:
+
+```kotlin
+@Excel
+data class Order(
+    @Column("금액", format = "#,##0")
+    val amount: Long,
+)
+```
+
+규칙:
+- 같은 컬럼에 전역·컬럼별·인라인 본문 스타일의 `numberFormat(...)`이 있어도 `format`이
+  우선합니다. 서식 외의 스타일 속성은 그대로 적용됩니다.
+- 조건부 스타일이 `numberFormat`을 지정하면 그 셀에서는 `format`보다 조건부 스타일이 우선합니다.
+- `LocalDate`·`LocalDateTime` 셀은 `format`이 있으면 그 형식을 따르고, 없으면
+  `yyyy-mm-dd`, `yyyy-mm-dd hh:mm:ss`를 씁니다.
+- 패턴은 Java `DateTimeFormatter` 패턴이 아니라 Excel 표시 형식 코드입니다
+  (예: `#,##0.00`, `0%`, `yyyy-mm-dd`).
 
 ### 스타일 우선순위
 

@@ -17,7 +17,9 @@ annotation class Excel
  *
  * @param header The column header text
  * @param width Column width in characters (0 = auto)
- * @param format Format pattern for dates/numbers
+ * @param format Excel number format code applied to body cells, such as `"#,##0"` or `"yyyy/mm/dd"`
+ *   (empty = none). It takes precedence over style number formats; a conditional style's
+ *   `numberFormat` overrides it. Date cells without a format use the default date format.
  * @param order Column order (lower values appear first)
  * @param aliases Alternative header names for matching during Excel parsing
  */
@@ -68,7 +70,8 @@ annotation class HeaderStyle(
  * When applied at property level, it overrides the class-level style for that column.
  *
  * If both enum color and hex color are specified, hex takes precedence.
- * For number/date formatting, use @Column(format = "...") instead.
+ * This annotation has no number format option. For number/date formatting, use
+ * `@Column(format = "...")`, which is applied as the body cells' number format.
  *
  * @param bold whether the text should be bold
  * @param italic whether the text should be italic
