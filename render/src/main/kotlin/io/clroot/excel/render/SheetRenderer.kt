@@ -156,8 +156,8 @@ internal class SheetRenderer(
         val finalStyle = styleResolver.resolveFinalStyle(column, baseStyle, value)
         finalStyle?.let { cell.cellStyle = styleCache.getOrCreate(it) }
 
-        // Track width for auto-width columns
-        widthTracker.trackWidth(cellIndex, value)
+        // Track width for auto-width columns using the text the applied number format displays
+        widthTracker.trackWidth(cellIndex, value, finalStyle?.numberFormat)
     }
 
     private fun setCellValue(

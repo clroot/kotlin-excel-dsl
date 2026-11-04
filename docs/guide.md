@@ -468,6 +468,21 @@ sheet<User>("Users") {
 
 By default, columns use auto-width which calculates the optimal width based on content.
 
+Auto-width estimates the text each cell displays, not the raw value's `toString()`:
+
+- Numbers are measured in plain notation (`10000000`, not `1.0E7`). When a number format
+  applies (`format`, or `numberFormat` from a style), the formatted text is measured,
+  including thousands separators and decimals.
+- Dates are measured with the applied date format (by default `yyyy-mm-dd` and
+  `yyyy-mm-dd hh:mm:ss`).
+- Formula results are unknown at write time, so formula cells count as a fixed 10 characters.
+  Set a fixed width if the results are wider.
+- CJK characters count as two characters. Font size and bold text are not taken into account.
+- Widths include 2 characters of padding and are clamped to 8–100 characters.
+
+Only the maximum width per column is kept while streaming rows, so memory use does not
+grow with the number of rows.
+
 ### Freeze Panes
 
 Lock rows and/or columns to keep them visible while scrolling:
