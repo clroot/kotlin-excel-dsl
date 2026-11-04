@@ -31,8 +31,8 @@ import io.clroot.excel.core.style.Color
 class CellStyleBuilder {
     private var backgroundColor: Color? = null
     private var fontColor: Color? = null
-    private var bold: Boolean = false
-    private var italic: Boolean = false
+    private var bold: Boolean? = null
+    private var italic: Boolean? = null
     private var alignment: Alignment? = null
     private var border: BorderStyle? = null
     private var numberFormat: String? = null
@@ -63,10 +63,34 @@ class CellStyleBuilder {
     }
 
     /**
+     * Turns bold on or off explicitly.
+     *
+     * `bold(false)` overrides a bold font from a lower-priority style.
+     * If neither overload is called, bold is inherited from lower-priority styles.
+     *
+     * @param enabled `true` for bold, `false` for regular weight
+     */
+    fun bold(enabled: Boolean) {
+        bold = enabled
+    }
+
+    /**
      * Makes the font italic.
      */
     fun italic() {
         italic = true
+    }
+
+    /**
+     * Turns italic on or off explicitly.
+     *
+     * `italic(false)` overrides an italic font from a lower-priority style.
+     * If neither overload is called, italic is inherited from lower-priority styles.
+     *
+     * @param enabled `true` for italic, `false` for upright
+     */
+    fun italic(enabled: Boolean) {
+        italic = enabled
     }
 
     /**

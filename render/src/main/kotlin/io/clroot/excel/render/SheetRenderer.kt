@@ -4,6 +4,7 @@ import io.clroot.excel.core.model.ColumnDefinition
 import io.clroot.excel.core.model.ColumnWidth
 import io.clroot.excel.core.model.Formula
 import io.clroot.excel.core.model.Sheet
+import io.clroot.excel.core.style.CellStyle
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.util.CellRangeAddress
@@ -34,6 +35,13 @@ internal class SheetRenderer(
     private val columns = sheetModel.columns
     private val hasHeaderGroups = sheetModel.headerGroups.isNotEmpty()
     private val widthTracker = ColumnWidthTracker(columns)
+
+    // Value-independent body styles, resolved once per column for regular and alternate rows
+    private val bodyStyles = columns.map { styleResolver.resolveBodyStyle(it) }
+    private val alternateBodyStyles =
+        sheetModel.alternateRowStyle?.let { alternate ->
+            columns.map { styleResolver.resolveBodyStyle(it, alternate) }
+        }
     private var currentRowIndex = 0
 
     companion object {
@@ -120,11 +128,12 @@ internal class SheetRenderer(
         var dataRowIndex = 0
         dataSource.forEach { item ->
             val row = sheet.createRow(currentRowIndex++)
-            val isAlternateRow = dataRowIndex % 2 == 0 && sheetModel.alternateRowStyle != null
+            val rowBodyStyles =
+                if (dataRowIndex % 2 == 0 && alternateBodyStyles != null) alternateBodyStyles else bodyStyles
 
             typedColumns.forEachIndexed { cellIndex, column ->
                 val value = column.valueExtractor(item)
-                renderCell(row, cellIndex, column, value, isAlternateRow)
+                renderCell(row, cellIndex, column, value, rowBodyStyles[cellIndex])
             }
 
             dataRowIndex++
@@ -136,18 +145,15 @@ internal class SheetRenderer(
         cellIndex: Int,
         column: ColumnDefinition<Any?>,
         value: Any?,
-        isAlternateRow: Boolean,
+        baseStyle: CellStyle?,
     ) {
         val cell = row.createCell(cellIndex)
 
         // Set cell value
         setCellValue(cell, value)
 
-        // Determine date format if applicable
-        val dateFormat = getDateFormat(value)
-
-        // Resolve and apply style (pass value for conditional style evaluation)
-        val finalStyle = styleResolver.resolveFinalStyle(column, sheetModel, isAlternateRow, dateFormat, value)
+        // Resolve and apply style (pass value for conditional style and date format resolution)
+        val finalStyle = styleResolver.resolveFinalStyle(column, baseStyle, value)
         finalStyle?.let { cell.cellStyle = styleCache.getOrCreate(it) }
 
         // Track width for auto-width columns
@@ -167,14 +173,6 @@ internal class SheetRenderer(
             is LocalDateTime -> cell.setCellValue(value)
             is Formula -> cell.cellFormula = value.normalizedExpression
             else -> cell.setCellValue(value.toString())
-        }
-    }
-
-    private fun getDateFormat(value: Any?): String? {
-        return when (value) {
-            is LocalDate -> "yyyy-mm-dd"
-            is LocalDateTime -> "yyyy-mm-dd hh:mm:ss"
-            else -> null
         }
     }
 

@@ -79,6 +79,17 @@ class StyleConverterTest : DescribeSpec({
             style.bold shouldBe true
         }
 
+        it("bold/italic이 false면 지정하지 않은 것(null)으로 변환해 하위 스타일을 끄지 않는다") {
+            @HeaderStyle(bold = false, italic = false, backgroundColor = StyleColor.BLUE)
+            class Dummy
+
+            val annotation = Dummy::class.annotations.first { it is HeaderStyle } as HeaderStyle
+            val style = StyleConverter.toCellStyle(annotation)
+            style.shouldNotBeNull()
+            style.bold.shouldBeNull()
+            style.italic.shouldBeNull()
+        }
+
         it("backgroundColor enum이 설정되면 CellStyle에 반영") {
             @HeaderStyle(backgroundColor = StyleColor.BLUE)
             class Dummy

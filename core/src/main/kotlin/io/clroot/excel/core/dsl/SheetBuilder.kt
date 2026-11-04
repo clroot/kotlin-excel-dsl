@@ -92,6 +92,8 @@ class SheetBuilder<T>(private val name: String) {
      *
      * This creates a visual pattern that makes it easier to read across rows.
      * The style is applied to rows at indices 0, 2, 4, etc. (0-indexed from data rows).
+     * It is the lowest-priority body style layer: it is merged under the global, column-specific,
+     * inline and conditional body styles, so it only supplies properties those styles leave unset.
      *
      * Example:
      * ```kotlin

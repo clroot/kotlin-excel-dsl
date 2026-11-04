@@ -202,20 +202,48 @@ data class Order(
 - 같은 컬럼에 전역·컬럼별·인라인 본문 스타일의 `numberFormat(...)`이 있어도 `format`이
   우선합니다. 서식 외의 스타일 속성은 그대로 적용됩니다.
 - 조건부 스타일이 `numberFormat`을 지정하면 그 셀에서는 `format`보다 조건부 스타일이 우선합니다.
-- `LocalDate`·`LocalDateTime` 셀은 `format`이 있으면 그 형식을 따르고, 없으면
-  `yyyy-mm-dd`, `yyyy-mm-dd hh:mm:ss`를 씁니다.
+- `LocalDate`·`LocalDateTime` 셀은 최종 결정된 서식을 따릅니다. `format`이나 어느 스타일
+  계층의 `numberFormat(...)`도 없을 때만 `yyyy-mm-dd`, `yyyy-mm-dd hh:mm:ss`를 씁니다.
+  따라서 전역 `styles { body { numberFormat(...) } }`는 날짜 컬럼에도 적용됩니다. 날짜 컬럼의
+  날짜 서식을 유지하려면 그 컬럼에 `format`을 지정하세요.
 - 패턴은 Java `DateTimeFormatter` 패턴이 아니라 Excel 표시 형식 코드입니다
   (예: `#,##0.00`, `0%`, `yyyy-mm-dd`).
 
 ### 스타일 우선순위
 
-여러 스타일이 정의된 경우 다음 순서로 적용됩니다 (높은 우선순위 순):
+스타일 계층은 속성 단위로 **병합**됩니다. 높은 계층에서 지정한 속성이 이기고, 지정하지 않은
+속성은 아래 계층의 값을 물려받습니다. 어느 계층도 다른 계층을 통째로 버리지 않으므로, 인라인
+`bold()`를 지정해도 전역 스타일의 테두리와 정렬은 유지됩니다.
+
+본문 셀 (높은 우선순위 순):
 
 1. **조건부 스타일** - 셀 값에 따른 동적 스타일
-2. **인라인 스타일** - 컬럼에 직접 정의
-3. **컬럼별 스타일** - `styles { column("이름") { ... } }`로 정의
-4. **전역 스타일** - `styles { header { ... } }`로 정의
-5. **줄무늬 행 스타일** - 짝수 인덱스 행에 적용
+2. **컬럼 서식** - `column(..., format = "...")`, 숫자 서식으로 적용
+3. **인라인 스타일** - `column(..., style = { ... })` 또는 `bodyStyle = { ... }`
+4. **컬럼별 스타일** - `styles { column("이름") { body { ... } } }`로 정의
+5. **전역 스타일** - `styles { body { ... } }`, 테마의 본문 스타일 위에 병합
+6. **줄무늬 행 스타일** - `alternateRowStyle { ... }`, 짝수 인덱스 행에만 적용
+
+헤더 셀도 같은 규칙을 따릅니다: 인라인 `headerStyle = { ... }` >
+`styles { column("이름") { header { ... } } }` > `styles { header { ... } }` > 테마.
+그룹 헤더 셀은 전역 헤더 스타일만 씁니다.
+
+굵게·기울임은 세 가지 상태를 가집니다. `bold()`/`bold(true)`는 켜고, `bold(false)`는 끄며,
+둘 다 호출하지 않으면 아래 계층의 값을 물려받습니다. 그래서 높은 계층이 낮은 계층의 굵게
+표시를 끌 수 있습니다. 예를 들어 조건부 스타일로 끄는 경우:
+
+```kotlin
+column(
+    "금액",
+    bodyStyle = { bold() },
+    conditionalStyle = { value: Int? ->
+        if (value == 0) CellStyle(bold = false) else null
+    },
+) { it.amount }
+```
+
+`LocalDate`·`LocalDateTime` 셀의 기본 날짜 서식은 어느 계층도 숫자 서식을 지정하지 않았을 때만
+적용됩니다([숫자·날짜 서식](#숫자날짜-서식) 참고).
 
 ### 테마
 
@@ -366,7 +394,8 @@ data class CustomStyled(
 
 ### 어노테이션 스타일 우선순위
 
-스타일은 다음 순서로 적용됩니다 (높은 우선순위 순):
+스타일은 DSL과 같은 규칙(높은 계층이 속성 단위로 이기고, 지정하지 않은 속성은 물려받음)으로
+다음 순서에 따라 병합됩니다 (높은 우선순위 순):
 
 1. **ConditionalStyle** - `ConditionalStyler`의 동적 스타일
 2. **프로퍼티 레벨 어노테이션** - 프로퍼티의 `@HeaderStyle`/`@BodyStyle`
@@ -388,6 +417,12 @@ data class Report(
 // 테마와 함께 사용:
 excelOf(reports, theme = Theme.Modern)  // 테마는 우선순위 4
 ```
+
+`@Column(format = "...")`은 DSL과 마찬가지로 프로퍼티 레벨 어노테이션과 `ConditionalStyle`
+사이에 위치합니다. 어노테이션 속성은 불리언 값에 "지정 안 함"을 표현할 수 없으므로
+`@HeaderStyle(bold = false)`·`@BodyStyle(bold = false)`(기본값)로는 테마나 클래스 레벨
+어노테이션의 굵게 표시를 끌 수 없습니다. 특정 셀을 굵게 표시하지 않아야 한다면
+`ConditionalStyler`에서 `CellStyle(bold = false)`를 반환하세요.
 
 ## 고급 기능
 
@@ -488,7 +523,7 @@ excel {
 }.writeTo(output)
 ```
 
-스타일은 짝수 인덱스 데이터 행(0, 2, 4, ...)에 적용되며, 기존 body 스타일과 **병합**됩니다. 따라서 `alternateRowStyle`과 `bodyStyle`을 함께 사용할 수 있습니다:
+스타일은 짝수 인덱스 데이터 행(0, 2, 4, ...)에 적용되며, 가장 낮은 우선순위 계층으로 기존 body 스타일과 **병합**됩니다. 전역·컬럼별·인라인·조건부 본문 스타일이 지정한 속성이 이기고, 줄무늬 스타일은 그 스타일들이 지정하지 않은 속성만 채웁니다. 따라서 `alternateRowStyle`과 `bodyStyle`을 함께 사용할 수 있습니다:
 
 ```kotlin
 excel {

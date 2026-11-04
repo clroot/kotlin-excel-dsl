@@ -85,11 +85,13 @@ object StyleConverter {
         if (bg == null && fg == null && !bold && !italic && align == null && border == null) {
             return null
         }
+        // Annotation booleans cannot express "not specified", so `false` leaves the property unset
+        // and only `true` overrides lower-priority styles.
         return CellStyle(
             backgroundColor = bg,
             fontColor = fg,
-            bold = bold,
-            italic = italic,
+            bold = bold.takeIf { it },
+            italic = italic.takeIf { it },
             alignment = align,
             border = border,
         )
