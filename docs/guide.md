@@ -384,6 +384,33 @@ Result:
 |   Alice    |   20241     |    95    |    88     |
 ```
 
+Columns declared outside any `headerGroup` can be mixed freely with groups, in any order.
+Each group title is placed above the group's actual columns. An ungrouped column has no
+group title, so its header text is merged vertically across both header rows (for example
+`A1:A2`), following the usual Excel convention:
+
+```kotlin
+sheet<Student>("Report") {
+    column("No.") { it.no }               // ungrouped: A1:A2
+    headerGroup("Scores") {               // title merged across B1:C1
+        column("Math") { it.math }
+        column("English") { it.english }
+    }
+    column("Note") { it.note }            // ungrouped: D1:D2
+    rows(students)
+}
+```
+
+```
++------+-------Scores--------+------+
+| No.  +---Math---+--English--+ Note |
+|  1   |    95    |    88     |  -   |
+```
+
+The second header row always contains every column header, including ungrouped ones,
+so `autoFilter()` is applied to that row across all columns. Data starts on the third row,
+so use `freezePane(row = 2)` to freeze both header rows.
+
 ### Column Width
 
 Set fixed column widths using the `chars` extension:

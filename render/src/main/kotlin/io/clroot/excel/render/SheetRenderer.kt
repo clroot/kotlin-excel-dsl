@@ -3,6 +3,7 @@ package io.clroot.excel.render
 import io.clroot.excel.core.model.ColumnDefinition
 import io.clroot.excel.core.model.ColumnWidth
 import io.clroot.excel.core.model.Formula
+import io.clroot.excel.core.model.HeaderGroup
 import io.clroot.excel.core.model.Sheet
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Row
@@ -60,13 +61,23 @@ internal class SheetRenderer(
         }
     }
 
+    /**
+     * Renders a two-row header.
+     *
+     * Row 1 holds group titles merged across each group's columns, placed at the
+     * group's actual position in [columns]. A column that belongs to no group gets
+     * its own header text in both rows, merged vertically (e.g. A1:A2). Row 2 always
+     * holds every column header, so the auto-filter row and readers of row 2 see all names.
+     */
     private fun renderGroupedHeaders() {
-        // First row: group headers
-        val groupHeaderRow = sheet.createRow(currentRowIndex++)
-        var colIndex = 0
+        val groupHeaderRowIndex = currentRowIndex++
+        val columnHeaderRowIndex = currentRowIndex++
+        val groupHeaderRow = sheet.createRow(groupHeaderRowIndex)
+        val columnHeaderRow = sheet.createRow(columnHeaderRowIndex)
 
-        sheetModel.headerGroups.forEach { group ->
-            val startCol = colIndex
+        val groupedIndices = mutableSetOf<Int>()
+        locateHeaderGroups().forEach { (group, startCol) ->
+            val endCol = startCol + group.columns.size - 1
             val cell = groupHeaderRow.createCell(startCol)
             cell.setCellValue(group.title)
 
@@ -75,20 +86,49 @@ internal class SheetRenderer(
                 cell.cellStyle = styleCache.getOrCreate(it)
             }
 
-            colIndex += group.columns.size
-
-            // Merge cells for group header
-            if (group.columns.size > 1) {
-                sheet.addMergedRegion(CellRangeAddress(0, 0, startCol, colIndex - 1))
+            if (endCol > startCol) {
+                sheet.addMergedRegion(CellRangeAddress(groupHeaderRowIndex, groupHeaderRowIndex, startCol, endCol))
             }
+            groupedIndices.addAll(startCol..endCol)
         }
 
-        // Second row: column headers
-        val columnHeaderRow = sheet.createRow(currentRowIndex++)
         columns.forEachIndexed { index, column ->
             createColumnHeaderCell(columnHeaderRow, index, column)
+            if (index !in groupedIndices) {
+                createColumnHeaderCell(groupHeaderRow, index, column)
+                sheet.addMergedRegion(CellRangeAddress(groupHeaderRowIndex, columnHeaderRowIndex, index, index))
+            }
         }
     }
+
+    /**
+     * Finds the start column index of each header group within [columns].
+     *
+     * Groups are matched in declaration order by the identity of their first column,
+     * falling back to equality for sheets built without the DSL. Groups that cannot
+     * be located as a contiguous run of columns are skipped.
+     */
+    private fun locateHeaderGroups(): List<Pair<HeaderGroup, Int>> {
+        var searchFrom = 0
+        return sheetModel.headerGroups.mapNotNull { group ->
+            if (group.columns.isEmpty()) return@mapNotNull null
+            val start =
+                findGroupStart(group, searchFrom) { a, b -> a === b }
+                    ?: findGroupStart(group, searchFrom) { a, b -> a == b }
+                    ?: return@mapNotNull null
+            searchFrom = start + group.columns.size
+            group to start
+        }
+    }
+
+    private inline fun findGroupStart(
+        group: HeaderGroup,
+        searchFrom: Int,
+        matches: (ColumnDefinition<*>, ColumnDefinition<*>) -> Boolean,
+    ): Int? =
+        (searchFrom..columns.size - group.columns.size).firstOrNull { start ->
+            group.columns.indices.all { offset -> matches(columns[start + offset], group.columns[offset]) }
+        }
 
     private fun renderSimpleHeader() {
         if (columns.isEmpty()) return
