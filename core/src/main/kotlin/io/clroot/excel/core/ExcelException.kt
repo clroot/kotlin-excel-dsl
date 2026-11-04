@@ -11,8 +11,12 @@ open class ExcelException(
 ) : RuntimeException(message, cause)
 
 /**
- * Exception thrown when there's a problem with the data being processed.
+ * Exception for problems with the data being processed.
+ *
+ * The library never throws this type. Write failures are reported as [ExcelWriteException]
+ * and parse failures as `ExcelParseException` or `ParseResult.Failure`.
  */
+@Deprecated("Not thrown by the library. Catch ExcelWriteException or ExcelParseException instead.")
 class ExcelDataException(
     message: String,
     sheetName: String? = null,
@@ -25,12 +29,20 @@ class ExcelDataException(
 
 /**
  * Exception thrown when there's an error writing the Excel file.
+ *
+ * When the failure happens while rendering a data cell (for example, a value extractor lambda throws),
+ * the location is available through [sheetName], [rowIndex] and [columnIndex].
+ *
+ * @property sheetName name of the sheet being rendered, if known
+ * @property rowIndex 0-based row index within the sheet (header rows included), if known.
+ *   The message shows it as a 1-based Excel row number.
+ * @property columnIndex 0-based column index, if known. The message shows it 1-based.
  */
 class ExcelWriteException(
     message: String,
-    sheetName: String? = null,
-    rowIndex: Int? = null,
-    columnIndex: Int? = null,
+    val sheetName: String? = null,
+    val rowIndex: Int? = null,
+    val columnIndex: Int? = null,
     cause: Throwable? = null,
 ) : ExcelException(buildWriteErrorMessage(message, sheetName, rowIndex, columnIndex), cause)
 
@@ -46,8 +58,12 @@ class ExcelConfigurationException(
 ) : ExcelException(buildConfigErrorMessage(message, className, propertyName, hint), cause)
 
 /**
- * Exception thrown when a required column is not found.
+ * Exception for a required column that is not found.
+ *
+ * The library never throws this type. Missing headers during parsing are reported
+ * as `ParseResult.Failure` (or `ExcelParseException` from `getOrThrow()`).
  */
+@Deprecated("Not thrown by the library. Missing columns are reported through ParseResult / ExcelParseException.")
 class ColumnNotFoundException(
     columnName: String,
     availableColumns: List<String> = emptyList(),
@@ -55,8 +71,12 @@ class ColumnNotFoundException(
 ) : ExcelException(buildColumnNotFoundMessage(columnName, availableColumns, sheetName))
 
 /**
- * Exception thrown when a style cannot be applied.
+ * Exception for a style that cannot be applied.
+ *
+ * The library never throws this type. Invalid style configuration is reported as
+ * [ExcelConfigurationException] or [IllegalArgumentException].
  */
+@Deprecated("Not thrown by the library. Catch ExcelConfigurationException or ExcelWriteException instead.")
 class StyleException(
     message: String,
     styleName: String? = null,

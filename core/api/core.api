@@ -21,6 +21,9 @@ public class io/clroot/excel/core/ExcelException : java/lang/RuntimeException {
 public final class io/clroot/excel/core/ExcelWriteException : io/clroot/excel/core/ExcelException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getColumnIndex ()Ljava/lang/Integer;
+	public final fun getRowIndex ()Ljava/lang/Integer;
+	public final fun getSheetName ()Ljava/lang/String;
 }
 
 public final class io/clroot/excel/core/StyleException : io/clroot/excel/core/ExcelException {

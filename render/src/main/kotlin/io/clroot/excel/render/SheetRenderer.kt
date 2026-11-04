@@ -1,5 +1,7 @@
 package io.clroot.excel.render
 
+import io.clroot.excel.core.ExcelException
+import io.clroot.excel.core.ExcelWriteException
 import io.clroot.excel.core.model.ColumnDefinition
 import io.clroot.excel.core.model.ColumnWidth
 import io.clroot.excel.core.model.Formula
@@ -123,11 +125,37 @@ internal class SheetRenderer(
             val isAlternateRow = dataRowIndex % 2 == 0 && sheetModel.alternateRowStyle != null
 
             typedColumns.forEachIndexed { cellIndex, column ->
-                val value = column.valueExtractor(item)
-                renderCell(row, cellIndex, column, value, isAlternateRow)
+                withCellLocation(row.rowNum, cellIndex) {
+                    val value = column.valueExtractor(item)
+                    renderCell(row, cellIndex, column, value, isAlternateRow)
+                }
             }
 
             dataRowIndex++
+        }
+    }
+
+    /**
+     * Runs [block] and wraps non-library failures in [ExcelWriteException] carrying the cell location.
+     * [ExcelException]s (e.g. [io.clroot.excel.core.ExcelConfigurationException]) propagate unchanged.
+     */
+    private inline fun withCellLocation(
+        rowIndex: Int,
+        columnIndex: Int,
+        block: () -> Unit,
+    ) {
+        try {
+            block()
+        } catch (e: ExcelException) {
+            throw e
+        } catch (e: Exception) {
+            throw ExcelWriteException(
+                message = "Failed to render cell: ${e.message}",
+                sheetName = sheetModel.name,
+                rowIndex = rowIndex,
+                columnIndex = columnIndex,
+                cause = e,
+            )
         }
     }
 

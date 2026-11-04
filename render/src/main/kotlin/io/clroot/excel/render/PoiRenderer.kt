@@ -1,5 +1,6 @@
 package io.clroot.excel.render
 
+import io.clroot.excel.core.ExcelException
 import io.clroot.excel.core.ExcelWriteException
 import io.clroot.excel.core.model.ExcelDocument
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
@@ -40,6 +41,9 @@ class PoiRenderer(
 
                 workbook.write(output)
             }
+        } catch (e: ExcelException) {
+            // Library exceptions (configuration errors, located write errors) already carry context.
+            throw e
         } catch (e: Exception) {
             throw ExcelWriteException(
                 message = "Failed to write Excel document: ${e.message}",
