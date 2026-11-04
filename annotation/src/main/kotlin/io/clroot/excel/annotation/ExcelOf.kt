@@ -10,7 +10,6 @@ import io.clroot.excel.core.model.ExcelDocument
 import io.clroot.excel.core.model.Sheet
 import io.clroot.excel.core.style.CellStyle
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
@@ -45,10 +44,7 @@ fun <T : Any> excelOf(
         )
     }
 
-    val columnProps =
-        klass.memberProperties
-            .filter { it.findAnnotation<Column>() != null }
-            .sortedBy { it.findAnnotation<Column>()!!.order }
+    val columnProps = columnProperties(klass)
 
     if (columnProps.isEmpty()) {
         val allProps = klass.memberProperties.map { it.name }
@@ -59,14 +55,12 @@ fun <T : Any> excelOf(
         )
     }
 
-    val typedProps = columnProps.filterIsInstance<KProperty1<T, *>>()
-
     // Extract class-level styles
     val classHeaderStyle = klass.findAnnotation<HeaderStyle>()?.let { StyleConverter.toCellStyle(it) }
     val classBodyStyle = klass.findAnnotation<BodyStyle>()?.let { StyleConverter.toCellStyle(it) }
 
     val columns =
-        typedProps.map { prop ->
+        columnProps.map { prop ->
             val annotation = prop.findAnnotation<Column>()!!
 
             // Extract property-level styles

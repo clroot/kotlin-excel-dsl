@@ -18,7 +18,10 @@ annotation class Excel
  * @param header The column header text
  * @param width Column width in characters (0 = auto)
  * @param format Format pattern for dates/numbers
- * @param order Column order (lower values appear first)
+ * @param order Column order (lower values appear first). Defaults to [Int.MAX_VALUE], so columns
+ * with an explicit order come first. Columns with equal or omitted order follow the primary constructor
+ * parameter order, then declaration order for properties outside the constructor. Writing (`excelOf`)
+ * and parsing use the same rule; see [columnProperties].
  * @param aliases Alternative header names for matching during Excel parsing
  */
 @Target(AnnotationTarget.PROPERTY)

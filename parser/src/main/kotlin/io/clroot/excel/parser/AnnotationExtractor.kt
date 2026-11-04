@@ -2,6 +2,7 @@ package io.clroot.excel.parser
 
 import io.clroot.excel.annotation.Column
 import io.clroot.excel.annotation.Excel
+import io.clroot.excel.annotation.columnProperties
 import io.clroot.excel.core.ExcelConfigurationException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
@@ -32,21 +33,8 @@ object AnnotationExtractor {
             )
         }
 
-        // Get constructor parameter order for stable sorting when order values are equal
-        val constructorParamOrder =
-            getConstructorParameterOrder(klass)
-                .withIndex()
-                .associate { it.value to it.index }
-
-        val columnProps =
-            klass.memberProperties
-                .filter { it.findAnnotation<Column>() != null }
-                .sortedWith(
-                    compareBy(
-                        { it.findAnnotation<Column>()!!.order },
-                        { constructorParamOrder[it.name] ?: Int.MAX_VALUE },
-                    ),
-                )
+        // Same ordering rule as excelOf: @Column.order, then primary constructor parameter order
+        val columnProps = columnProperties(klass)
 
         if (columnProps.isEmpty()) {
             val allProps = klass.memberProperties.map { it.name }
