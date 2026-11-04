@@ -62,10 +62,13 @@ class AnnotationE2ETest : DescribeSpec({
             val dataRow1 = sheet.getRow(1)
             dataRow1.getCell(0).stringCellValue shouldBe "상품A"
             dataRow1.getCell(1).numericCellValue shouldBe 10000.0
+            dataRow1.getCell(1).cellStyle.dataFormatString shouldBe "#,##0"
 
             val dataRow2 = sheet.getRow(2)
             dataRow2.getCell(0).stringCellValue shouldBe "상품B"
             dataRow2.getCell(1).numericCellValue shouldBe -5000.0
+            // 조건부 스타일(빨간 글자)이 적용된 셀도 @Column(format) 서식을 유지한다
+            dataRow2.getCell(1).cellStyle.dataFormatString shouldBe "#,##0"
 
             workbook.close()
         }

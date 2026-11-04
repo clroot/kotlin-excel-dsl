@@ -36,7 +36,14 @@ internal class StyleCache(private val workbook: Workbook) {
      * @return the corresponding POI CellStyle
      */
     fun getOrCreate(style: CellStyle): PoiCellStyle {
-        return cache.getOrPut(style) { createPoiStyle(style) }
+        // `false` and `null` render identically, so share one POI style for both
+        val key =
+            if (style.bold == false || style.italic == false) {
+                style.copy(bold = style.bold.takeIf { it == true }, italic = style.italic.takeIf { it == true })
+            } else {
+                style
+            }
+        return cache.getOrPut(key) { createPoiStyle(key) }
     }
 
     private fun createPoiStyle(style: CellStyle): PoiCellStyle {
@@ -52,8 +59,8 @@ internal class StyleCache(private val workbook: Workbook) {
         // Font (cached separately)
         val fontKey =
             FontKey(
-                bold = style.bold,
-                italic = style.italic,
+                bold = style.bold == true,
+                italic = style.italic == true,
                 fontColor = style.fontColor,
             )
         val font = fontCache.getOrPut(fontKey) { createFont(fontKey) }

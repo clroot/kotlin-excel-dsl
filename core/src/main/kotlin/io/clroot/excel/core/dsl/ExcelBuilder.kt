@@ -5,6 +5,7 @@ package io.clroot.excel.core.dsl
 import io.clroot.excel.core.model.ColumnStyleConfig
 import io.clroot.excel.core.model.ExcelDocument
 import io.clroot.excel.core.model.Sheet
+import io.clroot.excel.core.style.CellStyle
 
 /**
  * Builder for constructing an [ExcelDocument].
@@ -51,7 +52,8 @@ class ExcelBuilder(private val theme: ExcelTheme? = null) {
     /**
      * Configures global styles for the Excel document.
      *
-     * Styles defined here apply to all sheets unless overridden at the column level.
+     * Styles defined here apply to all sheets. They are merged on top of the theme passed to
+     * [excel], and column-specific, inline and conditional styles are merged on top of them.
      *
      * @param block the builder block to configure header, body, and column-specific styles
      * @see StylesBuilder
@@ -61,8 +63,9 @@ class ExcelBuilder(private val theme: ExcelTheme? = null) {
     }
 
     internal fun build(): ExcelDocument {
-        val headerStyle = stylesConfig?.headerStyle ?: theme?.headerStyle
-        val bodyStyle = stylesConfig?.bodyStyle ?: theme?.bodyStyle
+        // Global styles are merged on top of the theme (theme < styles { header/body })
+        val headerStyle = mergeNullable(theme?.headerStyle, stylesConfig?.headerStyle)
+        val bodyStyle = mergeNullable(theme?.bodyStyle, stylesConfig?.bodyStyle)
 
         // Convert DSL ColumnStyleConfig to model ColumnStyleConfig
         val columnStyles =
@@ -81,3 +84,13 @@ class ExcelBuilder(private val theme: ExcelTheme? = null) {
         )
     }
 }
+
+private fun mergeNullable(
+    lower: CellStyle?,
+    higher: CellStyle?,
+): CellStyle? =
+    when {
+        lower == null -> higher
+        higher == null -> lower
+        else -> lower.merge(higher)
+    }

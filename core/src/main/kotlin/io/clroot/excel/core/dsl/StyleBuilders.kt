@@ -9,7 +9,7 @@ import io.clroot.excel.core.style.CellStyle
  *
  * @property headerStyle the default style for all header cells
  * @property bodyStyle the default style for all body cells
- * @property columnStyles column-specific style overrides, keyed by header name
+ * @property columnStyles column-specific styles merged over the global styles, keyed by header name
  */
 data class StylesConfig(
     val headerStyle: CellStyle? = null,
@@ -20,8 +20,8 @@ data class StylesConfig(
 /**
  * Style configuration for a specific column.
  *
- * @property headerStyle the style for this column's header cell (overrides global header style)
- * @property bodyStyle the style for this column's body cells (overrides global body style)
+ * @property headerStyle the style for this column's header cell (merged over the global header style)
+ * @property bodyStyle the style for this column's body cells (merged over the global body style)
  */
 data class ColumnStyleConfig(
     val headerStyle: CellStyle? = null,
@@ -79,7 +79,8 @@ class StylesBuilder {
     /**
      * Defines styles for a specific column by header name.
      *
-     * Column-specific styles override the global header/body styles.
+     * Column-specific styles are merged over the global header/body styles: properties set here
+     * win, and properties left unset are inherited from the global styles.
      *
      * Example:
      * ```kotlin

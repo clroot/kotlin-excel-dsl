@@ -17,7 +17,9 @@ annotation class Excel
  *
  * @param header The column header text
  * @param width Column width in characters (0 = auto)
- * @param format Format pattern for dates/numbers
+ * @param format Excel number format code applied to body cells, such as `"#,##0"` or `"yyyy/mm/dd"`
+ *   (empty = none). It takes precedence over style number formats; a conditional style's
+ *   `numberFormat` overrides it. Date cells without a format use the default date format.
  * @param order Column order (lower values appear first)
  * @param aliases Alternative header names for matching during Excel parsing
  */
@@ -35,12 +37,15 @@ annotation class Column(
  * Defines the style for header cells.
  *
  * When applied at class level, the style applies to all header cells.
- * When applied at property level, it overrides the class-level style for that column.
+ * When applied at property level, it is merged over the class-level style for that column:
+ * properties set on the property win, and the others are inherited.
  *
  * If both enum color and hex color are specified, hex takes precedence.
  *
- * @param bold whether the text should be bold
- * @param italic whether the text should be italic
+ * @param bold `true` makes the text bold. `false` (default) means "not specified": the value is
+ *   inherited from lower-priority styles, so it cannot turn off bold from a theme or class-level
+ *   annotation. Use a [ConditionalStyler] returning `CellStyle(bold = false)` for that.
+ * @param italic `true` makes the text italic. `false` (default) means "not specified", as for [bold].
  * @param backgroundColor predefined background color
  * @param backgroundColorHex custom background color in "#RRGGBB" format (takes precedence)
  * @param fontColor predefined font color
@@ -65,13 +70,17 @@ annotation class HeaderStyle(
  * Defines the style for body cells.
  *
  * When applied at class level, the style applies to all body cells.
- * When applied at property level, it overrides the class-level style for that column.
+ * When applied at property level, it is merged over the class-level style for that column:
+ * properties set on the property win, and the others are inherited.
  *
  * If both enum color and hex color are specified, hex takes precedence.
- * For number/date formatting, use @Column(format = "...") instead.
+ * This annotation has no number format option. For number/date formatting, use
+ * `@Column(format = "...")`, which is applied as the body cells' number format.
  *
- * @param bold whether the text should be bold
- * @param italic whether the text should be italic
+ * @param bold `true` makes the text bold. `false` (default) means "not specified": the value is
+ *   inherited from lower-priority styles, so it cannot turn off bold from a theme or class-level
+ *   annotation. Use a [ConditionalStyler] returning `CellStyle(bold = false)` for that.
+ * @param italic `true` makes the text italic. `false` (default) means "not specified", as for [bold].
  * @param backgroundColor predefined background color
  * @param backgroundColorHex custom background color in "#RRGGBB" format (takes precedence)
  * @param fontColor predefined font color

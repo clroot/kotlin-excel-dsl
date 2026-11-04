@@ -3,16 +3,32 @@ package io.clroot.excel.render
 import io.clroot.excel.core.model.ColumnDefinition
 import io.clroot.excel.core.model.ColumnStyleConfig
 import io.clroot.excel.core.model.ExcelDocument
-import io.clroot.excel.core.model.Sheet
 import io.clroot.excel.core.style.CellStyle
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
- * Resolves cell styles based on priority rules.
+ * Resolves cell styles by merging style layers.
  *
- * Style priority (highest to lowest):
- * 1. Inline styles - defined directly on the column
- * 2. Column-specific styles - defined via `styles { column("Name") { ... } }`
- * 3. Global styles - defined via `styles { header { ... } }` or `styles { body { ... } }`
+ * Layers are merged with [CellStyle.merge]: a property set (non-null) in a higher layer
+ * overrides the same property of lower layers, and properties a layer leaves unset are
+ * inherited. No layer replaces another as a whole.
+ *
+ * Header layers (lowest to highest):
+ * 1. Global header style - theme header merged with `styles { header { ... } }`
+ * 2. Column-specific header style - `styles { column("Name") { header { ... } } }`
+ * 3. Inline header style - `column(..., headerStyle = { ... })`
+ *
+ * Body layers (lowest to highest):
+ * 1. Alternate row style - `alternateRowStyle { ... }`, even-indexed data rows only
+ * 2. Global body style - theme body merged with `styles { body { ... } }`
+ * 3. Column-specific body style - `styles { column("Name") { body { ... } } }`
+ * 4. Inline body style - `column(..., style = { ... })` or `bodyStyle = { ... }`
+ * 5. Column format - `column(..., format = "...")` / `@Column(format = "...")` as numberFormat
+ * 6. Conditional style - evaluated per cell value
+ *
+ * `LocalDate` and `LocalDateTime` cells get [DEFAULT_DATE_FORMAT] / [DEFAULT_DATE_TIME_FORMAT]
+ * only when no layer sets a numberFormat.
  *
  * @property globalHeaderStyle global header style from document
  * @property globalBodyStyle global body style from document
@@ -23,10 +39,16 @@ internal class StyleResolver(
     private val globalBodyStyle: CellStyle?,
     private val columnStyles: Map<String, ColumnStyleConfig>,
 ) {
-    /**
-     * Creates a StyleResolver from an ExcelDocument.
-     */
     companion object {
+        /** Number format applied to [LocalDate] cells without a user number format. */
+        const val DEFAULT_DATE_FORMAT = "yyyy-mm-dd"
+
+        /** Number format applied to [LocalDateTime] cells without a user number format. */
+        const val DEFAULT_DATE_TIME_FORMAT = "yyyy-mm-dd hh:mm:ss"
+
+        /**
+         * Creates a StyleResolver from an ExcelDocument.
+         */
         fun from(document: ExcelDocument): StyleResolver =
             StyleResolver(
                 globalHeaderStyle = document.headerStyle,
@@ -46,93 +68,81 @@ internal class StyleResolver(
     fun resolveGroupHeaderStyle(): CellStyle? = globalHeaderStyle
 
     /**
-     * Resolves the header style for a column.
+     * Resolves the header style for a column by merging global < column-specific < inline.
      *
      * @param column the column definition
      * @return the resolved header style, or null if no style is defined
      */
-    fun resolveHeaderStyle(column: ColumnDefinition<*>): CellStyle? {
-        return column.headerStyle
-            ?: columnStyles[column.header]?.headerStyle
-            ?: globalHeaderStyle
-    }
+    fun resolveHeaderStyle(column: ColumnDefinition<*>): CellStyle? =
+        mergeLayers(
+            globalHeaderStyle,
+            columnStyles[column.header]?.headerStyle,
+            column.headerStyle,
+        )
 
     /**
-     * Resolves the body style for a column.
+     * Resolves the static part of a column's body style: every layer except the conditional style.
+     *
+     * The result does not depend on the cell value, so callers can compute it once per column.
      *
      * @param column the column definition
+     * @param alternateRowStyle the alternate row style when rendering an alternate row, otherwise null
      * @return the resolved body style, or null if no style is defined
      */
-    fun resolveBodyStyle(column: ColumnDefinition<*>): CellStyle? {
-        return column.bodyStyle
-            ?: columnStyles[column.header]?.bodyStyle
-            ?: globalBodyStyle
-    }
-
-    /**
-     * Resolves the final body style for a cell, considering alternate row styling.
-     *
-     * @param column the column definition
-     * @param sheet the sheet containing alternate row style configuration
-     * @param isAlternateRow whether this is an alternate (even-indexed) row
-     * @return the resolved and merged style, or null if no style is defined
-     */
-    fun resolveBodyStyleWithAlternate(
+    fun resolveBodyStyle(
         column: ColumnDefinition<*>,
-        sheet: Sheet,
-        isAlternateRow: Boolean,
-    ): CellStyle? {
-        val bodyStyle = resolveBodyStyle(column)
-        val alternateStyle = sheet.alternateRowStyle
-
-        return if (isAlternateRow && alternateStyle != null) {
-            bodyStyle?.merge(alternateStyle) ?: alternateStyle
-        } else {
-            bodyStyle
-        }
-    }
+        alternateRowStyle: CellStyle? = null,
+    ): CellStyle? =
+        mergeLayers(
+            alternateRowStyle,
+            globalBodyStyle,
+            columnStyles[column.header]?.bodyStyle,
+            column.bodyStyle,
+            column.format?.let { CellStyle(numberFormat = it) },
+        )
 
     /**
-     * Resolves the final style for a cell, including date format and conditional style if applicable.
+     * Resolves the final style for a body cell.
      *
-     * Style priority (lowest to highest):
-     * 1. alternateRowStyle
-     * 2. globalBodyStyle
-     * 3. columnStyle (from styles DSL)
-     * 4. inlineBodyStyle
-     * 5. conditionalStyle (highest priority)
+     * Merges the conditional style (highest priority) on top of [baseStyle] and, for
+     * `LocalDate`/`LocalDateTime` values, applies the default date format when no layer
+     * set a numberFormat. See the class documentation for the full layer order.
      *
      * @param column the column definition
-     * @param sheet the sheet containing alternate row style configuration
-     * @param isAlternateRow whether this is an alternate (even-indexed) row
-     * @param dateFormat the date format to apply, or null if not a date cell
-     * @param cellValue the cell value to evaluate conditional style against
-     * @return the resolved style with date format applied, or null if no style is needed
+     * @param baseStyle the result of [resolveBodyStyle] for this column and row kind
+     * @param cellValue the cell value to evaluate the conditional style against
+     * @return the resolved style, or null if no style is needed
      */
     fun resolveFinalStyle(
         column: ColumnDefinition<*>,
-        sheet: Sheet,
-        isAlternateRow: Boolean,
-        dateFormat: String?,
-        cellValue: Any? = null,
+        baseStyle: CellStyle?,
+        cellValue: Any?,
     ): CellStyle? {
-        val baseStyle = resolveBodyStyleWithAlternate(column, sheet, isAlternateRow)
-
-        // Evaluate conditional style if present
         val conditionalStyle = column.conditionalStyle?.evaluate(cellValue)
-
-        // Merge base style with conditional style (conditional has highest priority)
         val mergedStyle =
-            if (conditionalStyle != null) {
-                baseStyle?.merge(conditionalStyle) ?: conditionalStyle
-            } else {
-                baseStyle
-            }
+            if (conditionalStyle != null) baseStyle?.merge(conditionalStyle) ?: conditionalStyle else baseStyle
 
-        return if (dateFormat != null) {
-            (mergedStyle ?: CellStyle()).copy(numberFormat = dateFormat)
-        } else {
-            mergedStyle
+        val defaultFormat = defaultNumberFormat(cellValue) ?: return mergedStyle
+        return when {
+            mergedStyle == null -> CellStyle(numberFormat = defaultFormat)
+            mergedStyle.numberFormat == null -> mergedStyle.copy(numberFormat = defaultFormat)
+            else -> mergedStyle
         }
+    }
+
+    private fun defaultNumberFormat(value: Any?): String? =
+        when (value) {
+            is LocalDate -> DEFAULT_DATE_FORMAT
+            is LocalDateTime -> DEFAULT_DATE_TIME_FORMAT
+            else -> null
+        }
+
+    private fun mergeLayers(vararg layers: CellStyle?): CellStyle? {
+        var result: CellStyle? = null
+        for (layer in layers) {
+            if (layer == null) continue
+            result = result?.merge(layer) ?: layer
+        }
+        return result
     }
 }

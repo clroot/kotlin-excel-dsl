@@ -66,7 +66,8 @@ data class HeaderGroup(
  * @param T the type of the data row
  * @property header the column header text
  * @property width the column width configuration
- * @property format the number format pattern (e.g., "#,##0" for integers)
+ * @property format the Excel number format code for body cells (e.g., "#,##0", "yyyy/mm/dd").
+ *   It overrides `numberFormat` from body styles; a conditional style's `numberFormat` overrides it.
  * @property headerStyle the style applied to the header cell
  * @property bodyStyle the base style applied to all body cells in this column
  * @property conditionalStyle optional conditional style that applies based on cell value
