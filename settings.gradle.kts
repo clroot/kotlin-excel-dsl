@@ -6,7 +6,7 @@ pluginManagement {
 }
 
 plugins {
-    id("com.gradleup.nmcp.settings") version "1.4.3"
+    id("com.gradleup.nmcp.settings") version "1.6.2"
 }
 
 rootProject.name = "kotlin-excel-dsl"
