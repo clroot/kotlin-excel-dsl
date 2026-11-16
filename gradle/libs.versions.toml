@@ -4,7 +4,7 @@ poi = "6.0.0"
 kotest = "6.2.6"
 ktlint-plugin = "14.2.0"
 ktlint = "1.0.1"
-jmh-plugin = "0.7.2"
+jmh-plugin = "0.7.4"
 jmh = "1.37"
 
 [libraries]
